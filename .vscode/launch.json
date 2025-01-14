@@ -10,7 +10,7 @@
             "type": "dart",
             "args": [
                 "-d",
-                "emulator-5554" // Specify the emulator ID here
+                "emulator-5556" // Specify the emulator ID here
             ]
         },
         {

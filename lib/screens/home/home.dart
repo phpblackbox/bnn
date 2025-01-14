@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:bnn/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -106,6 +108,14 @@ class _HomeState extends State<Home> {
           );
 
           await Constants.saveProfile(profile);
+
+          await SupabaseChatCore.instance.updateUser(
+            types.User(
+                firstName: data['first_name'],
+                id: data['id'],
+                lastName: data['last_name'],
+                imageUrl: data['avatar']),
+          );
 
           Profiles? loadedProfile = await Constants.loadProfile();
           if (loadedProfile != null) {

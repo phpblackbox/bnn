@@ -1,11 +1,15 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
+import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/Comments.dart';
 import 'package:bnn/screens/home/inputWithEmoji.dart';
 import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PostView extends StatefulWidget {
   const PostView({Key? key}) : super(key: key);
@@ -199,7 +203,27 @@ class _PostViewState extends State<PostView> {
                 height: 30,
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  types.User otherUser = types.User(
+                    id: posts![index]['author_id'],
+                    firstName: posts![index]['first_name'],
+                    lastName: posts![index]['last_name'],
+                    imageUrl: posts![index]['avatar'],
+                  );
+
+                  final navigator = Navigator.of(context);
+                  final room =
+                      await SupabaseChatCore.instance.createRoom(otherUser);
+
+                  navigator.pop();
+                  await navigator.push(
+                    MaterialPageRoute(
+                      builder: (context) => RoomPage(
+                        room: room,
+                      ),
+                    ),
+                  );
+                },
                 child: Row(children: [
                   SizedBox(width: 10),
                   Container(
