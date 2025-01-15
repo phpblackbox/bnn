@@ -2,14 +2,12 @@ import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/Comments.dart';
-import 'package:bnn/screens/home/inputWithEmoji.dart';
 import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PostView extends StatefulWidget {
   const PostView({Key? key}) : super(key: key);
@@ -115,6 +113,10 @@ class _PostViewState extends State<PostView> {
         }
       } catch (e) {
         print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     }
   }
@@ -151,6 +153,10 @@ class _PostViewState extends State<PostView> {
         return comments!;
       } catch (e) {
         print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     }
 

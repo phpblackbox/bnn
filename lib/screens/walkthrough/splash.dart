@@ -9,10 +9,6 @@ class Splash extends StatelessWidget {
   Widget build(BuildContext context) {
     // Start a timer to navigate to the next page after 3 seconds
     Timer(Duration(seconds: 1), () async {
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (context) => WalkthroughPage()),
-      // );
-
       if (supabase.auth.currentUser == null) {
         Navigator.pushReplacementNamed(context, '/login');
       } else {

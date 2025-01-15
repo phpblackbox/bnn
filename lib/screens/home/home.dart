@@ -60,8 +60,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    fToast = FToast();
-    fToast.init(context);
     // If not logged in, navigate to the login screen
     print(supabase.auth.currentUser);
     supabase.auth.startAutoRefresh();
@@ -128,6 +126,10 @@ class _HomeState extends State<Home> {
         }
       } catch (e) {
         print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     }
   }
@@ -200,87 +202,6 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      // bottomNavigationBar: Container(
-      //   height: 67.0,
-      //   child: Padding(
-      //     padding: EdgeInsets.only(left: 10, right: 10),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //       crossAxisAlignment: CrossAxisAlignment.center,
-      //       children: <Widget>[
-      //         GestureDetector(
-      //           onTap: () =>
-      //               _onBottomNavigationTapped(0), // Handle tap event for Home
-      //           child: _selectedIndex == 0
-      //               ? Image.asset(
-      //                   'assets/images/icons/home_active.png',
-      //                   width: 20,
-      //                   height: 20,
-      //                 )
-      //               : Image.asset(
-      //                   'assets/images/icons/home.png',
-      //                   width: 20,
-      //                   height: 20,
-      //                 ),
-      //         ),
-      //         GestureDetector(
-      //           onTap: () =>
-      //               _onBottomNavigationTapped(1), // Handle tap event for Home
-      //           child: _selectedIndex == 1
-      //               ? Image.asset(
-      //                   'assets/images/icons/comment_active.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20,
-      //                 )
-      //               : Image.asset(
-      //                   'assets/images/icons/comment.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20,
-      //                 ),
-      //         ),
-      //         GestureDetector(
-      //           onTap: () => _onBottomNavigationTapped(2),
-      //           child: Image.asset(
-      //             'assets/images/navigation_add_post.png',
-      //             width: 80,
-      //             height: 80,
-      //             fit: BoxFit.cover,
-      //           ),
-      //         ),
-      //         GestureDetector(
-      //           onTap: () =>
-      //               _onBottomNavigationTapped(3), // Handle tap event for Home
-      //           child: _selectedIndex == 3
-      //               ? Image.asset(
-      //                   'assets/images/icons/video_active.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20, // Height of the image
-      //                 )
-      //               : Image.asset(
-      //                   'assets/images/icons/video.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20, // Height of the image
-      //                 ),
-      //         ),
-      //         GestureDetector(
-      //           onTap: () =>
-      //               _onBottomNavigationTapped(4), // Handle tap event for Home
-      //           child: _selectedIndex == 4
-      //               ? Image.asset(
-      //                   'assets/images/icons/user_active.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20, // Height of the image
-      //                 )
-      //               : Image.asset(
-      //                   'assets/images/icons/user.png',
-      //                   width: 20, // Width of the image
-      //                   height: 20, // Height of the image
-      //                 ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

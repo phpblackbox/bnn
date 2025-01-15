@@ -58,6 +58,10 @@ class _StorySliderState extends State<StorySlider> {
         });
       } catch (e) {
         print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     }
   }

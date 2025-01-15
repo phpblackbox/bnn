@@ -1,8 +1,14 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/profile/suggested.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Friends extends StatefulWidget {
   const Friends({super.key});
@@ -14,7 +20,31 @@ class Friends extends StatefulWidget {
 class _FriendsState extends State<Friends> {
   final TextEditingController searchController = TextEditingController();
 
-  List<dynamic>? data = [];
+  List<Map<String, dynamic>>? data = [
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    },
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie Fake Faker FakerName",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    },
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie Fake Faker FakerName",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    }
+  ];
+
+  bool _loading = true;
 
   void initState() {
     super.initState();
@@ -23,36 +53,40 @@ class _FriendsState extends State<Friends> {
 
   Future<void> fetchdata() async {
     if (supabase.auth.currentUser != null) {
+      setState(() {
+        _loading = true;
+      });
       final userId = supabase.auth.currentUser!.id;
       List<Map<String, dynamic>> res =
           await supabase.rpc('get_friends', params: {
         'param_user_id': userId,
       });
 
-      print(res);
-
       if (res.isNotEmpty) {
-        setState(() {
-          data = res;
-        });
-
         for (int i = 0; i < data!.length; i++) {
           final int mutal = await supabase.rpc('get_count_mutual_friends',
               params: {'usera': userId, 'userb': data![i]["id"]});
 
-          print(mutal);
           setState(() {
             data![i]["mutal"] = '$mutal mutal friend';
 
-            DateTime createdAt = DateTime.parse(data![i]["created_at"]);
-            data![i]["friend"] =
-                "Friends since ${DateFormat('MMMM').format(createdAt)} ${createdAt.year}";
+            if (data![i].containsKey("created_at")) {
+              DateTime createdAt = DateTime.parse(data![i]["created_at"]);
+
+              data![i]["friend"] =
+                  "Friends since ${DateFormat('MMMM').format(createdAt)} ${createdAt.year}";
+            }
           });
         }
-        print(data);
+        setState(() {
+          data = res;
+          _loading = false;
+        });
       } else {
         setState(() {
           data = [];
+          _loading = false;
+          ;
         });
       }
     } else {
@@ -60,6 +94,48 @@ class _FriendsState extends State<Friends> {
 
       Navigator.pushReplacementNamed(context, '/login');
     }
+  }
+
+  Stream<List<Map<String, dynamic>>> getData() {
+    supabase
+        .channel('public:relationships')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'relationships',
+            callback: (payload) async {
+              if (payload.eventType.toString() ==
+                  "PostgresChangeEvent.update") {
+                print(payload);
+                final userId = supabase.auth.currentUser!.id;
+
+                if ((payload.newRecord["followed_id"] == userId ||
+                        payload.newRecord["follower_id"] == userId) &&
+                    payload.newRecord["status"] == "friend") {
+                  Map<String, dynamic> res = await supabase
+                      .rpc('get_relationship_follower_detail', params: {
+                    'param_r_id': payload.newRecord["id"],
+                  }).single();
+
+                  print(res);
+
+                  if (res.isNotEmpty) {
+                    final mutal = await supabase.rpc('get_count_mutual_friends',
+                        params: {'usera': userId, 'userb': res["id"]});
+
+                    res["mutal"] = '${mutal} mutal friend';
+                    res['name'] = '${res["first_name"]} ${res["last_name"]}';
+
+                    setState(() {
+                      data!.add(res);
+                    });
+                  }
+                }
+              }
+            })
+        .subscribe();
+
+    return Stream.fromIterable([data!]);
   }
 
   Future<void> unfollowUser(String r_id) async {
@@ -125,7 +201,27 @@ class _FriendsState extends State<Friends> {
                 height: 30, // Space around the divider
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  types.User otherUser = types.User(
+                    id: data![index]['author_id'],
+                    firstName: data![index]['first_name'],
+                    lastName: data![index]['last_name'],
+                    imageUrl: data![index]['avatar'],
+                  );
+
+                  final navigator = Navigator.of(context);
+                  final room =
+                      await SupabaseChatCore.instance.createRoom(otherUser);
+
+                  navigator.pop();
+                  await navigator.push(
+                    MaterialPageRoute(
+                      builder: (context) => RoomPage(
+                        room: room,
+                      ),
+                    ),
+                  );
+                },
                 child: Row(children: [
                   SizedBox(width: 10),
                   Container(
@@ -395,66 +491,91 @@ class _FriendsState extends State<Friends> {
               ),
             ),
             SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: data!.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    padding: EdgeInsets.only(bottom: 12),
-                    // margin: EdgeInsets.all(8),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Navigator.push(context,
-                        //     MaterialPageRoute(builder: (context) => Chat()));
-                      },
-                      child: Row(
-                        children: [
-                          Image.network(
-                            data![index]['avatar']!,
-                            fit: BoxFit.fill,
-                            width: 50,
-                            height: 50,
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            Center(
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: getData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    if (snapshot.error.toString().contains("JWT expired")) {
+                      supabase.auth.signOut();
+                      Navigator.pushReplacementNamed(context, '/login');
+                    }
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  final data = snapshot.data ?? [];
+                  print("data =  ${data.toString()}");
+
+                  return Skeletonizer(
+                    enabled: _loading,
+                    enableSwitchAnimation: true,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: data!.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          padding: EdgeInsets.only(bottom: 12),
+                          // margin: EdgeInsets.all(8),
+                          child: GestureDetector(
+                            onTap: () {
+                              // Navigator.push(context,
+                              //     MaterialPageRoute(builder: (context) => Chat()));
+                            },
+                            child: Row(
                               children: [
-                                Text(
-                                  data![index]['username'],
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.50,
+                                Image.network(
+                                  data![index]['avatar']!,
+                                  fit: BoxFit.fill,
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        data![index]['username'],
+                                        style: TextStyle(
+                                          color: Color(0xFF4D4C4A),
+                                          fontSize: 12,
+                                          fontFamily: 'Nunito',
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.50,
+                                        ),
+                                      ),
+                                      Text(
+                                        data![index]['mutal'] ?? "",
+                                        style: TextStyle(
+                                          color: Color(0xFF4D4C4A),
+                                          fontFamily: "Poppins",
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  data![index]['mutal'] ?? "",
-                                  style: TextStyle(
+                                GestureDetector(
+                                  onTap: () {
+                                    _showFriendDetail(context, index);
+                                  },
+                                  child: ImageIcon(
+                                    AssetImage('assets/images/icons/menu.png'),
                                     color: Color(0xFF4D4C4A),
-                                    fontFamily: "Poppins",
-                                    fontSize: 9,
+                                    size: 16,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              _showFriendDetail(context, index);
-                            },
-                            child: ImageIcon(
-                              AssetImage('assets/images/icons/menu.png'),
-                              color: Color(0xFF4D4C4A),
-                              size: 16,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   );
                 },
