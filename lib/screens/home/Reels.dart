@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
+import 'package:bnn/screens/home/reel.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -18,42 +19,7 @@ class Reels extends StatefulWidget {
 }
 
 class _ReelsState extends State<Reels> {
-  List<dynamic>? reels = [
-    {
-      'id': 1,
-      'avatar':
-          'https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png',
-      'name': 'Dennis Reynolds',
-      'firstname': 'Dennis',
-      'username': '@dennis',
-      'time': '2 hrs ago',
-      'content': 'AI Stadiums(part. 2)',
-      'video_url':
-          'https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/story/1736970525013.mp4',
-      'likes': '5.2K',
-      'comments': '1.1K',
-      'bookmakrs': '362',
-      'backspace': '344',
-      'friend': 'Friends since February 2023'
-    },
-    {
-      'id': 1,
-      'avatar':
-          'https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png',
-      'name': 'Dennis Reynolds',
-      'firstname': 'Dennis',
-      'username': '@dennis',
-      'time': '2 hrs ago',
-      'content': 'AI Stadiums(part. 2)',
-      'video_url':
-          'https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/story/1736970525013.mp4',
-      'likes': '5.2K',
-      'comments': '1.1K',
-      'bookmakrs': '362',
-      'backspace': '344',
-      'friend': 'Friends since February 2023'
-    },
-  ];
+  List<dynamic>? reels = [];
 
   bool _loading = false;
 
@@ -78,54 +44,44 @@ class _ReelsState extends State<Reels> {
             await supabase.from('view_reels').select();
 
         if (data.isNotEmpty) {
-          setState(() {
-            reels = data;
-          });
-        }
+          for (int i = 0; i < data.length; i++) {
+            dynamic res =
+                await supabase.rpc('get_count_reel_likes_by_reelid', params: {
+                      'param_reel_id': data[i]["id"],
+                    }) ??
+                    0;
 
-        for (int i = 0; i < reels!.length; i++) {
-          dynamic res =
-              await supabase.rpc('get_count_reel_likes_by_reelid', params: {
-                    'param_reel_id': reels![i]["id"],
-                  }) ??
-                  0;
+            data[i]["likes"] = res;
 
-          setState(() {
-            reels![i]["likes"] = res;
-          });
+            res = await supabase
+                .rpc('get_count_reel_bookmarks_by_reelid', params: {
+              'param_reel_id': data[i]["id"],
+            });
 
-          res =
-              await supabase.rpc('get_count_reel_bookmarks_by_reelid', params: {
-            'param_reel_id': reels![i]["id"],
-          });
+            data[i]["bookmarks"] = res;
 
-          setState(() {
-            reels![i]["bookmarks"] = res;
-          });
+            res = await supabase
+                .rpc('get_count_reel_comments_by_reelid', params: {
+              'param_reel_id': data[i]["id"],
+            });
 
-          res =
-              await supabase.rpc('get_count_reel_comments_by_reelid', params: {
-            'param_reel_id': reels![i]["id"],
-          });
+            data[i]["comments"] = res;
+            data[i]["share"] = 2;
+            data[i]['name'] =
+                '${data[i]["first_name"]} ${data[i]["last_name"]}';
 
-          setState(() {
-            reels![i]["comments"] = res;
-            reels![i]["share"] = 2;
-            reels![i]['name'] =
-                '${reels![i]["first_name"]} ${reels![i]["last_name"]}';
-          });
+            final nowString = await supabase.rpc('get_server_time');
+            DateTime now = DateTime.parse(nowString);
+            DateTime created_at = DateTime.parse(data[i]["created_at"]);
+            Duration difference = now.difference(created_at);
 
-          final nowString = await supabase.rpc('get_server_time');
-          DateTime now = DateTime.parse(nowString);
-          DateTime created_at = DateTime.parse(reels![i]["created_at"]);
-          Duration difference = now.difference(created_at);
-          setState(() {
-            reels![i]["time"] = Constants().formatDuration(difference);
-          });
+            data[i]["time"] = Constants().formatDuration(difference);
 
-          setState(() {
-            _loading = false;
-          });
+            setState(() {
+              reels = data;
+              _loading = false;
+            });
+          }
         }
       } catch (e) {
         print('Caught error: $e');
@@ -301,6 +257,7 @@ class _ReelsState extends State<Reels> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 360.0,
       child: Skeletonizer(
         enabled: _loading,
         enableSwitchAnimation: true,
@@ -317,7 +274,14 @@ class _ReelsState extends State<Reels> {
                   thickness: 1, // Thickness of the divider
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => reel(
+                                  reelId: reels![index]['id'],
+                                )));
+                  },
                   child: FutureBuilder<Uint8List?>(
                     future: VideoThumbnail.thumbnailData(
                       video: reels![index]['video_url'],
@@ -493,7 +457,7 @@ class _ReelsState extends State<Reels> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () async {},
                                       child: Container(
                                         padding: EdgeInsets.symmetric(
                                             vertical: 5.0,
@@ -507,18 +471,15 @@ class _ReelsState extends State<Reels> {
                                           ),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .center, // Center items horizontally
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: <Widget>[
                                             Icon(
                                               Icons.bookmark_outline,
-                                              color: Colors.white, // Icon color
-                                              size:
-                                                  16.0, // Adjustable size for the icon
+                                              color: Colors.white,
+                                              size: 16.0,
                                             ),
-                                            SizedBox(
-                                                width:
-                                                    4.0), // Spacing between icon and text
+                                            SizedBox(width: 4.0),
                                             Text(
                                               reels![index]['bookmarks']
                                                   .toString(),

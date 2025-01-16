@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CommentsModal extends StatefulWidget {
-  final int postId;
+class ReelCommands extends StatefulWidget {
+  final int reelId;
 
-  CommentsModal({required this.postId});
+  ReelCommands({required this.reelId});
 
   @override
-  _CommentsModalState createState() => _CommentsModalState();
+  _ReelCommandsState createState() => _ReelCommandsState();
 }
 
-class _CommentsModalState extends State<CommentsModal> {
+class _ReelCommandsState extends State<ReelCommands> {
   // late List<dynamic> _parentComments = [];
   Map<String, List<dynamic>> _childCommentsMap = {};
 
@@ -68,10 +69,10 @@ class _CommentsModalState extends State<CommentsModal> {
     });
 
     final data = await supabase
-        .from('post_comments')
+        .from('reel_comments')
         .select('*, profiles(username, avatar, first_name, last_name)')
         .eq('parent_id', 0)
-        .eq('post_id', widget.postId)
+        .eq('reel_id', widget.reelId)
         .order('created_at', ascending: false);
 
     for (int i = 0; i < data.length; i++) {
@@ -128,10 +129,10 @@ class _CommentsModalState extends State<CommentsModal> {
 
   Future<List<dynamic>> fetchChildComments(String parentId) async {
     final data = await supabase
-        .from('post_comments')
+        .from('reel_comments')
         .select('*, profiles(username, avatar, first_name, last_name)')
         .eq('parent_id', parentId)
-        .eq('post_id', widget.postId)
+        .eq('reel_id', widget.reelId)
         .order('created_at', ascending: false);
     ;
 
@@ -280,7 +281,7 @@ class _CommentsModalState extends State<CommentsModal> {
               onTap: () async {
                 var currentLikes = comment['likes'] + 1;
 
-                await supabase.from('post_comments').update({
+                await supabase.from('reel_comments').update({
                   'likes': currentLikes,
                 }).eq('id', comment['id']);
 
@@ -336,72 +337,16 @@ class _CommentsModalState extends State<CommentsModal> {
                 }
 
                 final userId = supabase.auth.currentUser!.id;
-                await supabase.from('post_comments').upsert({
+                await supabase.from('reel_comments').upsert({
                   'author_id': userId,
-                  'post_id': widget.postId,
+                  'reel_id': widget.reelId,
                   'parent_id': parentId,
                   'content': value,
                 });
 
-                final res = await supabase
-                    .from('post_comments')
-                    .select()
-                    .eq('author_id', userId)
-                    .eq('post_id', widget.postId)
-                    .eq('content', value)
-                    .order('created_at', ascending: false)
-                    .limit(1)
-                    .single();
-
-                final userInfo = await supabase
-                    .from('profiles')
-                    .select()
-                    .eq("id", userId)
-                    .single();
-
-                if (userInfo.isNotEmpty) {
-                  final nowString = await supabase.rpc('get_server_time');
-                  DateTime now = DateTime.parse(nowString);
-                  DateTime createdAt = DateTime.parse(res["created_at"]);
-                  Duration difference = now.difference(createdAt);
-
-                  dynamic temp = {
-                    "id": res["id"],
-                    "author_id": userId,
-                    "name":
-                        '${userInfo["first_name"]} ${userInfo["last_name"]}',
-                    "post_id": widget.postId,
-                    "parent_id": parentId,
-                    "content": value,
-                    "likes": res["likes"],
-                    "created_at": res["created_at"],
-                    "time": Constants().formatDuration(difference),
-                    "profiles": {
-                      "avatar": userInfo["avatar"],
-                      "first_name": userInfo["first_name"],
-                      "last_name": userInfo["last_name"],
-                    }
-                  };
-
-                  if (parentId == 0) {
-                    setState(() {
-                      _parentComments.insert(0, temp);
-                    });
-                  } else {
-                    print(_expandedComments);
-                    final childComments =
-                        await fetchChildComments(parentId.toString());
-                    setState(() {
-                      _childCommentsMap[parentId.toString()] = childComments;
-                      _expandedComments.add(parentId.toString());
-                    });
-                  }
-                }
+                // fetchData();
 
                 _commentController.clear(); // Clear the input field
-                setState(() {
-                  parentId = 0;
-                });
               },
               style: TextStyle(
                 fontSize: 10.0,

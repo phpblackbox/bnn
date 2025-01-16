@@ -57,6 +57,9 @@ class _StorySliderState extends State<StorySlider> {
         }
       }
     }
+    setState(() {
+      _loading = false;
+    });
   }
 
   Stream<List<Map<String, dynamic>>> getData() {

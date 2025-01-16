@@ -211,8 +211,7 @@ class _GalleyState extends State<Galley> {
                             ),
                             itemBuilder: (BuildContext context, int index) {
                               return ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                    10.0), // Adjust the radius as needed
+                                borderRadius: BorderRadius.circular(10.0),
                                 child: Image.file(
                                   File(_selectedImages![index].path),
                                   fit: BoxFit.cover,
@@ -226,7 +225,7 @@ class _GalleyState extends State<Galley> {
                 Center(
                   child: CircularProgressIndicator(),
                 ),
-              Spacer(),
+              // Spacer(),
               Row(
                 children: [
                   Spacer(), // This pushes the button to the right

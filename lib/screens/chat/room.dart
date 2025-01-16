@@ -3,7 +3,6 @@ import 'package:bnn/screens/chat/oneVoiceCall.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -384,7 +383,9 @@ class _RoomPageState extends State<RoomPage> {
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.grey[200],
-                          backgroundImage: NetworkImage(widget.room.imageUrl!),
+                          backgroundImage: widget.room.imageUrl == null
+                              ? null
+                              : NetworkImage(widget.room.imageUrl!),
                         ),
                         SizedBox(width: 16),
                         Column(

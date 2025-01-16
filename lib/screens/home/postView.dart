@@ -118,6 +118,9 @@ class _PostViewState extends State<PostView> {
         }
       }
     }
+    setState(() {
+      _loading = false;
+    });
   }
 
   Future<List> fetchComments(postId) async {
@@ -209,6 +212,14 @@ class _PostViewState extends State<PostView> {
               ),
               GestureDetector(
                 onTap: () async {
+                  final meId = supabase.auth.currentUser!.id;
+                  if (posts![index]['author_id'] == meId) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("You can't send message to you"),
+                    ));
+                    return;
+                  }
+
                   types.User otherUser = types.User(
                     id: posts![index]['author_id'],
                     firstName: posts![index]['first_name'],
@@ -217,15 +228,20 @@ class _PostViewState extends State<PostView> {
                   );
 
                   final navigator = Navigator.of(context);
-                  final room =
+                  final temp =
                       await SupabaseChatCore.instance.createRoom(otherUser);
+
+                  var room = temp.copyWith(
+                      imageUrl: posts![index]['avatar'],
+                      name:
+                          "${posts![index]['first_name']} ${posts![index]['last_name']}");
+
+                  print(room);
 
                   navigator.pop();
                   await navigator.push(
                     MaterialPageRoute(
-                      builder: (context) => RoomPage(
-                        room: room,
-                      ),
+                      builder: (context) => RoomPage(room: room),
                     ),
                   );
                 },
@@ -362,11 +378,10 @@ class _PostViewState extends State<PostView> {
                               MaterialPageRoute(
                                   builder: (context) => UserProfile()));
                         },
-                        child: Image.network(
-                          posts![index]['avatar'],
-                          fit: BoxFit.fill,
-                          width: 36,
-                          height: 36,
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundImage:
+                              NetworkImage(posts![index]['avatar']),
                         ),
                       ),
                       SizedBox(width: 5),

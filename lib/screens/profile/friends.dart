@@ -63,17 +63,17 @@ class _FriendsState extends State<Friends> {
       });
 
       if (res.isNotEmpty) {
-        for (int i = 0; i < data!.length; i++) {
+        for (int i = 0; i < res.length; i++) {
           final int mutal = await supabase.rpc('get_count_mutual_friends',
-              params: {'usera': userId, 'userb': data![i]["id"]});
+              params: {'usera': userId, 'userb': res[i]["id"]});
 
           setState(() {
-            data![i]["mutal"] = '$mutal mutal friend';
+            res[i]["mutal"] = '$mutal mutal friend';
 
-            if (data![i].containsKey("created_at")) {
-              DateTime createdAt = DateTime.parse(data![i]["created_at"]);
+            if (res[i].containsKey("created_at")) {
+              DateTime createdAt = DateTime.parse(res[i]["created_at"]);
 
-              data![i]["friend"] =
+              res[i]["friend"] =
                   "Friends since ${DateFormat('MMMM').format(createdAt)} ${createdAt.year}";
             }
           });
@@ -86,7 +86,6 @@ class _FriendsState extends State<Friends> {
         setState(() {
           data = [];
           _loading = false;
-          ;
         });
       }
     } else {
@@ -139,8 +138,6 @@ class _FriendsState extends State<Friends> {
   }
 
   Future<void> unfollowUser(String r_id) async {
-    final followerId = supabase.auth.currentUser!.id;
-
     await supabase.from('relationships').delete().eq('id', r_id);
 
     Navigator.pop(context);
@@ -202,16 +199,32 @@ class _FriendsState extends State<Friends> {
               ),
               GestureDetector(
                 onTap: () async {
+                  final meId = supabase.auth.currentUser!.id;
+                  if (data![index]['id'] == meId) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("You can't send message to you"),
+                    ));
+
+                    return;
+                  }
                   types.User otherUser = types.User(
-                    id: data![index]['author_id'],
+                    id: data![index]['id'],
                     firstName: data![index]['first_name'],
                     lastName: data![index]['last_name'],
                     imageUrl: data![index]['avatar'],
                   );
 
+                  print(otherUser);
+
                   final navigator = Navigator.of(context);
-                  final room =
+
+                  final temp =
                       await SupabaseChatCore.instance.createRoom(otherUser);
+
+                  var room = temp.copyWith(
+                      imageUrl: data![index]['avatar'],
+                      name:
+                          "${data![index]['first_name']} ${data![index]['last_name']}");
 
                   navigator.pop();
                   await navigator.push(
@@ -252,7 +265,7 @@ class _FriendsState extends State<Friends> {
               SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
-                  unfollowUser(data![index]["relationship_id"]);
+                  unfollowUser(data![index]["relationship_id"].toString());
                 },
                 child: Row(children: [
                   SizedBox(width: 10),
