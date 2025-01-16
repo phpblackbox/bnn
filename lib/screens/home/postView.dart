@@ -24,7 +24,6 @@ class _PostViewState extends State<PostView> {
   int parent_id = 0;
 
   late FocusNode commentFocusNode;
-  final TextEditingController _commentController = TextEditingController();
   bool _loading = false;
 
   void initState() {

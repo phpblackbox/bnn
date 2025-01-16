@@ -82,10 +82,6 @@ class _SuggestedState extends State<Suggested> {
       });
 
       if (res.isNotEmpty) {
-        // setState(() {
-        //   data = res;
-        // });
-
         for (int i = 0; i < res.length; i++) {
           final mutal = await supabase.rpc('get_count_mutual_friends',
               params: {'usera': userId, 'userb': res[i]["id"]});

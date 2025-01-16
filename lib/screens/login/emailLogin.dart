@@ -66,7 +66,9 @@ class _EmailLogin extends State<EmailLogin>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.message)),
       );
+      print(error);
     } catch (error) {
+      print(error);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An unexpected error occurred')),
       );

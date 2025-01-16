@@ -1,12 +1,13 @@
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/home/createStory.dart';
+import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Galley extends StatefulWidget {
   const Galley({Key? key}) : super(key: key);
@@ -30,6 +31,40 @@ class _GalleyState extends State<Galley> {
       }
     } catch (e) {
       print('Error picking images: $e');
+    }
+  }
+
+  Future<void> uploadVideo() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.video);
+
+    if (result != null) {
+      String filePath = result.files.single.path!;
+      final bytes = await File(filePath).readAsBytes();
+
+      String filename = '${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+      setState(() {
+        isLoading = true;
+      });
+
+      await supabase.storage.from('story').uploadBinary(filename, bytes);
+
+      final publicUrl = supabase.storage.from('story').getPublicUrl(filename);
+
+      final userId = supabase.auth.currentUser!.id;
+      await supabase.from('reels').upsert({
+        'author_id': userId,
+        'video_url': publicUrl,
+      });
+
+      setState(() {
+        isLoading = false;
+      });
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+    } else {
+      print('No video selected');
     }
   }
 
@@ -146,6 +181,16 @@ class _GalleyState extends State<Galley> {
                           10.0), // Adjust the radius as needed
                       child: Image(
                           image: AssetImage("assets/images/post/gallery.png"),
+                          width: 100,
+                          height: 100),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: uploadVideo,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Image(
+                          image: AssetImage("assets/images/post/video.png"),
                           width: 100,
                           height: 100),
                     ),
