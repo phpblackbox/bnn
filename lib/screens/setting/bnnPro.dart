@@ -274,11 +274,11 @@ class BnnProState extends State<BnnPro> {
                     ),
                     Spacer(),
                     Text(
-                      "\$24.99",
+                      "\$7/Mon \$56/Year ",
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 12,
                         fontFamily: 'Nunito',
                         fontWeight: FontWeight.w500,
                         height: 3.73,
@@ -328,11 +328,11 @@ class BnnProState extends State<BnnPro> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    ImageIcon(
-                      AssetImage('assets/images/icons/verified.png'),
-                      color: Color(0xFFF30802),
-                      size: 16,
-                    ),
+                    // ImageIcon(
+                    //   AssetImage('assets/images/icons/verified.png'),
+                    //   color: Color(0xFFF30802),
+                    //   size: 16,
+                    // ),
                     Spacer(),
                     Text(
                       "Apply",

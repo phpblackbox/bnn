@@ -150,17 +150,17 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
                         ),
                       ],
                     ),
-                    GestureDetector(
-                      onTap: () =>
-                          selectGender('no_gender'), // Select No Gender
-                      child: Image.asset(
-                        selectedGender == 'no_gender'
-                            ? 'assets/images/gender_no_select.png'
-                            : 'assets/images/gender_no.png',
-                        width: 150,
-                        height: 150,
-                      ),
-                    ),
+                    // GestureDetector(
+                    //   onTap: () =>
+                    //       selectGender('no_gender'), // Select No Gender
+                    //   child: Image.asset(
+                    //     selectedGender == 'no_gender'
+                    //         ? 'assets/images/gender_no_select.png'
+                    //         : 'assets/images/gender_no.png',
+                    //     width: 150,
+                    //     height: 150,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

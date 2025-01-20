@@ -26,6 +26,7 @@ class Constants {
     await prefs.setString('last_name', profileData.lastName);
     await prefs.setString('username', profileData.username);
     await prefs.setInt('age', profileData.age);
+    await prefs.setString('bio', profileData.bio!);
     await prefs.setInt('gender', profileData.gender);
     await prefs.setString('avatar', profileData.avatar);
   }
@@ -37,6 +38,7 @@ class Constants {
     String? lastName = prefs.getString('last_name');
     String? username = prefs.getString('username');
     int? age = prefs.getInt('age');
+    String? bio = prefs.getString('bio');
     int? gender = prefs.getInt('gender');
     String? avatar = prefs.getString('avatar');
 
@@ -47,6 +49,7 @@ class Constants {
         lastName: lastName ?? '',
         username: username ?? '',
         age: age ?? 0,
+        bio: bio ?? '',
         gender: gender ?? 0,
         avatar: avatar ?? '',
       );

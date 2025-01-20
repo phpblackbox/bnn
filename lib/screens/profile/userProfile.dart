@@ -1,9 +1,21 @@
+import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/chat.dart';
+import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/profile/followers.dart';
+import 'package:bnn/screens/setting/username.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class UserProfile extends StatefulWidget {
+  final String userId;
+
+  const UserProfile({
+    super.key,
+    required this.userId,
+  });
   @override
   _UserProfileState createState() => _UserProfileState();
 }
@@ -11,8 +23,8 @@ class UserProfile extends StatefulWidget {
 class _UserProfileState extends State<UserProfile> {
   final dynamic data = {
     "username": "John\nSmith",
-    "post_count": 35,
-    "follower": 6552,
+    "posts": 35,
+    "followers": 6552,
     "view": 128,
     "about":
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
@@ -21,40 +33,52 @@ class _UserProfileState extends State<UserProfile> {
     "nationality": "African-American",
     "location": "United States, California",
     "content": "Content Creator",
-    "post": [
-      {
-        'id': 1,
-        'avatar': 'assets/images/avatar/s1.png',
-        'name': 'Dennis Reynolds',
-        'firstname': 'Dennis',
-        'username': '@dennis',
-        'time': '2 hrs ago',
-        'content': 'AI Stadiums(part. 2)',
-        'attach': ['assets/images/post/1.png', 'assets/images/post/2.png'],
-        'like': '5.2K',
-        'comment': '1.1K',
-        'saved': '362',
-        'backspace': '344',
-        'friend': 'Friends since February 2023'
-      },
-      {
-        'id': 2,
-        'avatar': 'assets/images/avatar/s2.png',
-        'name': 'Charlie Kelly',
-        'firstname': 'Charlie',
-        'username': '@charlie',
-        'time': '4hrs ago',
-        'content':
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. When an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.",
-        'like': '5.2K',
-        'comment': '1.1K',
-        'saved': '362',
-        'backspace': '344',
-        'attach': [],
-        'friend': 'Friends since February 2023'
-      }
-    ]
   };
+
+  bool _loading = true;
+
+  void initState() {
+    super.initState();
+
+    fetchdata();
+  }
+
+  void fetchdata() async {
+    setState(() {
+      _loading = true;
+    });
+    final userInfo = await supabase
+        .from('profiles')
+        .select()
+        .eq("id", widget.userId)
+        .single();
+
+    if (userInfo.isNotEmpty) {
+      int followers = await supabase.rpc('get_count_follower', params: {
+            'param_followed_id': widget.userId,
+          }) ??
+          0;
+
+      int posts = await supabase.rpc('get_count_posts', params: {
+            'param_user_id': widget.userId,
+          }) ??
+          0;
+
+      setState(() {
+        data["username"] =
+            "${userInfo["first_name"]}\n${userInfo["last_name"]}";
+        data["followers"] = followers;
+        data["posts"] = posts;
+        data["id"] = userInfo["id"];
+        data["first_name"] = userInfo["first_name"];
+        data["last_name"] = userInfo["last_name"];
+        data["avatar"] = userInfo["avatar"];
+      });
+    }
+    setState(() {
+      _loading = false;
+    });
+  }
 
   String formatWithCommas(int number) {
     return number.toString().replaceAllMapped(
@@ -124,65 +148,37 @@ class _UserProfileState extends State<UserProfile> {
                           Positioned(
                             bottom: 0,
                             left: 8,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text(
-                                  data["username"],
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 30,
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.06,
-                                    letterSpacing: 1,
+                            child: Skeletonizer(
+                              enabled: _loading,
+                              enableSwitchAnimation: true,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    data["username"],
+                                    style: TextStyle(
+                                      color: Color(0xFF4D4C4A),
+                                      fontSize: 26,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.06,
+                                      letterSpacing: 1,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 5, height: 15),
-                                ImageIcon(
-                                  AssetImage(
-                                      'assets/images/icons/verified.png'),
-                                  color: Colors.red,
-                                  size: 16.0,
-                                ),
-                                SizedBox(width: 35),
-                                Row(children: [
-                                  Column(
-                                    children: [
-                                      Text(
-                                        'Posts',
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        data["post_count"].toString(),
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontSize: 20,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      )
-                                    ],
+                                  SizedBox(width: 5, height: 15),
+                                  ImageIcon(
+                                    AssetImage(
+                                        'assets/images/icons/verified.png'),
+                                    color: Colors.red,
+                                    size: 16.0,
                                   ),
-                                  SizedBox(width: 10),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Followers()));
-                                    },
-                                    child: Column(
+                                  SizedBox(width: 35),
+                                  Row(children: [
+                                    Column(
                                       children: [
                                         Text(
-                                          'Followers',
+                                          'Posts',
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontSize: 14,
@@ -192,45 +188,78 @@ class _UserProfileState extends State<UserProfile> {
                                         ),
                                         SizedBox(height: 10),
                                         Text(
-                                          formatWithCommas(data["follower"])
-                                              .toString(),
+                                          data["posts"].toString(),
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontSize: 20,
                                             fontFamily: 'Poppins',
                                             fontWeight: FontWeight.w700,
                                           ),
-                                        ),
+                                        )
                                       ],
                                     ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        'Views',
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                    SizedBox(width: 10),
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (context) =>
+                                        //             Followers()));
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            'Followers',
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            formatWithCommas(data["followers"])
+                                                .toString(),
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 20,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        data["view"].toString(),
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontSize: 20,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w700,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          'Views',
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w400,
+                                          ),
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(width: 10),
-                                ]),
-                              ],
+                                        SizedBox(height: 10),
+                                        Text(
+                                          data["view"].toString(),
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 20,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(width: 10),
+                                  ]),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -387,12 +416,43 @@ class _UserProfileState extends State<UserProfile> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           GestureDetector(
-                              onTap: () => {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Chat()))
-                                  },
+                              onTap: () async {
+                                final meId = supabase.auth.currentUser!.id;
+                                if (data['id'] == meId) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content:
+                                        Text("You can't send message to you"),
+                                  ));
+                                  return;
+                                }
+
+                                types.User otherUser = types.User(
+                                  id: data['author_id'],
+                                  firstName: data['first_name'],
+                                  lastName: data['last_name'],
+                                  imageUrl: data['avatar'],
+                                );
+
+                                final navigator = Navigator.of(context);
+                                final temp = await SupabaseChatCore.instance
+                                    .createRoom(otherUser);
+
+                                var room = temp.copyWith(
+                                    imageUrl: data['avatar'],
+                                    name:
+                                        "${data['first_name']} ${data['last_name']}");
+
+                                print(room);
+
+                                navigator.pop();
+
+                                await navigator.push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RoomPage(room: room),
+                                  ),
+                                );
+                              },
                               child: Image.asset(
                                 'assets/images/profile_msg_btn.png',
                                 width: 75,
@@ -408,7 +468,7 @@ class _UserProfileState extends State<UserProfile> {
               // Posts
               Padding(
                 padding: EdgeInsets.only(left: 16, top: 0, right: 16),
-                child: PostView(),
+                child: PostView(userId: widget.userId),
               ),
             ],
           ),

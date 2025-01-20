@@ -7,6 +7,7 @@ class CustomInputField extends StatefulWidget {
   final Color backgroundColor;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
 
   CustomInputField({
     this.icon = Icons.abc,
@@ -15,6 +16,7 @@ class CustomInputField extends StatefulWidget {
     required this.controller,
     this.backgroundColor = const Color(0xFFEAEAEA),
     required this.onChanged,
+    this.onSubmitted,
   });
 
   @override
@@ -43,6 +45,7 @@ class _CustomInputState extends State<CustomInputField> {
         controller: widget.controller,
         obscureText: widget.isPassword ? _obscureText : false,
         onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
         decoration: InputDecoration(
           prefixIcon: Icon(
             widget.icon != Icons.abc ? widget.icon : null,

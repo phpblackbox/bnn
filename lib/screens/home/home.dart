@@ -91,6 +91,7 @@ class _HomeState extends State<Home> {
             lastName: data['last_name'],
             username: data['username'],
             age: data['age'],
+            bio: data['bio'],
             gender: data['gender'],
             avatar: data['avatar'],
           );
@@ -101,6 +102,7 @@ class _HomeState extends State<Home> {
             lastName: data['last_name'],
             username: data['username'],
             age: data['age'],
+            bio: data['bio'],
             gender: data['gender'],
             avatar: data['avatar'],
           );

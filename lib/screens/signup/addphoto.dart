@@ -97,21 +97,6 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
           SnackBar(content: Text('Error uploading image: ${e.toString()}')),
         );
       }
-      // print(response.error);
-      // if (response == null) {
-      //   // Get public URL of the uploaded image
-      //   final publicUrlResponse = await supabase.storage
-      //       .from('avatars')
-      //       .getPublicUrl(filename);
-
-      //   setState(() {
-      //     _imageUrl = publicUrlResponse.data;
-      //   });
-
-      //   print('Image uploaded successfully: $_imageUrl');
-      // } else {
-      //   print('Error uploading image: ${response.error!.message}');
-      // }
     }
   }
 

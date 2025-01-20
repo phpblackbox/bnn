@@ -4,13 +4,16 @@ import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/Comments.dart';
 import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class PostView extends StatefulWidget {
-  const PostView({Key? key}) : super(key: key);
+  final String? userId;
+
+  const PostView({super.key, this.userId});
 
   @override
   _PostViewState createState() => _PostViewState();
@@ -57,8 +60,15 @@ class _PostViewState extends State<PostView> {
         return;
       }
       try {
-        List<Map<String, dynamic>> data =
-            await supabase.from('view_posts').select();
+        List<Map<String, dynamic>> data = [];
+
+        if (widget.userId != null) {
+          data = await supabase.rpc('get_posts_by_userid', params: {
+            'param_user_id': widget.userId,
+          });
+        } else {
+          data = await supabase.from('view_posts').select();
+        }
 
         if (data.isNotEmpty) {
           setState(() {
@@ -376,7 +386,8 @@ class _PostViewState extends State<PostView> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => UserProfile()));
+                                  builder: (context) => UserProfile(
+                                      userId: posts![index]["author_id"])));
                         },
                         child: CircleAvatar(
                           radius: 18,
@@ -458,15 +469,26 @@ class _PostViewState extends State<PostView> {
                         scrollDirection: Axis.horizontal,
                         itemCount: posts![index]['img_urls'].length,
                         itemBuilder: (context, index2) {
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 5.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                posts![index]['img_urls'][index2]!,
-                                fit: BoxFit.cover,
-                                width: 150.0,
-                                height: 140.0,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => FullScreenImage(
+                                      imageUrl: posts![index]['img_urls']
+                                          [index2]!),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 5.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0),
+                                child: Image.network(
+                                  posts![index]['img_urls'][index2]!,
+                                  fit: BoxFit.cover,
+                                  width: 150.0,
+                                  height: 140.0,
+                                ),
                               ),
                             ),
                           );
