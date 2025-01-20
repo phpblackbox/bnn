@@ -1,22 +1,51 @@
+import 'package:bnn/main.dart';
 import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:flutter/material.dart';
 
 class CreateStory extends StatefulWidget {
-  const CreateStory({Key? key}) : super(key: key);
+  final int storyId;
+
+  const CreateStory({
+    super.key,
+    required this.storyId,
+  });
 
   @override
   _CreateStoryState createState() => _CreateStoryState();
 }
 
 class _CreateStoryState extends State<CreateStory> {
+  Map<String, dynamic>? data;
+  final TextEditingController _storyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchdata();
+  }
+
+  void fetchdata() async {
+    final res = await supabase
+        .from('stories')
+        .select()
+        .eq('id', widget.storyId)
+        .single();
+    if (res.isNotEmpty) {
+      setState(() {
+        data = res;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/createstory_background.png"),
+            image: NetworkImage(data != null ? (data?["img_urls"][0]) : null),
             fit: BoxFit.cover,
           ),
         ),
@@ -109,26 +138,31 @@ class _CreateStoryState extends State<CreateStory> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
-                maxLines: null, // Allows the TextField to expand vertically
+                controller: _storyController,
+                maxLines: null,
                 decoration: InputDecoration(
-                  border: InputBorder.none, // Removes the border
-                  filled: false, // No fill color
+                  border: InputBorder.none,
+                  filled: false,
                   hintText: 'Type your message here...',
                 ),
                 style: TextStyle(
-                  fontSize: 16.0, // Set the font size
+                  fontSize: 16.0,
                 ),
               ),
             ),
             Spacer(),
             Row(
               children: [
-                Spacer(), // This pushes the button to the right
+                Spacer(),
                 SizedBox(
-                  width: 110, // Set your desired width here
+                  width: 110,
                   child: ButtonGradientMain(
                     label: 'Send',
-                    onPressed: () {
+                    onPressed: () async {
+                      await supabase.from('stories').upsert({
+                        'id': widget.storyId,
+                        'content': _storyController.text
+                      });
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) => Home()));
                     },

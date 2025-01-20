@@ -20,6 +20,7 @@ class _AccountRecoveryState extends State<AccountRecovery>
   final TextEditingController lastnameController = TextEditingController();
   final TextEditingController biocontroller = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

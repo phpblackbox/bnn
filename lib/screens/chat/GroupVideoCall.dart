@@ -2,7 +2,7 @@ import 'package:bnn/screens/chat/callBottom.dart';
 import 'package:flutter/material.dart';
 
 class GroupVideoCall extends StatefulWidget {
-  const GroupVideoCall({Key? key}) : super(key: key);
+  const GroupVideoCall({super.key});
 
   @override
   _GroupVideoCallState createState() => _GroupVideoCallState();

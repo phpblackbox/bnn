@@ -12,8 +12,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 class PostView extends StatefulWidget {
   final String? userId;
+  final bool? bookmark;
 
-  const PostView({super.key, this.userId});
+  const PostView({super.key, this.userId, this.bookmark});
 
   @override
   _PostViewState createState() => _PostViewState();
@@ -29,6 +30,7 @@ class _PostViewState extends State<PostView> {
   late FocusNode commentFocusNode;
   bool _loading = false;
 
+  @override
   void initState() {
     super.initState();
 
@@ -39,12 +41,6 @@ class _PostViewState extends State<PostView> {
     });
 
     fetchdata();
-  }
-
-  @override
-  void dispose() {
-    commentFocusNode.dispose();
-    super.dispose();
   }
 
   Future<void> fetchdata() async {
@@ -62,12 +58,18 @@ class _PostViewState extends State<PostView> {
       try {
         List<Map<String, dynamic>> data = [];
 
-        if (widget.userId != null) {
-          data = await supabase.rpc('get_posts_by_userid', params: {
-            'param_user_id': widget.userId,
+        if (widget.bookmark == true) {
+          data = await supabase.rpc('get_post_bookmarks_by_author', params: {
+            'param_user_id': userId,
           });
         } else {
-          data = await supabase.from('view_posts').select();
+          if (widget.userId != null) {
+            data = await supabase.rpc('get_posts_by_userid', params: {
+              'param_user_id': widget.userId,
+            });
+          } else {
+            data = await supabase.from('view_posts').select();
+          }
         }
 
         if (data.isNotEmpty) {
@@ -110,8 +112,8 @@ class _PostViewState extends State<PostView> {
 
           final nowString = await supabase.rpc('get_server_time');
           DateTime now = DateTime.parse(nowString);
-          DateTime created_at = DateTime.parse(posts![i]["created_at"]);
-          Duration difference = now.difference(created_at);
+          DateTime createdAt = DateTime.parse(posts![i]["created_at"]);
+          Duration difference = now.difference(createdAt);
           setState(() {
             posts![i]["time"] = Constants().formatDuration(difference);
           });
@@ -150,9 +152,9 @@ class _PostViewState extends State<PostView> {
         for (int i = 0; i < comments!.length; i++) {
           final nowString = await supabase.rpc('get_server_time');
           DateTime now = DateTime.parse(nowString);
-          DateTime created_at = DateTime.parse(comments![i]["created_at"]);
+          DateTime createdAt = DateTime.parse(comments![i]["created_at"]);
 
-          Duration difference = now.difference(created_at);
+          Duration difference = now.difference(createdAt);
 
           setState(() {
             comments![i]['name'] =
@@ -349,20 +351,20 @@ class _PostViewState extends State<PostView> {
     );
   }
 
-  void _showCommentDetail(BuildContext context, int post_id) async {
+  void _showCommentDetail(BuildContext context, int postId) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return CommentsModal(postId: post_id);
+        return CommentsModal(postId: postId);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 360.0,
+    return SizedBox(
+      height: widget.bookmark != null ? 200 : 360.0,
       child: Skeletonizer(
           enabled: _loading,
           enableSwitchAnimation: true,
@@ -463,7 +465,7 @@ class _PostViewState extends State<PostView> {
                     ),
                   ),
                   if (posts![index]['img_urls'].isNotEmpty)
-                    Container(
+                    SizedBox(
                       height: 140.0,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,

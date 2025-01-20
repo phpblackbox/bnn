@@ -4,7 +4,7 @@ import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter/material.dart';
 
 class GroupList extends StatefulWidget {
-  const GroupList({Key? key}) : super(key: key);
+  const GroupList({super.key});
 
   @override
   _GroupListState createState() => _GroupListState();

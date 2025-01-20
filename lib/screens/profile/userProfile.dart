@@ -2,6 +2,7 @@ import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/chat.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/postView.dart';
+import 'package:bnn/screens/profile/ProfileFollower.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/screens/setting/username.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _UserProfileState extends State<UserProfile> {
     "username": "John\nSmith",
     "posts": 35,
     "followers": 6552,
-    "view": 128,
+    "views": 128,
     "about":
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
     "year": "20yrs",
@@ -37,10 +38,18 @@ class _UserProfileState extends State<UserProfile> {
 
   bool _loading = true;
 
+  @override
   void initState() {
     super.initState();
 
     fetchdata();
+    updateViewPlus();
+  }
+
+  void updateViewPlus() async {
+    await supabase.rpc('increment_profile_view_count', params: {
+      'user_id': widget.userId,
+    });
   }
 
   void fetchdata() async {
@@ -73,6 +82,7 @@ class _UserProfileState extends State<UserProfile> {
         data["first_name"] = userInfo["first_name"];
         data["last_name"] = userInfo["last_name"];
         data["avatar"] = userInfo["avatar"];
+        data["views"] = userInfo["views"];
       });
     }
     setState(() {
@@ -87,391 +97,396 @@ class _UserProfileState extends State<UserProfile> {
         );
   }
 
+  void message() async {
+    final meId = supabase.auth.currentUser!.id;
+    if (data['id'] == meId) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("You can't send message to you"),
+      ));
+      return;
+    }
+
+    types.User otherUser = types.User(
+      id: data['id'],
+      firstName: data['first_name'],
+      lastName: data['last_name'],
+      imageUrl: data['avatar'],
+    );
+
+    final navigator = Navigator.of(context);
+    final temp = await SupabaseChatCore.instance.createRoom(otherUser);
+
+    var room = temp.copyWith(
+        imageUrl: data['avatar'],
+        name: "${data['first_name']} ${data['last_name']}");
+
+    navigator.pop();
+
+    await navigator.push(
+      MaterialPageRoute(
+        builder: (context) => RoomPage(room: room),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
           padding: EdgeInsets.all(4),
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(16), // Clip with rounded corners
-                  child: Column(
-                    children: [
-                      Stack(
-                        children: <Widget>[
-                          Container(
-                            width: double.infinity,
-                            height: 400,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: AssetImage(
-                                    'assets/images/avatar/userprofile1.png'),
+          child: _loading
+              ? Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            16), // Clip with rounded corners
+                        child: Column(
+                          children: [
+                            Stack(
+                              children: <Widget>[
+                                Container(
+                                  width: double.infinity,
+                                  height: 400,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(data["avatar"]),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  height: 400,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    gradient: LinearGradient(
+                                      begin: FractionalOffset.topCenter,
+                                      end: FractionalOffset.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.white.withOpacity(1),
+                                      ],
+                                      stops: [0.5, 1.0],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  left: 8,
+                                  child: IconButton(
+                                    icon: Icon(Icons.close,
+                                        color: Color(0xFF4D4C4A)),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 8,
+                                  child: Skeletonizer(
+                                    enabled: _loading,
+                                    enableSwitchAnimation: true,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text(
+                                          data["username"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 26,
+                                            fontFamily: 'Roboto',
+                                            fontWeight: FontWeight.w400,
+                                            height: 1.06,
+                                            letterSpacing: 1,
+                                          ),
+                                        ),
+                                        SizedBox(width: 5, height: 15),
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/verified.png'),
+                                          color: Colors.red,
+                                          size: 16.0,
+                                        ),
+                                        SizedBox(width: 35),
+                                        Row(children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                'Posts',
+                                                style: TextStyle(
+                                                  color: Color(0xFF4D4C4A),
+                                                  fontSize: 14,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                data["posts"].toString(),
+                                                style: TextStyle(
+                                                  color: Color(0xFF4D4C4A),
+                                                  fontSize: 20,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(width: 10),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ProfileFollowers(
+                                                            userId: data["id"],
+                                                          )));
+                                            },
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  'Followers',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF4D4C4A),
+                                                    fontSize: 14,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 10),
+                                                Text(
+                                                  formatWithCommas(
+                                                          data["followers"])
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: Color(0xFF4D4C4A),
+                                                    fontSize: 20,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                'Views',
+                                                style: TextStyle(
+                                                  color: Color(0xFF4D4C4A),
+                                                  fontSize: 14,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                data["views"].toString(),
+                                                style: TextStyle(
+                                                  color: Color(0xFF4D4C4A),
+                                                  fontSize: 20,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(width: 10),
+                                        ]),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // about and ...
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      child: Column(children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 8),
+                            Text(
+                              'ABOUT',
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 14,
+                                fontFamily: 'Abel',
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
-                          ),
-                          Container(
-                            width: double.infinity,
-                            height: 400,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              gradient: LinearGradient(
-                                begin: FractionalOffset.topCenter,
-                                end: FractionalOffset.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.white.withOpacity(1),
-                                ],
-                                stops: [0.5, 1.0],
+                            SizedBox(height: 8),
+                            Text(
+                              data['about'],
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 12,
+                                fontFamily: 'Abel',
+                                fontWeight: FontWeight.w400,
+                                height: 1.50,
                               ),
                             ),
-                          ),
-                          Positioned(
-                            top: 8,
-                            left: 8,
-                            child: IconButton(
-                              icon: Icon(Icons.close, color: Colors.white),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            left: 8,
-                            child: Skeletonizer(
-                              enabled: _loading,
-                              enableSwitchAnimation: true,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    data["username"],
-                                    style: TextStyle(
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/speedometer.png'),
+                                      size: 22.0,
                                       color: Color(0xFF4D4C4A),
-                                      fontSize: 26,
-                                      fontFamily: 'Roboto',
-                                      fontWeight: FontWeight.w400,
-                                      height: 1.06,
-                                      letterSpacing: 1,
                                     ),
-                                  ),
-                                  SizedBox(width: 5, height: 15),
-                                  ImageIcon(
-                                    AssetImage(
-                                        'assets/images/icons/verified.png'),
-                                    color: Colors.red,
-                                    size: 16.0,
-                                  ),
-                                  SizedBox(width: 35),
-                                  Row(children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          'Posts',
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 14,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          data["posts"].toString(),
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 20,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(width: 10),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // Navigator.push(
-                                        //     context,
-                                        //     MaterialPageRoute(
-                                        //         builder: (context) =>
-                                        //             Followers()));
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            'Followers',
-                                            style: TextStyle(
-                                              color: Color(0xFF4D4C4A),
-                                              fontSize: 14,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            formatWithCommas(data["followers"])
-                                                .toString(),
-                                            style: TextStyle(
-                                              color: Color(0xFF4D4C4A),
-                                              fontSize: 20,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["year"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
                                       ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/heart.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
                                     ),
-                                    SizedBox(width: 10),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          'Views',
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 14,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          data["view"].toString(),
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 20,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        )
-                                      ],
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["marital"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/flag.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
                                     ),
-                                    SizedBox(width: 10),
-                                  ]),
-                                ],
-                              ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["nationality"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/location.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["location"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/content.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["content"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                )
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                    onTap: message,
+                                    child: Image.asset(
+                                      'assets/images/profile_msg_btn.png',
+                                      width: 75,
+                                      height: 75,
+                                    )),
+                              ],
+                            )
+                          ],
+                        ),
+                      ]),
+                    ),
+
+                    // Posts
+                    Padding(
+                      padding: EdgeInsets.only(left: 16, top: 0, right: 16),
+                      child: PostView(userId: widget.userId),
+                    ),
+                  ],
                 ),
-              ),
-
-              // about and ...
-              Container(
-                padding: EdgeInsets.all(8),
-                child: Column(children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 8),
-                      Text(
-                        'ABOUT',
-                        style: TextStyle(
-                          color: Color(0xFF4D4C4A),
-                          fontSize: 14,
-                          fontFamily: 'Abel',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        data['about'],
-                        style: TextStyle(
-                          color: Color(0xFF4D4C4A),
-                          fontSize: 12,
-                          fontFamily: 'Abel',
-                          fontWeight: FontWeight.w400,
-                          height: 1.50,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage(
-                                    'assets/images/icons/speedometer.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                data["year"],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage('assets/images/icons/heart.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                data["marital"],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage('assets/images/icons/flag.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                data["nationality"],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage('assets/images/icons/location.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                data["location"],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage('assets/images/icons/content.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                data["content"],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                              onTap: () async {
-                                final meId = supabase.auth.currentUser!.id;
-                                if (data['id'] == meId) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content:
-                                        Text("You can't send message to you"),
-                                  ));
-                                  return;
-                                }
-
-                                types.User otherUser = types.User(
-                                  id: data['author_id'],
-                                  firstName: data['first_name'],
-                                  lastName: data['last_name'],
-                                  imageUrl: data['avatar'],
-                                );
-
-                                final navigator = Navigator.of(context);
-                                final temp = await SupabaseChatCore.instance
-                                    .createRoom(otherUser);
-
-                                var room = temp.copyWith(
-                                    imageUrl: data['avatar'],
-                                    name:
-                                        "${data['first_name']} ${data['last_name']}");
-
-                                print(room);
-
-                                navigator.pop();
-
-                                await navigator.push(
-                                  MaterialPageRoute(
-                                    builder: (context) => RoomPage(room: room),
-                                  ),
-                                );
-                              },
-                              child: Image.asset(
-                                'assets/images/profile_msg_btn.png',
-                                width: 75,
-                                height: 75,
-                              )),
-                        ],
-                      )
-                    ],
-                  ),
-                ]),
-              ),
-
-              // Posts
-              Padding(
-                padding: EdgeInsets.only(left: 16, top: 0, right: 16),
-                child: PostView(userId: widget.userId),
-              ),
-            ],
-          ),
         ),
       ),
     );

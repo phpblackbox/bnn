@@ -4,7 +4,7 @@ import 'package:bnn/screens/profile/suggested.dart';
 import 'package:flutter/material.dart';
 
 class Header extends StatefulWidget {
-  const Header({Key? key}) : super(key: key);
+  const Header({super.key});
 
   @override
   _HeaderState createState() => _HeaderState();

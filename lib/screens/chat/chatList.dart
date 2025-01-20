@@ -1,5 +1,6 @@
 import 'package:bnn/screens/chat/chat.dart';
 import 'package:bnn/screens/chat/room.dart';
+import 'package:bnn/screens/chat/users.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:bnn/widgets/room_tile.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,7 @@ import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class ChatList extends StatefulWidget {
-  const ChatList({Key? key}) : super(key: key);
+  const ChatList({super.key});
 
   @override
   _ChatListState createState() => _ChatListState();
@@ -45,15 +46,18 @@ class _ChatListState extends State<ChatList> {
 
   static const _pageSize = 20;
   String _filter = '';
-
   final PagingController<int, types.Room> _controller =
       PagingController(firstPageKey: 0);
+
+  static const _pageSizeUser = 20;
+  String _filterUser = '';
 
   @override
   void initState() {
     _controller.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
+
     super.initState();
   }
 
@@ -95,12 +99,29 @@ class _ChatListState extends State<ChatList> {
         child: Column(
       children: [
         Container(
-          child: CustomInputField(
-            placeholder: "Search for friends",
-            controller: searchController,
-            onChanged: (value) => _setFilters(value),
-            icon: Icons.search,
-          ),
+          child: Row(children: [
+            Expanded(
+              child: CustomInputField(
+                placeholder: "Search for friends",
+                controller: searchController,
+                onChanged: (value) => _setFilters(value),
+                icon: Icons.search,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.add,
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => const UsersPage(),
+                  ),
+                );
+              },
+            )
+          ]),
         ),
         Expanded(
           child: RefreshIndicator(

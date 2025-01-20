@@ -2,6 +2,9 @@ import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter/material.dart';
 
 class Email extends StatefulWidget {
+  const Email({super.key});
+
+  @override
   _Email createState() => _Email();
 }
 
@@ -15,6 +18,7 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
 
   final TextEditingController emailController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

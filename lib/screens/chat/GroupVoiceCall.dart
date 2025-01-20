@@ -2,7 +2,7 @@ import 'package:bnn/screens/chat/callBottom.dart';
 import 'package:flutter/material.dart';
 
 class GroupVoiceCall extends StatefulWidget {
-  const GroupVoiceCall({Key? key}) : super(key: key);
+  const GroupVoiceCall({super.key});
 
   @override
   _GroupVoiceCallState createState() => _GroupVoiceCallState();

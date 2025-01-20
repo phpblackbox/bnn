@@ -1,57 +1,171 @@
+import 'package:bnn/main.dart';
+import 'package:bnn/utils/constants.dart';
+import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class AllPost extends StatefulWidget {
-  const AllPost({super.key});
+  final int param_allorbookmakr;
+
+  const AllPost({super.key, required this.param_allorbookmakr});
 
   @override
   State<AllPost> createState() => _AllPostState();
 }
 
 class _AllPostState extends State<AllPost> {
+  bool _loading = false;
+  List<dynamic>? posts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchdata();
+  }
+
+  void fetchdata() async {
+    final userId = supabase.auth.currentUser!.id;
+    dynamic data;
+    if (widget.param_allorbookmakr == 0) {
+      data = await supabase.rpc('get_posts_by_userid', params: {
+            'param_user_id': userId,
+          }) ??
+          0;
+    } else {
+      print("111111111111");
+      final userId = supabase.auth.currentUser!.id;
+      data = await supabase
+          .from('post_bookmarks')
+          .select('id as bookmark_id, posts.*')
+          .eq('post_bookmarks.author_id', userId);
+
+      print(data);
+    }
+
+    print("data ===>>> $data");
+    if (data.isNotEmpty) {
+      setState(() {
+        // posts = data;
+        _loading = true;
+      });
+
+      for (int i = 0; i < data.length; i++) {
+        print("views ===>>> ${data[i]['views']}");
+
+        dynamic res =
+            await supabase.rpc('get_count_post_likes_by_postid', params: {
+                  'param_post_id': data[i]["id"],
+                }) ??
+                0;
+
+        data[i]["likes"] = res;
+
+        res = await supabase.rpc('get_count_post_bookmarks_by_postid', params: {
+          'param_post_id': data[i]["id"],
+        });
+
+        data[i]["bookmarks"] = res;
+
+        res = await supabase.rpc('get_count_post_comments_by_postid', params: {
+          'param_post_id': data[i]["id"],
+        });
+
+        data[i]["comments"] = res;
+        data[i]["share"] = 2;
+        data[i]['name'] = '${data[i]["first_name"]} ${data[i]["last_name"]}';
+
+        final nowString = await supabase.rpc('get_server_time');
+        DateTime now = DateTime.parse(nowString);
+        DateTime createdAt = DateTime.parse(data[i]["created_at"]);
+        Duration difference = now.difference(createdAt);
+
+        data[i]["time"] = Constants().formatDuration(difference);
+      }
+
+      setState(() {
+        posts = data;
+        _loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(children: [
-              Container(
-                margin: EdgeInsets.all(4),
-                height: 200,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/profile/1.png"),
-                    fit: BoxFit.cover,
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+        child: Skeletonizer(
+            enabled: _loading,
+            enableSwitchAnimation: true,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: posts!.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Color(0x7CA6A8AB), width: 1),
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
                   ),
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: ImageIcon(
-                          AssetImage('assets/images/icons/play.png'),
-                          color: Colors.white,
-                          size: 32,
+                  padding: EdgeInsets.all(4),
+                  margin: EdgeInsets.all(4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        posts![index]['content'],
+                        style: TextStyle(
+                          color: Color(0xFF272729),
+                          fontSize: 12.80,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Row(
+                      SizedBox(
+                        height: 140.0,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: posts![index]['img_urls'].length,
+                          itemBuilder: (context, index2) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => FullScreenImage(
+                                        imageUrl: posts![index]['img_urls']
+                                                [index2] ??
+                                            ''),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Image.network(
+                                    posts![index]['img_urls'][index2]!,
+                                    fit: BoxFit.cover,
+                                    width: 160.0,
+                                    height: 140.0,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () async {},
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
+                                  vertical: 5.0, horizontal: 16.0),
                               decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
+                                color: Colors.black.withOpacity(0.4),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(35),
                                 ),
@@ -59,14 +173,17 @@ class _AllPostState extends State<AllPost> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Icon(Icons.remove_red_eye_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.favorite_border,
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                  SizedBox(width: 4.0),
                                   Text(
-                                    "5.2K",
+                                    posts![index]['likes'].toString(),
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: 12.0,
                                     ),
                                   ),
                                 ],
@@ -74,12 +191,15 @@ class _AllPostState extends State<AllPost> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              // _showCommentDetail(context, posts![index]['id']);
+                            },
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
+                                  vertical: 5.0,
+                                  horizontal: 16.0), // Add padding
                               decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
+                                color: Colors.black.withOpacity(0.4),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(35),
                                 ),
@@ -87,99 +207,17 @@ class _AllPostState extends State<AllPost> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Icon(Icons.mode_comment_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.bookmark,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 200,
-                margin: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/profile/3.png"),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: ImageIcon(
-                          AssetImage('assets/images/icons/play.png'),
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.remove_red_eye_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.mode_comment_outlined,
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                  SizedBox(width: 4.0),
                                   Text(
-                                    "5.2K",
+                                    posts![index]['comments'].toString(),
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: 12.0,
                                     ),
                                   ),
                                 ],
@@ -187,12 +225,12 @@ class _AllPostState extends State<AllPost> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () async {},
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
+                                  vertical: 5.0, horizontal: 16.0),
                               decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
+                                color: Colors.black.withOpacity(0.4),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(35),
                                 ),
@@ -200,278 +238,31 @@ class _AllPostState extends State<AllPost> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Icon(Icons.mode_comment_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.bookmark,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
-          ),
-          Expanded(
-            child: Column(children: [
-              Container(
-                margin: EdgeInsets.all(4),
-                height: 100,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/profile/2.png"),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: ImageIcon(
-                          AssetImage('assets/images/icons/play.png'),
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.remove_red_eye_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.bookmark_outline,
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                  SizedBox(width: 4.0),
                                   Text(
-                                    "5.2K",
+                                    posts![index]['bookmarks'].toString(),
                                     style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                      color: Colors
+                                          .white, // Set text color to contrast with the background
+                                      fontSize: 12.0, // Set font size
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.mode_comment_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.bookmark,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
                         ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 270,
-                margin: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/profile/4.png"),
-                    fit: BoxFit.fill,
+                      )
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: ImageIcon(
-                          AssetImage('assets/images/icons/play.png'),
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.remove_red_eye_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    "5.2K",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.mode_comment_outlined,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                color: Color(0x66E5E5E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.bookmark,
-                                      color: Colors.white, size: 14),
-                                  SizedBox(width: 4),
-                                  Text("5.2K",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
-          ),
-        ],
+                );
+              },
+            )),
       ),
     );
   }

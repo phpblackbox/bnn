@@ -12,7 +12,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class Reels extends StatefulWidget {
-  const Reels({Key? key}) : super(key: key);
+  const Reels({super.key});
 
   @override
   _ReelsState createState() => _ReelsState();
@@ -23,6 +23,7 @@ class _ReelsState extends State<Reels> {
 
   bool _loading = false;
 
+  @override
   void initState() {
     super.initState();
 
@@ -72,8 +73,8 @@ class _ReelsState extends State<Reels> {
 
             final nowString = await supabase.rpc('get_server_time');
             DateTime now = DateTime.parse(nowString);
-            DateTime created_at = DateTime.parse(data[i]["created_at"]);
-            Duration difference = now.difference(created_at);
+            DateTime createdAt = DateTime.parse(data[i]["created_at"]);
+            Duration difference = now.difference(createdAt);
 
             data[i]["time"] = Constants().formatDuration(difference);
 
@@ -256,7 +257,7 @@ class _ReelsState extends State<Reels> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 360.0,
       child: Skeletonizer(
         enabled: _loading,

@@ -11,6 +11,9 @@ import './BottomLogin.dart';
 import './createUserName.dart';
 
 class EmailSignUp extends StatefulWidget {
+  const EmailSignUp({super.key});
+
+  @override
   _EmailSignUp createState() => _EmailSignUp();
 }
 
@@ -30,6 +33,7 @@ class _EmailSignUp extends State<EmailSignUp>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -163,7 +167,7 @@ class _EmailSignUp extends State<EmailSignUp>
               SizedBox(
                 height: 16,
               ),
-              Container(
+              SizedBox(
                 height: 200,
                 child: Center(
                   child: Image.asset(

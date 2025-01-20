@@ -6,7 +6,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StorySlider extends StatefulWidget {
-  const StorySlider({Key? key}) : super(key: key);
+  const StorySlider({super.key});
 
   @override
   _StorySliderState createState() => _StorySliderState();
@@ -72,7 +72,7 @@ class _StorySliderState extends State<StorySlider> {
             callback: (payload) async {
               if (payload.eventType.toString() ==
                   "PostgresChangeEvent.insert") {
-                print("payload ${payload}");
+                print("payload $payload");
 
                 if (payload.newRecord["is_published"] == true) {
                   final res = await supabase
@@ -102,7 +102,7 @@ class _StorySliderState extends State<StorySlider> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(1.0),
-      child: Container(
+      child: SizedBox(
         height: 110, // Specify a height for the ListView
         child: StreamBuilder<List<Map<String, dynamic>>>(
           stream: getData(),
@@ -150,7 +150,7 @@ class _StorySliderState extends State<StorySlider> {
                           Positioned(
                             left: 6,
                             top: 12,
-                            child: Container(
+                            child: SizedBox(
                               width: 70,
                               height: 70,
                               child: CustomPaint(

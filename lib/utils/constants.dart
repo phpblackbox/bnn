@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:bnn/models/profiles.dart';
-import 'package:bnn/screens/setting/username.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Constants {

@@ -6,7 +6,7 @@ import 'dart:async';
 class Story extends StatefulWidget {
   final int id;
 
-  const Story({Key? key, required this.id}) : super(key: key);
+  const Story({super.key, required this.id});
 
   @override
   _StoryState createState() => _StoryState();
@@ -34,7 +34,7 @@ class _StoryState extends State<Story> {
   };
   String timeDiff = "";
 
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentIndex = 0;
   Timer? _timer;
 
@@ -67,9 +67,9 @@ class _StoryState extends State<Story> {
           final nowString = await supabase.rpc('get_server_time');
 
           DateTime now = DateTime.parse(nowString);
-          DateTime created_at = DateTime.parse(data["created_at"]);
+          DateTime createdAt = DateTime.parse(data["created_at"]);
 
-          Duration difference = now.difference(created_at);
+          Duration difference = now.difference(createdAt);
           print(difference);
           setState(() {
             story = data;
@@ -144,7 +144,7 @@ class _StoryState extends State<Story> {
             left: 10,
             right: 10,
             child: Column(children: [
-              Container(
+              SizedBox(
                 height: 5.0, // Height of the progress bar
                 child: Row(
                   children: List.generate(story["img_urls"].length, (index) {

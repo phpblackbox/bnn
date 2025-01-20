@@ -21,10 +21,11 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  bool _accepted = false;
+  final bool _accepted = false;
 
   final ImagePicker _picker = ImagePicker();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -68,7 +69,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
     if (image != null) {
       try {
         String randomNumStr = Constants().generateRandomNumberString(6);
-        final filename = '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
+        final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
         // final filename = '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
         final fileBytes = await File(image.path).readAsBytes();
 
@@ -191,7 +192,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
                     mainAxisSize: MainAxisSize
                         .min, // To prevent Column from taking up more space than necessary
                     children: [
-                      Container(
+                      SizedBox(
                         height: 200,
                         child: Center(
                           child: Image.asset(

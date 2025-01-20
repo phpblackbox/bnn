@@ -7,7 +7,8 @@ class ButtonGradientPrimary extends StatelessWidget {
   final Color textColor;
   final VoidCallback onPressed;
 
-  ButtonGradientPrimary({
+  const ButtonGradientPrimary({
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,

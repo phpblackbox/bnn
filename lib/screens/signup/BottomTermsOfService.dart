@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import './termsofservice.dart';
 
 class BottomTermsOfService extends StatelessWidget {
+  const BottomTermsOfService({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

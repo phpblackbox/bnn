@@ -12,6 +12,9 @@ import './emailSignUp.dart';
 import './BottomTermsOfService.dart';
 
 class SignUpDash extends StatefulWidget {
+  const SignUpDash({super.key});
+
+  @override
   _SignUpDash createState() => _SignUpDash();
 }
 
@@ -88,6 +91,7 @@ class _SignUpDash extends State<SignUpDash>
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     // Start a timer to navigate to the next page after 3 seconds
 
@@ -138,7 +142,7 @@ class _SignUpDash extends State<SignUpDash>
           ),
 
           SizedBox(height: 16),
-          Container(
+          SizedBox(
             height: 200,
             child: Center(
               child: Image.asset(

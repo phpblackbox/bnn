@@ -6,6 +6,9 @@ import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class Username extends StatefulWidget {
+  const Username({super.key});
+
+  @override
   _Username createState() => _Username();
 }
 
@@ -18,6 +21,7 @@ class _Username extends State<Username> with SingleTickerProviderStateMixin {
 
   Profiles? loadedProfile;
 
+  @override
   void initState() {
     super.initState();
 

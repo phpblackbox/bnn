@@ -53,6 +53,7 @@ class _InterestsState extends State<Interests>
 
   List<String> selectedInterests = [];
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

@@ -2,7 +2,7 @@ import 'package:bnn/screens/chat/callBottom.dart';
 import 'package:flutter/material.dart';
 
 class OneVideoCall extends StatefulWidget {
-  const OneVideoCall({Key? key}) : super(key: key);
+  const OneVideoCall({super.key});
 
   @override
   _OneVideoCallState createState() => _OneVideoCallState();

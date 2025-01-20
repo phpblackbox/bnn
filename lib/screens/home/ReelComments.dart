@@ -7,7 +7,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 class ReelCommands extends StatefulWidget {
   final int reelId;
 
-  ReelCommands({required this.reelId});
+  const ReelCommands({super.key, required this.reelId});
 
   @override
   _ReelCommandsState createState() => _ReelCommandsState();
@@ -15,7 +15,7 @@ class ReelCommands extends StatefulWidget {
 
 class _ReelCommandsState extends State<ReelCommands> {
   // late List<dynamic> _parentComments = [];
-  Map<String, List<dynamic>> _childCommentsMap = {};
+  final Map<String, List<dynamic>> _childCommentsMap = {};
 
   late List<dynamic> _parentComments = [
     {
@@ -64,7 +64,7 @@ class _ReelCommandsState extends State<ReelCommands> {
     },
   ];
 
-  List<String> _expandedComments = [];
+  final List<String> _expandedComments = [];
   late int parentId = 0;
   late FocusNode commentFocusNode;
   final TextEditingController _commentController = TextEditingController();
@@ -317,7 +317,7 @@ class _ReelCommandsState extends State<ReelCommands> {
   }
 
   Widget buildCommentInput() {
-    return Container(
+    return SizedBox(
       height: 30,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

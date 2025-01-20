@@ -2,7 +2,7 @@ import 'package:bnn/screens/chat/callEnd.dart';
 import 'package:flutter/material.dart';
 
 class CallBottom extends StatefulWidget {
-  const CallBottom({Key? key}) : super(key: key);
+  const CallBottom({super.key});
 
   @override
   _CallBottomState createState() => _CallBottomState();

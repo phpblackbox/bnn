@@ -5,6 +5,8 @@ import './walkthroughPage.dart';
 import 'package:bnn/utils/constants.dart';
 
 class Splash extends StatelessWidget {
+  const Splash({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Start a timer to navigate to the next page after 3 seconds

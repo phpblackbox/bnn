@@ -4,6 +4,9 @@ import 'ButtonGradientMain.dart';
 import './gender.dart';
 
 class SetupPassowrd extends StatefulWidget {
+  const SetupPassowrd({super.key});
+
+  @override
   _SetupPassowrd createState() => _SetupPassowrd();
 }
 
@@ -15,6 +18,7 @@ class _SetupPassowrd extends State<SetupPassowrd>
 
   final TextEditingController passwordController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

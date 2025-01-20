@@ -6,7 +6,8 @@ class CustomInput extends StatefulWidget {
   final bool isPassword;
   final TextEditingController controller;
 
-  CustomInput({
+  const CustomInput({
+    super.key,
     required this.icon,
     required this.placeholder,
     this.isPassword = false,
@@ -57,6 +58,8 @@ class MyForm extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+
+  MyForm({super.key});
 
   @override
   Widget build(BuildContext context) {

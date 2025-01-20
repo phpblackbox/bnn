@@ -94,12 +94,12 @@ class _reelState extends State<reel> {
     super.dispose();
   }
 
-  void _showCommentDetail(BuildContext context, int reel_id) async {
+  void _showCommentDetail(BuildContext context, int reelId) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return ReelCommands(reelId: reel_id);
+        return ReelCommands(reelId: reelId);
       },
     );
   }

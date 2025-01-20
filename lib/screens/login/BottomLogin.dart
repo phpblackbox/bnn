@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
 class BottomLogin extends StatelessWidget {
+  const BottomLogin({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

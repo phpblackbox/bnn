@@ -6,7 +6,8 @@ class ButtonGradientMain extends StatelessWidget {
   final Color textColor;
   final VoidCallback onPressed;
 
-  ButtonGradientMain({
+  const ButtonGradientMain({
+    super.key,
     required this.label,
     required this.onPressed,
     required this.gradientColors,

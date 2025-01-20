@@ -1,5 +1,6 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/profile/friends.dart';
+import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -40,6 +41,7 @@ class _SuggestedState extends State<Suggested> {
   ];
   bool _loading = false;
 
+  @override
   void initState() {
     super.initState();
     fetchdata();
@@ -86,7 +88,7 @@ class _SuggestedState extends State<Suggested> {
           final mutal = await supabase.rpc('get_count_mutual_friends',
               params: {'usera': userId, 'userb': res[i]["id"]});
 
-          res[i]["mutal"] = '${mutal} mutal friend';
+          res[i]["mutal"] = '$mutal mutal friend';
           // res[i]["name"] = res[i]["first_name"] + res[i]["last_name"];
         }
         setState(() {
@@ -334,11 +336,19 @@ class _SuggestedState extends State<Suggested> {
                               onTap: () {},
                               child: Row(
                                 children: [
-                                  Image.network(
-                                    data[index]['avatar'],
-                                    fit: BoxFit.fill,
-                                    width: 50,
-                                    height: 50,
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => UserProfile(
+                                                  userId: data[index]['id'])));
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 25,
+                                      backgroundImage:
+                                          NetworkImage(data[index]['avatar']),
+                                    ),
                                   ),
                                   SizedBox(width: 12),
                                   Expanded(
@@ -349,7 +359,7 @@ class _SuggestedState extends State<Suggested> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          data![index]['username'],
+                                          data[index]['username'],
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontSize: 12,
@@ -358,7 +368,7 @@ class _SuggestedState extends State<Suggested> {
                                           ),
                                         ),
                                         Text(
-                                          data![index]['mutal'] ?? "",
+                                          data[index]['mutal'] ?? "",
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontFamily: "Poppins",
@@ -415,8 +425,7 @@ class _SuggestedState extends State<Suggested> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () {
-                                                  removeUser(
-                                                      data![index]["id"]);
+                                                  removeUser(data[index]["id"]);
                                                 },
                                                 child: Container(
                                                   padding: EdgeInsets.only(

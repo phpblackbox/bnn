@@ -134,7 +134,7 @@ class _ApplyBNNState extends State<ApplyBNN> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            content: Container(
+                            content: SizedBox(
                               height: 200,
                               width: double.maxFinite,
                               child: Column(

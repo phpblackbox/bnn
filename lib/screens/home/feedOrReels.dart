@@ -4,7 +4,7 @@ class FeedOrReel extends StatelessWidget {
   final int index;
   final Function(int) onPressed;
 
-  FeedOrReel({required this.index, required this.onPressed});
+  const FeedOrReel({super.key, required this.index, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/ChatView.dart';
 import 'package:bnn/screens/home/createPost.dart';
 import 'package:bnn/screens/home/home.dart';
+import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/live/live.dart';
 import 'package:bnn/screens/profile/all.dart';
 import 'package:bnn/screens/profile/bookmark.dart';
@@ -18,7 +19,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
+  const Profile({super.key});
 
   @override
   _ProfileState createState() => _ProfileState();
@@ -29,6 +30,7 @@ class _ProfileState extends State<Profile> {
   int _posts = 0;
   int _views = 124;
   bool _loading = true;
+  int _allorbookmark = 0; // 0: all, 1; save
 
   Profiles? loadedProfile;
   @override
@@ -36,37 +38,6 @@ class _ProfileState extends State<Profile> {
     super.initState();
     fetchdata();
   }
-
-  // Future<void> pickImages() async {
-  //   try {
-  //     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-
-  //     if (image != null) {
-  //       String randomNumStr = Constants().generateRandomNumberString(8);
-  //       final filename = '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
-
-  //       final fileBytes = await File(image.path).readAsBytes();
-
-  //       await supabase.storage.from('avatar').uploadBinary(
-  //             filename,
-  //             fileBytes,
-  //           );
-
-  //       final publicUrl =
-  //           supabase.storage.from('avatar').getPublicUrl(filename);
-
-  //       if (loadedProfile != null) {
-  //         setState(() {
-  //           loadedProfile?.avatar = publicUrl;
-  //         });
-
-  //         await Constants.saveProfile(loadedProfile!);
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print('Error picking images: $e');
-  //   }
-  // }
 
   void fetchdata() async {
     final res = await Constants.loadProfile();
@@ -83,20 +54,30 @@ class _ProfileState extends State<Profile> {
       _followers = data;
     });
 
+    final temp = await supabase
+        .from('profiles')
+        .select('views')
+        .eq('id', loadedProfile!.id)
+        .single();
+
+    setState(() {
+      _views = temp['views'];
+    });
+
     data = await supabase.rpc('get_count_posts', params: {
           'param_user_id': loadedProfile!.id,
         }) ??
         0;
+
     setState(() {
       _posts = data;
       _loading = false;
     });
   }
 
-  int _allorsave = 0; // 0: all, 1; save
   void _onAllOrSave(int index) {
     setState(() {
-      _allorsave = index; // Update the selected index
+      _allorbookmark = index; // Update the selected index
     });
   }
 
@@ -125,13 +106,12 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+      body: Container(
         child: loadedProfile != null
             ? Column(
                 children: [
-                  // profile
                   Container(
-                    height: 350,
+                    height: 300,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage("assets/images/profile/rect.png"),
@@ -330,7 +310,6 @@ class _ProfileState extends State<Profile> {
                       ],
                     )),
                   ),
-
                   SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -341,7 +320,7 @@ class _ProfileState extends State<Profile> {
                         },
                         child: ImageIcon(
                           AssetImage('assets/images/icons/all.png'),
-                          color: _allorsave == 0
+                          color: _allorbookmark == 0
                               ? Colors.black
                               : Colors.black.withOpacity(0.5),
                           size: 24,
@@ -353,7 +332,7 @@ class _ProfileState extends State<Profile> {
                         },
                         child: ImageIcon(
                           AssetImage('assets/images/icons/bookmark.png'),
-                          color: _allorsave == 1
+                          color: _allorbookmark == 1
                               ? Colors.black.withOpacity(1)
                               : Colors.black.withOpacity(0.5),
                           size: 24,
@@ -361,15 +340,18 @@ class _ProfileState extends State<Profile> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
-
-                  if (_allorsave == 0) AllPost(),
-                  if (_allorsave == 1) Bookmark(),
+                  if (_allorbookmark == 0)
+                    AllPost(param_allorbookmakr: _allorbookmark),
+                  if (_allorbookmark == 1)
+                    Container(
+                        padding:
+                            EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                        child: PostView(bookmark: true)),
                 ],
               )
             : null,
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SizedBox(
         height: 67.0,
         child: Padding(
           padding: EdgeInsets.only(left: 10, right: 10),

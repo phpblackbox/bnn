@@ -8,7 +8,7 @@ import './ChatOrGroup.dart';
 import 'package:flutter/material.dart';
 
 class ChatView extends StatefulWidget {
-  const ChatView({Key? key}) : super(key: key);
+  const ChatView({super.key});
 
   @override
   _ChatViewState createState() => _ChatViewState();
@@ -58,7 +58,7 @@ class _ChatViewState extends State<ChatView> {
           if (_ChatViewOrGroup == 1) GroupList(),
         ]),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SizedBox(
         height: 67.0,
         child: Padding(
           padding: EdgeInsets.only(left: 10, right: 10),

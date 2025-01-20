@@ -9,6 +9,9 @@ import '../signup/CustomInputField.dart';
 import '../signup/ButtonGradientMain.dart';
 
 class EmailLogin extends StatefulWidget {
+  const EmailLogin({super.key});
+
+  @override
   _EmailLogin createState() => _EmailLogin();
 }
 
@@ -23,6 +26,7 @@ class _EmailLogin extends State<EmailLogin>
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -130,7 +134,7 @@ class _EmailLogin extends State<EmailLogin>
               height: 16,
             ),
 
-            Container(
+            SizedBox(
               height: 200,
               child: Center(
                 child: Image.asset(

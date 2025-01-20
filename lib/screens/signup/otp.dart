@@ -19,6 +19,7 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
   Timer? _timer;
   int _start = 59;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -123,7 +124,7 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
 
                       SizedBox(height: 10),
 
-                      Container(
+                      SizedBox(
                         width: 150, // Set a smaller width
                         child: TextField(
                           controller: _otpController,

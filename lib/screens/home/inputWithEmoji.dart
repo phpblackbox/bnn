@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class InputWithEmoji extends StatefulWidget {
-  const InputWithEmoji({Key? key}) : super(key: key);
+  const InputWithEmoji({super.key});
 
   @override
   _InputWithEmojiState createState() => _InputWithEmojiState();

@@ -19,7 +19,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -155,7 +155,7 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SizedBox(
         height: 67.0,
         child: Padding(
           padding: EdgeInsets.only(left: 10, right: 10),

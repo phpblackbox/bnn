@@ -3,7 +3,7 @@ import 'package:bnn/screens/chat/oneVoiceCall.dart';
 import 'package:flutter/material.dart';
 
 class Chat extends StatefulWidget {
-  const Chat({Key? key}) : super(key: key);
+  const Chat({super.key});
 
   @override
   _ChatState createState() => _ChatState();

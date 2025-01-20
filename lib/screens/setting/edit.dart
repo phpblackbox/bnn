@@ -71,7 +71,7 @@ class _EditProfileState extends State<EditProfile> {
     if (image != null) {
       try {
         String randomNumStr = Constants().generateRandomNumberString(6);
-        final filename = '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
+        final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
         final fileBytes = await File(image.path).readAsBytes();
 
         await supabase.storage.from('avatars').uploadBinary(
@@ -230,7 +230,7 @@ class _EditProfileState extends State<EditProfile> {
                       ],
                     ),
                     // Image(image: NetworkImage(loadedProfile!.avatar)),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
                       height: 270,
                       child: Stack(

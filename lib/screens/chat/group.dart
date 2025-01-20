@@ -3,7 +3,7 @@ import 'package:bnn/screens/chat/GroupVoiceCall.dart';
 import 'package:flutter/material.dart';
 
 class Group extends StatefulWidget {
-  const Group({Key? key}) : super(key: key);
+  const Group({super.key});
 
   @override
   _GroupState createState() => _GroupState();

@@ -6,7 +6,7 @@ import 'package:bnn/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 
 class Live extends StatefulWidget {
-  const Live({Key? key}) : super(key: key);
+  const Live({super.key});
 
   @override
   _LiveState createState() => _LiveState();
@@ -270,7 +270,7 @@ class _LiveState extends State<Live> {
         ],
       ),
 
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SizedBox(
         height: 67.0,
         child: Padding(
           padding: EdgeInsets.only(left: 10, right: 10),

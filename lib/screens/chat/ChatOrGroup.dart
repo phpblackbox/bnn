@@ -4,7 +4,7 @@ class ChatOrGroup extends StatelessWidget {
   final int index;
   final Function(int) onPressed;
 
-  ChatOrGroup({required this.index, required this.onPressed});
+  const ChatOrGroup({super.key, required this.index, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

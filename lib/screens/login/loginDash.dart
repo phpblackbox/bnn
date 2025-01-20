@@ -11,6 +11,9 @@ import '../signup/ButtonGradientPrimary.dart';
 import '../signup//BottomTermsOfService.dart';
 
 class LoginDash extends StatefulWidget {
+  const LoginDash({super.key});
+
+  @override
   _LoginDash createState() => _LoginDash();
 }
 
@@ -81,6 +84,7 @@ class _LoginDash extends State<LoginDash> with SingleTickerProviderStateMixin {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     // Start a timer to navigate to the next page after 3 seconds
 
@@ -131,7 +135,7 @@ class _LoginDash extends State<LoginDash> with SingleTickerProviderStateMixin {
           SizedBox(
             height: 16,
           ),
-          Container(
+          SizedBox(
             height: 200,
             child: Center(
               child: Image.asset(

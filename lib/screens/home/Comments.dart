@@ -7,7 +7,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 class CommentsModal extends StatefulWidget {
   final int postId;
 
-  CommentsModal({required this.postId});
+  const CommentsModal({super.key, required this.postId});
 
   @override
   _CommentsModalState createState() => _CommentsModalState();
@@ -15,7 +15,7 @@ class CommentsModal extends StatefulWidget {
 
 class _CommentsModalState extends State<CommentsModal> {
   // late List<dynamic> _parentComments = [];
-  Map<String, List<dynamic>> _childCommentsMap = {};
+  final Map<String, List<dynamic>> _childCommentsMap = {};
 
   late List<dynamic> _parentComments = [
     {
@@ -52,7 +52,7 @@ class _CommentsModalState extends State<CommentsModal> {
     },
   ];
 
-  List<String> _expandedComments = [];
+  final List<String> _expandedComments = [];
   late int parentId = 0;
   late FocusNode commentFocusNode;
   final TextEditingController _commentController = TextEditingController();
@@ -133,7 +133,6 @@ class _CommentsModalState extends State<CommentsModal> {
         .eq('parent_id', parentId)
         .eq('post_id', widget.postId)
         .order('created_at', ascending: false);
-    ;
 
     for (int i = 0; i < data.length; i++) {
       final nowString = await supabase.rpc('get_server_time');
@@ -312,7 +311,7 @@ class _CommentsModalState extends State<CommentsModal> {
   }
 
   Widget buildCommentInput() {
-    return Container(
+    return SizedBox(
       height: 30,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

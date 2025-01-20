@@ -3,7 +3,7 @@ import 'package:bnn/screens/live/liveEnd.dart';
 import 'package:flutter/material.dart';
 
 class LiveDash extends StatefulWidget {
-  const LiveDash({Key? key}) : super(key: key);
+  const LiveDash({super.key});
 
   @override
   _LiveDashState createState() => _LiveDashState();
@@ -96,7 +96,7 @@ class _LiveDashState extends State<LiveDash> {
                             color: Colors.white, size: 13),
                         SizedBox(width: 3),
                         Text(
-                          profile['view'].toString() + ' View',
+                          '${profile['view']} View',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -213,7 +213,7 @@ class _LiveDashState extends State<LiveDash> {
             left: 0,
             right: 0,
             child: Column(children: [
-              Container(
+              SizedBox(
                 height: 200,
                 child: ListView.builder(
                   shrinkWrap: true,

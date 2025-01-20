@@ -3,6 +3,8 @@ import 'package:bnn/utils/constants.dart';
 import '../signup/signupDash.dart';
 
 class WalkthroughPage extends StatefulWidget {
+  const WalkthroughPage({super.key});
+
   @override
   _WalkthroughPageState createState() => _WalkthroughPageState();
 }
@@ -74,7 +76,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             SizedBox(height: 30),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 600),
-              child: Container(
+              child: SizedBox(
                 height: 200,
                 child: Center(
                   child: Image.asset(

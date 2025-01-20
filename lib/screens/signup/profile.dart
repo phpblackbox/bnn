@@ -20,6 +20,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   final TextEditingController lastnameController = TextEditingController();
   final TextEditingController biocontroller = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

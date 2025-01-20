@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreatePost extends StatefulWidget {
-  const CreatePost({Key? key}) : super(key: key);
+  const CreatePost({super.key});
 
   @override
   _CreatePostState createState() => _CreatePostState();
@@ -23,10 +23,11 @@ class _CreatePostState extends State<CreatePost> {
   final TextEditingController _postController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  List<XFile>? _selectedImages = [];
+  final List<XFile>? _selectedImages = [];
 
   bool isLoading = false;
 
+  @override
   void initState() {
     super.initState();
     fetchdata();
@@ -72,7 +73,7 @@ class _CreatePostState extends State<CreatePost> {
 
   Future<void> pickImages() async {
     try {
-      final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+      final List<XFile> pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles!.isNotEmpty) {
         setState(() {
           _selectedImages!.addAll(pickedFiles);
@@ -112,14 +113,14 @@ class _CreatePostState extends State<CreatePost> {
 
     if (_selectedImages == null) return;
 
-    List img_urls = [];
+    List imgUrls = [];
     try {
       setState(() {
         isLoading = true;
       });
       for (var image in _selectedImages!) {
         String randomNumStr = Constants().generateRandomNumberString(8);
-        final filename = '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
+        final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
 
         final fileBytes = await File(image.path).readAsBytes();
 
@@ -129,17 +130,14 @@ class _CreatePostState extends State<CreatePost> {
             );
 
         final publicUrl = supabase.storage.from('posts').getPublicUrl(filename);
-        img_urls.add(publicUrl);
+        imgUrls.add(publicUrl);
       }
-
-      print(_postController.text);
-      print(img_urls);
 
       final userId = supabase.auth.currentUser!.id;
       await supabase.from('posts').upsert({
         'author_id': userId,
         'content': _postController.text,
-        'img_urls': img_urls,
+        'img_urls': imgUrls,
       });
 
       setState(() {

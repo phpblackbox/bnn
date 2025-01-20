@@ -2,7 +2,7 @@ import 'package:bnn/screens/home/home.dart';
 import 'package:flutter/material.dart';
 
 class liveEnd extends StatefulWidget {
-  const liveEnd({Key? key}) : super(key: key);
+  const liveEnd({super.key});
 
   @override
   _liveEndState createState() => _liveEndState();
@@ -61,7 +61,7 @@ class _liveEndState extends State<liveEnd> {
                 ),
                 SizedBox(height: 10),
                 // Avatar Image (Center of display)
-                Container(
+                SizedBox(
                   width: 90,
                   height: 90,
                   child: CircleAvatar(

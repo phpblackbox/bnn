@@ -5,8 +5,7 @@ class InterestItem extends StatefulWidget {
   final ValueChanged<bool> onSelected;
 
   const InterestItem(
-      {Key? key, required this.interest, required this.onSelected})
-      : super(key: key);
+      {super.key, required this.interest, required this.onSelected});
 
   @override
   _InterestItemState createState() => _InterestItemState();

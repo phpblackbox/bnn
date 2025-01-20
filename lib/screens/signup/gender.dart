@@ -5,6 +5,9 @@ import 'ButtonGradientMain.dart';
 import './profile.dart';
 
 class Gender extends StatefulWidget {
+  const Gender({super.key});
+
+  @override
   _Gender createState() => _Gender();
 }
 
@@ -15,6 +18,7 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
 
   final TextEditingController usernameController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -97,7 +101,7 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Container(
+            SizedBox(
               height: 200,
               child: Center(
                 child: Image.asset(

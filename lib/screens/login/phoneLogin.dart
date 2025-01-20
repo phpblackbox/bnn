@@ -6,6 +6,9 @@ import 'package:country_picker/country_picker.dart';
 import 'package:country_flags/country_flags.dart';
 
 class PhoneLogin extends StatefulWidget {
+  const PhoneLogin({super.key});
+
+  @override
   _PhoneLogin createState() => _PhoneLogin();
 }
 
@@ -18,6 +21,7 @@ class _PhoneLogin extends State<PhoneLogin>
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedCountryCode;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

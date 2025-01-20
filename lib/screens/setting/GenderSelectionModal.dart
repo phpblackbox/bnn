@@ -5,11 +5,11 @@ class GenderSelectionModal extends StatefulWidget {
   final int? initialSelectedOption;
   final Function(int?) onContinue;
 
-  GenderSelectionModal({
-    Key? key,
+  const GenderSelectionModal({
+    super.key,
     this.initialSelectedOption,
     required this.onContinue,
-  }) : super(key: key);
+  });
 
   @override
   _GenderSelectionModalState createState() => _GenderSelectionModalState();

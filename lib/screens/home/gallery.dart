@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Galley extends StatefulWidget {
-  const Galley({Key? key}) : super(key: key);
+  const Galley({super.key});
 
   @override
   _GalleyState createState() => _GalleyState();
@@ -18,12 +18,12 @@ class Galley extends StatefulWidget {
 
 class _GalleyState extends State<Galley> {
   final ImagePicker _picker = ImagePicker();
-  List<XFile>? _selectedImages = [];
+  final List<XFile>? _selectedImages = [];
   bool isLoading = false;
 
   Future<void> pickImages() async {
     try {
-      final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+      final List<XFile> pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles!.isNotEmpty) {
         setState(() {
           _selectedImages!.addAll(pickedFiles);
@@ -87,16 +87,15 @@ class _GalleyState extends State<Galley> {
   }
 
   Future<void> uploadImages() async {
-    if (_selectedImages!.length > 0) {
+    if (_selectedImages!.isNotEmpty) {
       setState(() {
         isLoading = true;
       });
-      List img_urls = [];
+      List imgUrls = [];
       try {
         for (var image in _selectedImages!) {
           String randomNumStr = Constants().generateRandomNumberString(8);
-          final filename =
-              '${supabase.auth.currentUser!.id}_${randomNumStr}.png';
+          final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
 
           final fileBytes = await File(image.path).readAsBytes();
 
@@ -107,7 +106,7 @@ class _GalleyState extends State<Galley> {
 
           final publicUrl =
               supabase.storage.from('story').getPublicUrl(filename);
-          img_urls.add(publicUrl);
+          imgUrls.add(publicUrl);
         }
 
         setState(() {
@@ -115,17 +114,17 @@ class _GalleyState extends State<Galley> {
         });
 
         final userId = supabase.auth.currentUser!.id;
-        await supabase.from('stories').upsert({
+        final newStory = await supabase.from('stories').upsert({
           'author_id': userId,
-          'img_urls': img_urls,
-        });
+          'img_urls': imgUrls,
+        }).select();
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Images have been uploaded!'),
-        ));
+        print(newStory[0]["id"]);
 
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => CreateStory()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => CreateStory(storyId: newStory[0]["id"])));
       } catch (e) {
         print(e.toString());
         ScaffoldMessenger.of(context).showSnackBar(

@@ -7,6 +7,9 @@ import 'ButtonGradientMain.dart';
 import './setupPassword.dart';
 
 class CreateUserName extends StatefulWidget {
+  const CreateUserName({super.key});
+
+  @override
   _CreateUserName createState() => _CreateUserName();
 }
 
@@ -19,6 +22,7 @@ class _CreateUserName extends State<CreateUserName>
   final _formKey = GlobalKey<FormState>();
   final TextEditingController usernameController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

@@ -46,6 +46,7 @@ class _FriendsState extends State<Friends> {
 
   bool _loading = true;
 
+  @override
   void initState() {
     super.initState();
     fetchdata();
@@ -122,7 +123,7 @@ class _FriendsState extends State<Friends> {
                     final mutal = await supabase.rpc('get_count_mutual_friends',
                         params: {'usera': userId, 'userb': res["id"]});
 
-                    res["mutal"] = '${mutal} mutal friend';
+                    res["mutal"] = '$mutal mutal friend';
                     res['name'] = '${res["first_name"]} ${res["last_name"]}';
 
                     setState(() {
@@ -137,17 +138,17 @@ class _FriendsState extends State<Friends> {
     return Stream.fromIterable([data!]);
   }
 
-  Future<void> unfollowUser(String r_id) async {
-    await supabase.from('relationships').delete().eq('id', r_id);
+  Future<void> unfollowUser(String rId) async {
+    await supabase.from('relationships').delete().eq('id', rId);
 
     Navigator.pop(context);
     await fetchdata();
   }
 
-  Future<void> blockUser(int r_id) async {
+  Future<void> blockUser(int rId) async {
     await supabase
         .from('relationships')
-        .update({'status': 'blocked'}).eq('id', r_id);
+        .update({'status': 'blocked'}).eq('id', rId);
 
     Navigator.pop(context);
     await fetchdata();
@@ -528,7 +529,7 @@ class _FriendsState extends State<Friends> {
                     enableSwitchAnimation: true,
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: data!.length,
+                      itemCount: data.length,
                       itemBuilder: (context, index) {
                         return Container(
                           padding: EdgeInsets.only(bottom: 12),
@@ -541,7 +542,7 @@ class _FriendsState extends State<Friends> {
                             child: Row(
                               children: [
                                 Image.network(
-                                  data![index]['avatar']!,
+                                  data[index]['avatar']!,
                                   fit: BoxFit.fill,
                                   width: 50,
                                   height: 50,
@@ -554,7 +555,7 @@ class _FriendsState extends State<Friends> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        data![index]['username'],
+                                        data[index]['username'],
                                         style: TextStyle(
                                           color: Color(0xFF4D4C4A),
                                           fontSize: 12,
@@ -564,7 +565,7 @@ class _FriendsState extends State<Friends> {
                                         ),
                                       ),
                                       Text(
-                                        data![index]['mutal'] ?? "",
+                                        data[index]['mutal'] ?? "",
                                         style: TextStyle(
                                           color: Color(0xFF4D4C4A),
                                           fontFamily: "Poppins",

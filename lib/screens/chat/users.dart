@@ -1,3 +1,4 @@
+import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -15,6 +16,8 @@ class UsersPage extends StatefulWidget {
 }
 
 class _UsersPageState extends State<UsersPage> {
+  final TextEditingController searchController = TextEditingController();
+
   static const _pageSize = 20;
   String _filter = '';
 
@@ -85,13 +88,12 @@ class _UsersPageState extends State<UsersPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FractionallySizedBox(
-              widthFactor: .5,
-              child: TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Search',
-                ),
+              widthFactor: .9,
+              child: CustomInputField(
+                placeholder: "Search for friends",
+                controller: searchController,
                 onChanged: (value) => _setFilters(value),
+                icon: Icons.search,
               ),
             ),
             Expanded(

@@ -9,7 +9,8 @@ class CustomInputField extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onSubmitted;
 
-  CustomInputField({
+  const CustomInputField({
+    super.key,
     this.icon = Icons.abc,
     required this.placeholder,
     this.isPassword = false,

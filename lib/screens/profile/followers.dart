@@ -43,6 +43,7 @@ class _FollowersState extends State<Followers> {
 
   bool _loading = true;
 
+  @override
   void initState() {
     super.initState();
     fetchData();
@@ -87,7 +88,7 @@ class _FollowersState extends State<Followers> {
                     final mutal = await supabase.rpc('get_count_mutual_friends',
                         params: {'usera': userId, 'userb': res["id"]});
 
-                    res["mutal"] = '${mutal} mutal friend';
+                    res["mutal"] = '$mutal mutal friend';
                     res['name'] = '${res["first_name"]} ${res["last_name"]}';
 
                     setState(() {
@@ -120,7 +121,7 @@ class _FollowersState extends State<Followers> {
         final mutal = await supabase.rpc('get_count_mutual_friends',
             params: {'usera': userId, 'userb': res[i]["id"]});
 
-        res[i]["mutal"] = '${mutal} mutal friend';
+        res[i]["mutal"] = '$mutal mutal friend';
         res[i]["name"] = res[i]["first_name"] + res[i]["last_name"];
       }
 
@@ -197,7 +198,7 @@ class _FollowersState extends State<Followers> {
                       enableSwitchAnimation: true,
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: data!.length,
+                        itemCount: data.length,
                         itemBuilder: (context, index) {
                           return Container(
                             padding: EdgeInsets.only(bottom: 12),
@@ -206,7 +207,7 @@ class _FollowersState extends State<Followers> {
                               child: Row(
                                 children: [
                                   Image.network(
-                                    data![index]['avatar'],
+                                    data[index]['avatar'],
                                     fit: BoxFit.fill,
                                     width: 50,
                                     height: 50,
@@ -220,7 +221,7 @@ class _FollowersState extends State<Followers> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          data![index]['name'] ?? "",
+                                          data[index]['name'] ?? "",
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontSize: 12,
@@ -230,7 +231,7 @@ class _FollowersState extends State<Followers> {
                                           ),
                                         ),
                                         Text(
-                                          data![index]['mutal'] ?? "",
+                                          data[index]['mutal'] ?? "",
                                           style: TextStyle(
                                             color: Color(0xFF4D4C4A),
                                             fontFamily: "Poppins",
@@ -245,7 +246,7 @@ class _FollowersState extends State<Followers> {
                                     child: ButtonGradientMain(
                                       label: 'Follow',
                                       onPressed: () {
-                                        followUser(data![index]['id']);
+                                        followUser(data[index]['id']);
                                       },
                                       textColor: Colors.white,
                                       gradientColors: _loading

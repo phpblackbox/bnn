@@ -2,6 +2,9 @@ import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter/material.dart';
 
 class PhoneNumber extends StatefulWidget {
+  const PhoneNumber({super.key});
+
+  @override
   _PhoneNumber createState() => _PhoneNumber();
 }
 
@@ -11,11 +14,12 @@ class _PhoneNumber extends State<PhoneNumber>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  bool _isMessage = false;
-  bool _isPromotions = false;
+  final bool _isMessage = false;
+  final bool _isPromotions = false;
 
   final TextEditingController phonenumberController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

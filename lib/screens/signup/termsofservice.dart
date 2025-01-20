@@ -15,6 +15,7 @@ class _TermsOfServiceState extends State<TermsOfService>
 
   bool _accepted = false;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

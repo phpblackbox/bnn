@@ -3,7 +3,7 @@ import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:flutter/material.dart';
 
 class callEnd extends StatefulWidget {
-  const callEnd({Key? key}) : super(key: key);
+  const callEnd({super.key});
 
   @override
   _callEndState createState() => _callEndState();
