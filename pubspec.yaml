@@ -59,6 +59,7 @@ dependencies:
   flutter_chat_ui: ^1.6.15
   get_thumbnail_video: ^0.7.3
   video_player: ^2.9.2
+  cube_transition_plus: ^2.0.1
 
 dev_dependencies:
   flutter_test:

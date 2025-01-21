@@ -70,6 +70,12 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
       'followed_id': followedId,
     });
 
+    await supabase.from('notifications').insert({
+      'actor_id': followerId,
+      'user_id': followedId,
+      'action_type': 'follow'
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text("Followed!"),
     ));

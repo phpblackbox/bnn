@@ -60,6 +60,12 @@ class _FollowersState extends State<Followers> {
         .eq("follower_id", followerId)
         .eq("followed_id", followedId);
 
+    await supabase.from('notifications').insert({
+      'actor_id': followedId,
+      'user_id': followerId,
+      'action_type': 'follow'
+    });
+
     fetchData();
   }
 

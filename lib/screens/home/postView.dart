@@ -512,8 +512,6 @@ class _PostViewState extends State<PostView> {
                               .eq('post_id', posts![index]['id'])
                               .maybeSingle();
 
-                          print(existingLikeResponse);
-
                           if (existingLikeResponse != null) {
                             bool currentLikeStatus =
                                 existingLikeResponse['is_like'];
@@ -538,6 +536,24 @@ class _PostViewState extends State<PostView> {
 
                             setState(() {
                               posts![index]["likes"]++;
+                            });
+                          }
+
+                          final noti = await supabase
+                              .from('notifications')
+                              .select()
+                              .eq('actor_id', userId)
+                              .eq('user_id', posts![index]['author_id'])
+                              .eq('action_type', 'like post')
+                              .eq('target_id', posts![index]['id']);
+
+                          if (userId != posts![index]['author_id'] &&
+                              noti.isEmpty) {
+                            await supabase.from('notifications').upsert({
+                              'actor_id': userId,
+                              'user_id': posts![index]['author_id'],
+                              'action_type': 'like post',
+                              'target_id': posts![index]['id'],
                             });
                           }
                         },

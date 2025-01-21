@@ -117,6 +117,12 @@ class _SuggestedState extends State<Suggested> {
       'status': 'following',
     });
 
+    await supabase.from('notifications').insert({
+      'actor_id': followerId,
+      'user_id': followedId,
+      'action_type': 'follow'
+    });
+
     // await fetchdata();
   }
 

@@ -1,4 +1,11 @@
+import 'package:bnn/main.dart';
+import 'package:bnn/screens/home/OnePost.dart';
+import 'package:bnn/screens/home/reel.dart';
+import 'package:bnn/screens/home/story.dart';
+import 'package:bnn/screens/profile/followers.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});
@@ -8,43 +15,129 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  final dynamic data = {
-    'today': [
-      {
-        'avatar': 'assets/images/avatar/p4.png',
-        'name': 'Cole McGee',
-        'content': "Liked your post",
-        // 0: Liked your post, 1: Followed you, 2: Commented on your post
-      },
-      {
-        'avatar': 'assets/images/avatar/p5.png',
-        'name': 'Peter',
-        'content': "Followed you"
-      },
-      {
-        'avatar': 'assets/images/avatar/p6.png',
-        'name': 'Johnson',
-        'content': "Liked your post" // 0: Liked your post 1: Followed you
-      },
-    ],
-    'yesterday': [
-      {
-        'avatar': 'assets/images/avatar/p7.png',
-        'name': 'Jeremy',
-        'content': "Liked your post"
-      },
-      {
-        'avatar': 'assets/images/avatar/p8.png',
-        'name': 'John',
-        'content': "Followed you"
-      },
-      {
-        'avatar': 'assets/images/avatar/p3.png',
-        'name': 'Derrick',
-        'content': "Liked your post"
-      },
-    ],
-  };
+  late List<dynamic> data = [
+    {
+      "id": 11,
+      "created_at": "2025-01-21T07:02:44.7553+00:00",
+      "user_id": "e09e81d7-5e8c-4885-9e68-b9725745f79e",
+      "actor_id": "9e2a1bcb-0367-4998-8ecd-ac741907e893",
+      "action_type": "like reel",
+      "target_id": 2,
+      "timeDiff": "today",
+      "action": "Liked your post",
+      "is_read": false,
+      "content": null,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/9e2a1bcb-0367-4998-8ecd-ac741907e893_350906.png",
+        "username": "slack",
+        "last_name": "Reynolds",
+        "first_name": "Dennis"
+      }
+    },
+    {
+      "id": 10,
+      "created_at": "2025-01-21T06:55:38.607353+00:00",
+      "user_id": "e09e81d7-5e8c-4885-9e68-b9725745f79e",
+      "actor_id": "9e2a1bcb-0367-4998-8ecd-ac741907e893",
+      "action_type": "comment reel",
+      "target_id": 2,
+      "timeDiff": "today",
+      "action": "Liked your post",
+      "is_read": false,
+      "content": "notification test",
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/9e2a1bcb-0367-4998-8ecd-ac741907e893_350906.png",
+        "username": "slack",
+        "last_name": "Reynolds",
+        "first_name": "Dennis"
+      }
+    }
+  ];
+
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchdata();
+  }
+
+  void fetchdata() async {
+    setState(() {
+      _loading = true;
+    });
+
+    final userId = supabase.auth.currentUser?.id;
+
+    final res = await supabase
+        .from('notifications')
+        .select('*, profiles(username, avatar, first_name, last_name)')
+        .eq('is_read', false)
+        .eq('user_id', userId!)
+        .order('created_at', ascending: false);
+
+    if (res.isNotEmpty) {
+      try {
+        for (int i = 0; i < res.length; i++) {
+          final nowString = await supabase.rpc('get_server_time');
+          DateTime now = DateTime.parse(nowString);
+          DateTime createdAt = DateTime.parse(res[i]["created_at"]);
+          Duration difference = now.difference(createdAt);
+          res[i]['timeDiff'] = Constants().formatDuration(difference);
+
+          res[i]['action'] = "";
+          switch (res[i]['action_type']) {
+            case "follow":
+              res[i]['action'] = "Followed you";
+              break;
+
+            case "like post":
+              res[i]['action'] = "Liked your post";
+              break;
+
+            case "like story":
+              res[i]['action'] = "Liked your story";
+              break;
+
+            case "like reel":
+              res[i]['action'] = "Liked your reel";
+              break;
+
+            case "comment post":
+              res[i]['action'] = "Commented on your post";
+              break;
+
+            case "comment story":
+              res[i]['action'] = "Commented on your story";
+              break;
+
+            case "comment reel":
+              res[i]['action'] = "Commented on your reel";
+              break;
+          }
+        }
+        setState(() {
+          data = res;
+        });
+      } catch (e) {
+        print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      }
+    } else {
+      setState(() {
+        data = [];
+      });
+    }
+
+    setState(() {
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,133 +163,127 @@ class _NotificationsState extends State<Notifications> {
       body: Padding(
         padding: const EdgeInsets.only(left: 16, top: 4, right: 16, bottom: 4),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Today',
-              style: TextStyle(
-                color: Color(0xFF4D4C4A),
-                fontSize: 15,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
             Expanded(
-              child: ListView.builder(
-                itemCount: data["today"].length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          data["today"][index]['avatar']!,
-                          fit: BoxFit.fill,
-                          width: 50,
-                          height: 50,
-                        ),
-                        SizedBox(width: 6),
-                        Expanded(
-                          child: Column(
+              child: Skeletonizer(
+                enabled: _loading,
+                enableSwitchAnimation: true,
+                child: ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: EdgeInsets.all(4),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(
+                                data[index]['profiles']['avatar']!),
+                            radius: 25,
+                          ),
+                          SizedBox(width: 6),
+                          Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(children: [
                                 Text(
-                                  data["today"][index]['name']!,
+                                  data[index]['profiles']['username']!,
                                   style: TextStyle(
-                                      color: Color(0xFF8A8B8F),
+                                      color: Color(0xFF4D4C4A),
+                                      fontFamily: "Nunito",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  data[index]['timeDiff']!,
+                                  style: TextStyle(
+                                      color: Color(0xFF4D4C4A),
                                       fontFamily: "Nunito",
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ]),
-                              SizedBox(height: 10),
+                              SizedBox(height: 4),
                               Text(
-                                data["today"][index]['content']!,
+                                data[index]['action']!,
                                 style: TextStyle(
                                     color: Color(0xFF8A8B8F),
                                     fontFamily: "Nunito",
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 20),
                             ],
                           ),
-                        ),
-                        Column(
-                          children: [
-                            Icon(Icons.arrow_forward_ios,
-                                size: 12, color: Color(0xFF8A8B8F)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            Text(
-              'yesterday',
-              style: TextStyle(
-                color: Color(0xFF4D4C4A),
-                fontSize: 15,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: data["yesterday"].length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          data["yesterday"][index]['avatar']!,
-                          fit: BoxFit.fill,
-                          width: 50,
-                          height: 50,
-                        ),
-                        SizedBox(width: 6),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(children: [
-                                Text(
-                                  data["yesterday"][index]['name']!,
-                                  style: TextStyle(
-                                      color: Color(0xFF8A8B8F),
-                                      fontFamily: "Nunito",
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ]),
-                              SizedBox(height: 10),
-                              Text(
-                                data["yesterday"][index]['content']!,
-                                style: TextStyle(
-                                    color: Color(0xFF8A8B8F),
-                                    fontFamily: "Nunito",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            Icon(Icons.arrow_forward_ios,
-                                size: 12, color: Color(0xFF8A8B8F)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          Spacer(),
+                          GestureDetector(
+                            onTap: () async {
+                              await supabase
+                                  .from('notifications')
+                                  .update({'is_read': true}).eq(
+                                      'id', data[index]['id']);
+
+                              switch (data[index]['action_type']) {
+                                case "follow":
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Followers())).then((value) {
+                                    fetchdata();
+                                  });
+                                  break;
+
+                                case "like post":
+                                case "comment post":
+                                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => OnePost(
+                                                  postId: data[index]
+                                                      ['target_id'])))
+                                      .then((value) {
+                                    fetchdata();
+                                  });
+                                  break;
+
+                                case "like reel":
+                                case "comment reel":
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => reel(
+                                                reelId: data[index]
+                                                    ['target_id'],
+                                              ))).then((value) {
+                                    fetchdata();
+                                  });
+                                  break;
+
+                                case "like story":
+                                case "comment story":
+                                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Story(
+                                                  id: data[index]["user_id"])))
+                                      .then((value) {
+                                    fetchdata();
+                                  });
+                                  break;
+                              }
+                            },
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 12,
+                              color: Color(0xFF8A8B8F),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

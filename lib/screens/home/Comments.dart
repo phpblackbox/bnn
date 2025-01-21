@@ -342,6 +342,24 @@ class _CommentsModalState extends State<CommentsModal> {
                   'content': value,
                 });
 
+                final post_author_userInfo = await supabase
+                    .from('posts')
+                    .select()
+                    .eq('id', widget.postId)
+                    .single();
+
+                if (post_author_userInfo.isNotEmpty) {
+                  if (userId != post_author_userInfo['author_id']) {
+                    await supabase.from('notifications').upsert({
+                      'actor_id': userId,
+                      'user_id': post_author_userInfo['author_id'],
+                      'action_type': 'comment post',
+                      'target_id': widget.postId,
+                      'content': value,
+                    });
+                  }
+                }
+
                 final res = await supabase
                     .from('post_comments')
                     .select()

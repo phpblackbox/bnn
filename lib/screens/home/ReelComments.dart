@@ -348,6 +348,24 @@ class _ReelCommandsState extends State<ReelCommands> {
                   'content': value,
                 });
 
+                final reel_author_userInfo = await supabase
+                    .from('reels')
+                    .select()
+                    .eq('id', widget.reelId)
+                    .single();
+
+                if (reel_author_userInfo.isNotEmpty) {
+                  if (userId != reel_author_userInfo['author_id']) {
+                    await supabase.from('notifications').upsert({
+                      'actor_id': userId,
+                      'user_id': reel_author_userInfo['author_id'],
+                      'action_type': 'comment reel',
+                      'target_id': widget.reelId,
+                      'content': value,
+                    });
+                  }
+                }
+
                 final res = await supabase
                     .from('reel_comments')
                     .select()

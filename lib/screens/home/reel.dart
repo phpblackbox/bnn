@@ -21,77 +21,92 @@ class _reelState extends State<reel> {
   late Future<void> _initializeVideoPlayerFuture;
   bool _loading = false;
 
-  dynamic temp = {"likes": 0, "comments": 0, "share": 0, "bookmarks": 0};
-  dynamic data = {"likes": 0, "comments": 0, "share": 0, "bookmarks": 0};
+  late dynamic currentReel;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(
-          'https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/story/1736970291950.mp4'), // Replace with your video URL
-    );
-
-    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      setState(() {});
-      _controller.setLooping(true); // Loop the video
-      _controller.play();
-    }).catchError((error) {
-      print("Error initializing video: $error");
-    });
-
-    fetchdata();
+    fetchDataAndInitialize();
   }
 
-  Future<void> fetchdata() async {
-    if (supabase.auth.currentUser != null) {
-      setState(() {
-        _loading = true;
-      });
-      widget.reelId;
-      try {
-        dynamic res =
-            await supabase.rpc('get_count_reel_likes_by_reelid', params: {
-                  'param_reel_id': widget.reelId,
-                }) ??
-                0;
+  Future<void> fetchDataAndInitialize() async {
+    await fetchdata(widget.reelId);
 
-        temp["likes"] = res;
+    if (currentReel['video_url'] != null) {
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(currentReel['video_url']),
+      );
 
-        res = await supabase.rpc('get_count_reel_bookmarks_by_reelid', params: {
-          'param_reel_id': widget.reelId,
-        });
-
-        temp["bookmarks"] = res;
-
-        res = await supabase.rpc('get_count_reel_comments_by_reelid', params: {
-          'param_reel_id': widget.reelId,
-        });
-
-        temp["comments"] = res;
-        temp["share"] = 2;
-
+      _initializeVideoPlayerFuture = _controller.initialize().then((_) {
         setState(() {
-          data = temp;
-          _loading = false;
+          _controller.setLooping(true);
+          _controller.play();
         });
-      } catch (e) {
-        print('Caught error: $e');
-        if (e.toString().contains("JWT expired")) {
-          await supabase.auth.signOut();
-          Navigator.pushReplacementNamed(context, '/login');
-        }
-      }
+      }).catchError((error) {
+        print("Error initializing video: $error");
+      });
+    } else {
+      print("Video URL is not available");
     }
-    setState(() {
-      _loading = false;
-    });
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose of the controller when done
+    _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> fetchdata(reelId) async {
+    if (supabase.auth.currentUser != null) {
+      setState(() {
+        _loading = true;
+      });
+
+      final oneReel =
+          await supabase.from('reels').select().eq("id", reelId).single();
+
+      if (oneReel.isNotEmpty) {
+        try {
+          dynamic res =
+              await supabase.rpc('get_count_reel_likes_by_reelid', params: {
+                    'param_reel_id': widget.reelId,
+                  }) ??
+                  0;
+
+          oneReel["likes"] = res;
+
+          res =
+              await supabase.rpc('get_count_reel_bookmarks_by_reelid', params: {
+            'param_reel_id': widget.reelId,
+          });
+
+          oneReel["bookmarks"] = res;
+
+          res =
+              await supabase.rpc('get_count_reel_comments_by_reelid', params: {
+            'param_reel_id': widget.reelId,
+          });
+
+          oneReel["comments"] = res;
+          oneReel["share"] = 2;
+
+          setState(() {
+            currentReel = oneReel;
+            _loading = false;
+          });
+        } catch (e) {
+          print('Caught error: $e');
+          if (e.toString().contains("JWT expired")) {
+            await supabase.auth.signOut();
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+        }
+      }
+    }
+
+    setState(() {
+      _loading = false;
+    });
   }
 
   void _showCommentDetail(BuildContext context, int reelId) async {
@@ -111,17 +126,17 @@ class _reelState extends State<reel> {
 
       body: Stack(
         children: <Widget>[
-          FutureBuilder<void>(
-            future: _initializeVideoPlayerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return VideoPlayer(_controller);
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-          // Overlay Widgets Here
+          if (_loading == false)
+            FutureBuilder<void>(
+              future: _initializeVideoPlayerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return VideoPlayer(_controller);
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
           Positioned(
             top: 15,
             left: 0,
@@ -132,7 +147,6 @@ class _reelState extends State<reel> {
               },
             ),
           ),
-
           if (_loading == false)
             Positioned(
               bottom: 60,
@@ -164,8 +178,8 @@ class _reelState extends State<reel> {
                                 .eq('reel_id', widget.reelId);
 
                             setState(() {
-                              if (currentLikeStatus) data["likes"]--;
-                              if (!currentLikeStatus) data["likes"]++;
+                              if (currentLikeStatus) currentReel["likes"]--;
+                              if (!currentLikeStatus) currentReel["likes"]++;
                             });
                           } else {
                             await supabase.from('reel_likes').upsert({
@@ -175,7 +189,25 @@ class _reelState extends State<reel> {
                             });
 
                             setState(() {
-                              data["likes"]++;
+                              currentReel["likes"]++;
+                            });
+                          }
+
+                          final noti = await supabase
+                              .from('notifications')
+                              .select()
+                              .eq('actor_id', userId)
+                              .eq('user_id', currentReel['author_id'])
+                              .eq('action_type', 'like reel')
+                              .eq('target_id', currentReel['id']);
+
+                          if (userId != currentReel['author_id'] &&
+                              noti.isEmpty) {
+                            await supabase.from('notifications').upsert({
+                              'actor_id': userId,
+                              'user_id': currentReel['author_id'],
+                              'action_type': 'like reel',
+                              'target_id': currentReel['id'],
                             });
                           }
                         },
@@ -187,7 +219,7 @@ class _reelState extends State<reel> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        data["likes"].toString(),
+                        currentReel["likes"].toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -212,7 +244,7 @@ class _reelState extends State<reel> {
                         ),
                       ),
                       Text(
-                        data["comments"].toString(),
+                        currentReel["comments"].toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -250,10 +282,10 @@ class _reelState extends State<reel> {
 
                             setState(() {
                               if (currentBookmarksStatus) {
-                                data["bookmarks"]--;
+                                currentReel["bookmarks"]--;
                               }
                               if (!currentBookmarksStatus) {
-                                data["bookmarks"]++;
+                                currentReel["bookmarks"]++;
                               }
                             });
                           } else {
@@ -264,7 +296,7 @@ class _reelState extends State<reel> {
                             });
 
                             setState(() {
-                              data["bookmarks"]++;
+                              currentReel["bookmarks"]++;
                             });
                           }
                         },
@@ -276,7 +308,7 @@ class _reelState extends State<reel> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        data["bookmarks"].toString(),
+                        currentReel["bookmarks"].toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -300,7 +332,7 @@ class _reelState extends State<reel> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        data["share"].toString(),
+                        currentReel["share"].toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
