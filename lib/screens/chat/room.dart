@@ -529,6 +529,25 @@ class _RoomPageState extends State<RoomPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (message.metadata != null)
+                          isMe
+                              ? Text(
+                                  "You replied to their story",
+                                  style: TextStyle(
+                                      color: Color(0xFF4D4C4A), fontSize: 10),
+                                )
+                              : Text(
+                                  "Replied to your story",
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 10),
+                                ),
+                        if (message.metadata != null)
+                          Image.network(
+                            message.metadata!["image_url"],
+                            fit: BoxFit.fill,
+                            width: 108,
+                            height: 190,
+                          ),
                         Text(
                           message.text,
                           style: TextStyle(color: Colors.black, fontSize: 10),

@@ -334,49 +334,21 @@ class _CommentsModalState extends State<CommentsModal> {
                   return;
                 }
 
+                _commentController.clear();
+
                 final userId = supabase.auth.currentUser!.id;
-                await supabase.from('post_comments').upsert({
-                  'author_id': userId,
-                  'post_id': widget.postId,
-                  'parent_id': parentId,
-                  'content': value,
-                });
-
-                final post_author_userInfo = await supabase
-                    .from('posts')
-                    .select()
-                    .eq('id', widget.postId)
-                    .single();
-
-                if (post_author_userInfo.isNotEmpty) {
-                  if (userId != post_author_userInfo['author_id']) {
-                    await supabase.from('notifications').upsert({
-                      'actor_id': userId,
-                      'user_id': post_author_userInfo['author_id'],
-                      'action_type': 'comment post',
-                      'target_id': widget.postId,
-                      'content': value,
-                    });
-                  }
-                }
-
                 final res = await supabase
                     .from('post_comments')
+                    .upsert({
+                      'author_id': userId,
+                      'post_id': widget.postId,
+                      'parent_id': parentId,
+                      'content': value,
+                    })
                     .select()
-                    .eq('author_id', userId)
-                    .eq('post_id', widget.postId)
-                    .eq('content', value)
-                    .order('created_at', ascending: false)
-                    .limit(1)
                     .single();
 
-                final userInfo = await supabase
-                    .from('profiles')
-                    .select()
-                    .eq("id", userId)
-                    .single();
-
-                if (userInfo.isNotEmpty) {
+                if (loadedProfile != null) {
                   final nowString = await supabase.rpc('get_server_time');
                   DateTime now = DateTime.parse(nowString);
                   DateTime createdAt = DateTime.parse(res["created_at"]);
@@ -386,7 +358,7 @@ class _CommentsModalState extends State<CommentsModal> {
                     "id": res["id"],
                     "author_id": userId,
                     "name":
-                        '${userInfo["first_name"]} ${userInfo["last_name"]}',
+                        '${loadedProfile!.firstName} ${loadedProfile!.lastName}',
                     "post_id": widget.postId,
                     "parent_id": parentId,
                     "content": value,
@@ -394,9 +366,9 @@ class _CommentsModalState extends State<CommentsModal> {
                     "created_at": res["created_at"],
                     "time": Constants().formatDuration(difference),
                     "profiles": {
-                      "avatar": userInfo["avatar"],
-                      "first_name": userInfo["first_name"],
-                      "last_name": userInfo["last_name"],
+                      "avatar": loadedProfile!.avatar,
+                      "first_name": loadedProfile!.firstName,
+                      "last_name": loadedProfile!.lastName,
                     }
                   };
 
@@ -413,9 +385,26 @@ class _CommentsModalState extends State<CommentsModal> {
                       _expandedComments.add(parentId.toString());
                     });
                   }
+
+                  final post_author_userInfo = await supabase
+                      .from('posts')
+                      .select()
+                      .eq('id', widget.postId)
+                      .single();
+
+                  if (post_author_userInfo.isNotEmpty) {
+                    if (userId != post_author_userInfo['author_id']) {
+                      await supabase.from('notifications').upsert({
+                        'actor_id': userId,
+                        'user_id': post_author_userInfo['author_id'],
+                        'action_type': 'comment post',
+                        'target_id': widget.postId,
+                        'content': value,
+                      });
+                    }
+                  }
                 }
 
-                _commentController.clear(); // Clear the input field
                 setState(() {
                   parentId = 0;
                 });

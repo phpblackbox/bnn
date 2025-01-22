@@ -17,7 +17,7 @@ class reel extends StatefulWidget {
 }
 
 class _reelState extends State<reel> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   late Future<void> _initializeVideoPlayerFuture;
   bool _loading = false;
 
@@ -29,18 +29,31 @@ class _reelState extends State<reel> {
     fetchDataAndInitialize();
   }
 
-  Future<void> fetchDataAndInitialize() async {
-    await fetchdata(widget.reelId);
+  void nextReel() async {
+    final randomReelId = await supabase.rpc('get_random_reel_id');
 
+    await fetchdata(randomReelId);
+    loadVideo(currentReel);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  void loadVideo(Map<String, dynamic> currentReel) {
     if (currentReel['video_url'] != null) {
+      _controller?.dispose();
+
       _controller = VideoPlayerController.networkUrl(
         Uri.parse(currentReel['video_url']),
       );
 
-      _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+      _initializeVideoPlayerFuture = _controller!.initialize().then((_) {
         setState(() {
-          _controller.setLooping(true);
-          _controller.play();
+          _controller!.setLooping(true);
+          _controller!.play();
         });
       }).catchError((error) {
         print("Error initializing video: $error");
@@ -50,10 +63,9 @@ class _reelState extends State<reel> {
     }
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Future<void> fetchDataAndInitialize() async {
+    await fetchdata(widget.reelId);
+    loadVideo(currentReel);
   }
 
   Future<void> fetchdata(reelId) async {
@@ -127,15 +139,23 @@ class _reelState extends State<reel> {
       body: Stack(
         children: <Widget>[
           if (_loading == false)
-            FutureBuilder<void>(
-              future: _initializeVideoPlayerFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return VideoPlayer(_controller);
-                } else {
-                  return Center(child: CircularProgressIndicator());
+            GestureDetector(
+              onVerticalDragEnd: (DragEndDetails details) {
+                if (details.velocity.pixelsPerSecond.dy > 0) {
+                  print("next level");
+                  nextReel();
                 }
               },
+              child: FutureBuilder<void>(
+                future: _initializeVideoPlayerFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return VideoPlayer(_controller!);
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
             ),
           Positioned(
             top: 15,

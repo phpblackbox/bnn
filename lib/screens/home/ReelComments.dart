@@ -341,48 +341,18 @@ class _ReelCommandsState extends State<ReelCommands> {
                 }
 
                 final userId = supabase.auth.currentUser!.id;
-                await supabase.from('reel_comments').upsert({
-                  'author_id': userId,
-                  'reel_id': widget.reelId,
-                  'parent_id': parentId,
-                  'content': value,
-                });
-
-                final reel_author_userInfo = await supabase
-                    .from('reels')
-                    .select()
-                    .eq('id', widget.reelId)
-                    .single();
-
-                if (reel_author_userInfo.isNotEmpty) {
-                  if (userId != reel_author_userInfo['author_id']) {
-                    await supabase.from('notifications').upsert({
-                      'actor_id': userId,
-                      'user_id': reel_author_userInfo['author_id'],
-                      'action_type': 'comment reel',
-                      'target_id': widget.reelId,
-                      'content': value,
-                    });
-                  }
-                }
-
                 final res = await supabase
                     .from('reel_comments')
+                    .upsert({
+                      'author_id': userId,
+                      'reel_id': widget.reelId,
+                      'parent_id': parentId,
+                      'content': value,
+                    })
                     .select()
-                    .eq('author_id', userId)
-                    .eq('reel_id', widget.reelId)
-                    .eq('content', value)
-                    .order('created_at', ascending: false)
-                    .limit(1)
                     .single();
 
-                final userInfo = await supabase
-                    .from('profiles')
-                    .select()
-                    .eq("id", userId)
-                    .single();
-
-                if (userInfo.isNotEmpty) {
+                if (loadedProfile != null) {
                   final nowString = await supabase.rpc('get_server_time');
                   DateTime now = DateTime.parse(nowString);
                   DateTime createdAt = DateTime.parse(res["created_at"]);
@@ -392,7 +362,7 @@ class _ReelCommandsState extends State<ReelCommands> {
                     "id": res["id"],
                     "author_id": userId,
                     "name":
-                        '${userInfo["first_name"]} ${userInfo["last_name"]}',
+                        '${loadedProfile!.firstName} ${loadedProfile!.lastName}',
                     "reel_id": widget.reelId,
                     "parent_id": parentId,
                     "content": value,
@@ -400,9 +370,9 @@ class _ReelCommandsState extends State<ReelCommands> {
                     "created_at": res["created_at"],
                     "time": Constants().formatDuration(difference),
                     "profiles": {
-                      "avatar": userInfo["avatar"],
-                      "first_name": userInfo["first_name"],
-                      "last_name": userInfo["last_name"],
+                      "avatar": loadedProfile!.avatar,
+                      "first_name": loadedProfile!.firstName,
+                      "last_name": loadedProfile!.lastName,
                     }
                   };
 
@@ -418,6 +388,24 @@ class _ReelCommandsState extends State<ReelCommands> {
                       _childCommentsMap[parentId.toString()] = childComments;
                       _expandedComments.add(parentId.toString());
                     });
+                  }
+
+                  final reel_author_userInfo = await supabase
+                      .from('reels')
+                      .select()
+                      .eq('id', widget.reelId)
+                      .single();
+
+                  if (reel_author_userInfo.isNotEmpty) {
+                    if (userId != reel_author_userInfo['author_id']) {
+                      await supabase.from('notifications').upsert({
+                        'actor_id': userId,
+                        'user_id': reel_author_userInfo['author_id'],
+                        'action_type': 'comment reel',
+                        'target_id': widget.reelId,
+                        'content': value,
+                      });
+                    }
                   }
                 }
 

@@ -66,14 +66,25 @@ class _UsersPageState extends State<UsersPage> {
 
   void _handlePressed(types.User otherUser, BuildContext context) async {
     final navigator = Navigator.of(context);
-    final room = await SupabaseChatCore.instance.createRoom(otherUser);
+
+    types.User other = types.User(
+      id: otherUser.id,
+      firstName: otherUser.firstName,
+      lastName: otherUser.lastName,
+      imageUrl: otherUser.imageUrl,
+    );
+
+    final temp = await SupabaseChatCore.instance.createRoom(other);
+
+    var room = temp.copyWith(
+        imageUrl: otherUser.imageUrl,
+        name: "${otherUser.firstName} ${otherUser.lastName}");
 
     navigator.pop();
+
     await navigator.push(
       MaterialPageRoute(
-        builder: (context) => RoomPage(
-          room: room,
-        ),
+        builder: (context) => RoomPage(room: room),
       ),
     );
   }

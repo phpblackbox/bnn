@@ -1,11 +1,14 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/OnePost.dart';
 import 'package:bnn/screens/home/reel.dart';
 import 'package:bnn/screens/home/story.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});
@@ -110,7 +113,7 @@ class _NotificationsState extends State<Notifications> {
               break;
 
             case "comment story":
-              res[i]['action'] = "Commented on your story";
+              res[i]['action'] = "Message on your story";
               break;
 
             case "comment reel":
@@ -262,14 +265,43 @@ class _NotificationsState extends State<Notifications> {
 
                                 case "like story":
                                 case "comment story":
-                                  Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Story(
-                                                  id: data[index]["user_id"])))
-                                      .then((value) {
-                                    fetchdata();
-                                  });
+                                  final meId = supabase.auth.currentUser!.id;
+                                  if (data[index]['actor_id'] == meId) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content:
+                                          Text("You can't send message to you"),
+                                    ));
+                                    return;
+                                  }
+
+                                  types.User otherUser = types.User(
+                                    id: data[index]['actor_id'],
+                                    firstName: data[index]['profiles']
+                                        ['avatar'],
+                                    lastName: data[index]['profiles']
+                                        ['last_name'],
+                                    imageUrl: data[index]['profiles']['avatar'],
+                                  );
+
+                                  final navigator = Navigator.of(context);
+                                  final temp = await SupabaseChatCore.instance
+                                      .createRoom(otherUser);
+
+                                  var room = temp.copyWith(
+                                      imageUrl: data[index]['profiles']
+                                          ['avatar'],
+                                      name:
+                                          "${data[index]['profiles']['first_name']} ${data[index]['profiles']['last_name']}");
+
+                                  navigator.pop();
+
+                                  await navigator.push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          RoomPage(room: room),
+                                    ),
+                                  );
                                   break;
                               }
                             },

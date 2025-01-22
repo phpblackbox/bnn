@@ -86,6 +86,8 @@ class _EmailSignUp extends State<EmailSignUp>
           password: passwordController.text,
         );
 
+        print(res);
+
         if (res.user != null) {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => CreateUserName()));

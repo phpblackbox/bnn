@@ -1,8 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:bnn/main.dart';
+import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:cube_transition_plus/cube_transition_plus.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
+import 'package:http/http.dart' as http;
 
 class Story extends StatefulWidget {
   final String id;
@@ -57,7 +63,7 @@ class _StoryState extends State<Story> {
     try {
       data = await supabase
           .from('stories')
-          .select('*, profiles(avatar, username)')
+          .select('*, profiles(avatar, username, first_name, last_name)')
           .eq('author_id', widget.id)
           .eq('is_published', true)
           .order('id', ascending: false);
@@ -391,8 +397,54 @@ class _StoryState extends State<Story> {
                     padding: EdgeInsets.all(10),
                     backgroundColor: Colors.white,
                   ),
-                  onPressed: () {
-                    // Handle button press
+                  onPressed: () async {
+                    final meId = supabase.auth.currentUser!.id;
+                    if (story['author_id'] == meId) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("You can't send message to you"),
+                      ));
+                      return;
+                    }
+
+                    types.User otherUser = types.User(
+                      id: story['author_id'],
+                      firstName: story['profiles']['first_name'],
+                      lastName: story['profiles']['last_name'],
+                      imageUrl: story['profiles']['avatar'],
+                    );
+
+                    final navigator = Navigator.of(context);
+                    final temp =
+                        await SupabaseChatCore.instance.createRoom(otherUser);
+
+                    var room = temp.copyWith(
+                        imageUrl: story['profiles']['avatar'],
+                        name:
+                            "${story['profiles']['first_name']} ${story['profiles']['last_name']}");
+
+                    final message = types.PartialText(
+                        text: _msgController.text,
+                        metadata: {
+                          'image_url': story["img_urls"][_currentIndex]
+                        });
+
+                    await SupabaseChatCore.instance
+                        .sendMessage(message, room.id);
+
+                    _msgController.clear();
+
+                    await supabase.from('notifications').insert({
+                      'actor_id': meId,
+                      'user_id': story['author_id'],
+                      'action_type': 'comment story',
+                      'content': _msgController.text,
+                    });
+
+                    await navigator.push(
+                      MaterialPageRoute(
+                        builder: (context) => RoomPage(room: room),
+                      ),
+                    );
                   },
                   child: ClipOval(
                     child: Image.asset(
