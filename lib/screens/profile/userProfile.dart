@@ -1,10 +1,7 @@
 import 'package:bnn/main.dart';
-import 'package:bnn/screens/chat/chat.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/profile/ProfileFollower.dart';
-import 'package:bnn/screens/profile/followers.dart';
-import 'package:bnn/screens/setting/username.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -153,11 +150,11 @@ class _UserProfileState extends State<UserProfile> {
                               children: <Widget>[
                                 Container(
                                   width: double.infinity,
-                                  height: 400,
+                                  height: 350,
                                   decoration: BoxDecoration(
                                     color: Colors.transparent,
                                     image: DecorationImage(
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
                                       image: NetworkImage(data["avatar"]),
                                     ),
                                   ),

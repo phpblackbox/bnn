@@ -79,4 +79,142 @@ class Constants {
       return '30+d'; // For any duration greater than 30 days
     }
   }
+
+  // these are fake data for skeleton
+  static const List<dynamic> fakeAddParticipants = [
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p1.png',
+      'name': 'Emelie',
+      'mutal': '6 mutual friends'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p3.png',
+      'name': 'Abigail',
+      'mutal': '2 mutual friends'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p4.png',
+      'name': 'Elizabeth',
+      'mutal': '12 mutual friends'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p6.png',
+      'name': 'Penelope',
+      'mutal': '1 mutual friend'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p7.png',
+      'name': 'Chloe',
+      'mutal': '3 mutual friends'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p8.png',
+      'name': 'Grace',
+      'mutal': '4 mutual friends'
+    },
+  ];
+
+  static const List<dynamic> fakeChatList = [
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p1.png',
+      'name': 'Jason bosch',
+      'content': 'Hey, how’s it goin?'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p3.png',
+      'name': 'Jakob Curtis',
+      'content': 'Yo, how are you doing?'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p4.png',
+      'name': 'Abram Levin',
+      'content': 'There is a new AI image generator software i use now'
+    },
+    {
+      'id': '1',
+      'avatar': 'assets/images/avatar/p5.png',
+      'name': 'Marilyn Herwitz',
+      'content': 'hey, i got new Pictures for you'
+    },
+  ];
+
+  static const List<dynamic> fakeParentComments = [
+    {
+      "id": "1",
+      "name": "User One",
+      "time": "2 hours ago",
+      "content": "This is a comment.",
+      "likes": 5,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png"
+      }
+    },
+    {
+      "id": "2",
+      "name": "User Two",
+      "time": "1 hour ago",
+      "content": "This is another comment.",
+      "likes": 3,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png"
+      }
+    },
+    {
+      "id": "2",
+      "name": "User Two",
+      "time": "1 hour ago",
+      "content": "This is another comment.",
+      "likes": 3,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png"
+      }
+    },
+    {
+      "id": "2",
+      "name": "User Two",
+      "time": "1 hour ago",
+      "content": "This is another comment.",
+      "likes": 3,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/d84a2718-cddc-42dd-949d-6d0d4a04cc64_489708.png"
+      }
+    },
+  ];
+
+  static const List<Map<String, dynamic>> fakeFollwers = [
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    },
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie Fake Faker FakerName",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    },
+    {
+      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
+      "username": "Charlie Fake Faker FakerName",
+      "avatar":
+          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
+      "mutal": "1 mutal friend",
+    }
+  ];
 }

@@ -2,7 +2,6 @@ import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/OnePost.dart';
 import 'package:bnn/screens/home/reel.dart';
-import 'package:bnn/screens/home/story.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';

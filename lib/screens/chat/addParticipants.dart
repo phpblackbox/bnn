@@ -1,3 +1,4 @@
+import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 
@@ -11,44 +12,7 @@ class AddParticipants extends StatefulWidget {
 class _AddParticipantsState extends State<AddParticipants> {
   final TextEditingController searchController = TextEditingController();
 
-  final List<dynamic> data = [
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p1.png',
-      'name': 'Emelie',
-      'mutal': '6 mutual friends'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p3.png',
-      'name': 'Abigail',
-      'mutal': '2 mutual friends'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p4.png',
-      'name': 'Elizabeth',
-      'mutal': '12 mutual friends'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p6.png',
-      'name': 'Penelope',
-      'mutal': '1 mutual friend'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p7.png',
-      'name': 'Chloe',
-      'mutal': '3 mutual friends'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p8.png',
-      'name': 'Grace',
-      'mutal': '4 mutual friends'
-    },
-  ];
+  final List<dynamic> data = Constants.fakeAddParticipants;
 
   @override
   Widget build(BuildContext context) {

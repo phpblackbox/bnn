@@ -7,7 +7,6 @@ import 'package:bnn/utils/constants.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Galley extends StatefulWidget {
   const Galley({super.key});
@@ -24,7 +23,7 @@ class _GalleyState extends State<Galley> {
   Future<void> pickImages() async {
     try {
       final List<XFile> pickedFiles = await _picker.pickMultiImage();
-      if (pickedFiles!.isNotEmpty) {
+      if (pickedFiles.isNotEmpty) {
         setState(() {
           _selectedImages!.addAll(pickedFiles);
         });
@@ -93,7 +92,7 @@ class _GalleyState extends State<Galley> {
       });
       List imgUrls = [];
       try {
-        for (var image in _selectedImages!) {
+        for (var image in _selectedImages) {
           String randomNumStr = Constants().generateRandomNumberString(8);
           final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
 
@@ -196,12 +195,12 @@ class _GalleyState extends State<Galley> {
                   ),
                 ],
               ),
-              _selectedImages != null && _selectedImages!.isNotEmpty
+              _selectedImages != null && _selectedImages.isNotEmpty
                   ? Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: GridView.builder(
-                            itemCount: _selectedImages!.length,
+                            itemCount: _selectedImages.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
@@ -212,7 +211,7 @@ class _GalleyState extends State<Galley> {
                               return ClipRRect(
                                 borderRadius: BorderRadius.circular(10.0),
                                 child: Image.file(
-                                  File(_selectedImages![index].path),
+                                  File(_selectedImages[index].path),
                                   fit: BoxFit.cover,
                                 ),
                               );

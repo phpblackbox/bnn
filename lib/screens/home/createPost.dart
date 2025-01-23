@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
-import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,7 +21,7 @@ class _CreatePostState extends State<CreatePost> {
   final TextEditingController _postController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  final List<XFile>? _selectedImages = [];
+  late List<XFile>? _selectedImages;
 
   bool isLoading = false;
 
@@ -41,14 +39,12 @@ class _CreatePostState extends State<CreatePost> {
         userAvatar = loadedProfile.avatar;
       });
     } else {
-      print('No profile found.');
       return;
     }
 
     if (supabase.auth.currentUser != null) {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) {
-        print('User is not logged in!');
         return;
       }
 
@@ -62,7 +58,6 @@ class _CreatePostState extends State<CreatePost> {
           });
         }
       } catch (e) {
-        print('Caught error: $e');
         if (e.toString().contains("JWT expired")) {
           await supabase.auth.signOut();
           Navigator.pushReplacementNamed(context, '/login');
@@ -74,7 +69,7 @@ class _CreatePostState extends State<CreatePost> {
   Future<void> pickImages() async {
     try {
       final List<XFile> pickedFiles = await _picker.pickMultiImage();
-      if (pickedFiles!.isNotEmpty) {
+      if (pickedFiles.isNotEmpty) {
         setState(() {
           _selectedImages!.addAll(pickedFiles);
         });

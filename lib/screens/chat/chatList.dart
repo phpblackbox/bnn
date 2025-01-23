@@ -1,7 +1,7 @@
-import 'package:bnn/screens/chat/chat.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/chat/users.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/room_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -17,40 +17,12 @@ class ChatList extends StatefulWidget {
 
 class _ChatListState extends State<ChatList> {
   final TextEditingController searchController = TextEditingController();
-  final List<dynamic> data = [
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p1.png',
-      'name': 'Jason bosch',
-      'content': 'Hey, how’s it goin?'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p3.png',
-      'name': 'Jakob Curtis',
-      'content': 'Yo, how are you doing?'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p4.png',
-      'name': 'Abram Levin',
-      'content': 'There is a new AI image generator software i use now'
-    },
-    {
-      'id': '1',
-      'avatar': 'assets/images/avatar/p5.png',
-      'name': 'Marilyn Herwitz',
-      'content': 'hey, i got new Pictures for you'
-    },
-  ];
+  final List<dynamic> data = Constants.fakeChatList;
 
   static const _pageSize = 20;
   String _filter = '';
   final PagingController<int, types.Room> _controller =
       PagingController(firstPageKey: 0);
-
-  static const _pageSizeUser = 20;
-  String _filterUser = '';
 
   @override
   void initState() {

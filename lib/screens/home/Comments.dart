@@ -17,40 +17,7 @@ class _CommentsModalState extends State<CommentsModal> {
   // late List<dynamic> _parentComments = [];
   final Map<String, List<dynamic>> _childCommentsMap = {};
 
-  late List<dynamic> _parentComments = [
-    {
-      "id": "1",
-      "name": "User One",
-      "time": "2 hours ago",
-      "content": "This is a comment.",
-      "likes": 5,
-      "profiles": {"avatar": "https://example.com/avatar1.png"}
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {"avatar": "https://example.com/avatar2.png"}
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {"avatar": "https://example.com/avatar2.png"}
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {"avatar": "https://example.com/avatar2.png"}
-    },
-  ];
+  late List<dynamic> _parentComments = Constants.fakeParentComments;
 
   final List<String> _expandedComments = [];
   late int parentId = 0;

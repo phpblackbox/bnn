@@ -17,52 +17,7 @@ class _ReelCommandsState extends State<ReelCommands> {
   // late List<dynamic> _parentComments = [];
   final Map<String, List<dynamic>> _childCommentsMap = {};
 
-  late List<dynamic> _parentComments = [
-    {
-      "id": "1",
-      "name": "User One",
-      "time": "2 hours ago",
-      "content": "This is a comment.",
-      "likes": 5,
-      "profiles": {
-        "avatar":
-            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png"
-      }
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {
-        "avatar":
-            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png"
-      }
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {
-        "avatar":
-            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png"
-      }
-    },
-    {
-      "id": "2",
-      "name": "User Two",
-      "time": "1 hour ago",
-      "content": "This is another comment.",
-      "likes": 3,
-      "profiles": {
-        "avatar":
-            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png"
-      }
-    },
-  ];
+  late List<dynamic> _parentComments = Constants.fakeParentComments;
 
   final List<String> _expandedComments = [];
   late int parentId = 0;

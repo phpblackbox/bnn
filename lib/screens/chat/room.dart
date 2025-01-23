@@ -120,7 +120,6 @@ class _RoomPageState extends State<RoomPage> {
       ],
     ).then((value) {
       if (value != null) {
-        // Handle the selected option here
         print('Selected option: $value');
       }
     });
@@ -389,7 +388,6 @@ class _RoomPageState extends State<RoomPage> {
                         ),
                         SizedBox(width: 16),
                         Column(
-                          // mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -545,8 +543,6 @@ class _RoomPageState extends State<RoomPage> {
                           Image.network(
                             message.metadata!["image_url"],
                             fit: BoxFit.fill,
-                            width: 108,
-                            height: 190,
                           ),
                         Text(
                           message.text,

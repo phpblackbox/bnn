@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/utils/constants.dart';
@@ -8,7 +6,6 @@ import 'dart:async';
 import 'package:cube_transition_plus/cube_transition_plus.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
-import 'package:http/http.dart' as http;
 
 class Story extends StatefulWidget {
   final String id;
@@ -116,12 +113,12 @@ class _StoryState extends State<Story> {
     _timer = null; // Clear the timer reference
   }
 
-  void _resumeAutoSlide() {
-    if (_timer == null) {
-      // Only start if it's not already running
-      _startAutoSlide();
-    }
-  }
+  // void _resumeAutoSlide() {
+  //   if (_timer == null) {
+  //     // Only start if it's not already running
+  //     _startAutoSlide();
+  //   }
+  // }
 
   void _nextStory() {
     print("nexsotry");

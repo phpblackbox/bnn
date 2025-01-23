@@ -1,6 +1,7 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/profile/friends.dart';
 import 'package:bnn/screens/profile/userProfile.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,29 +17,7 @@ class Suggested extends StatefulWidget {
 class _SuggestedState extends State<Suggested> {
   final TextEditingController searchController = TextEditingController();
 
-  List<Map<String, dynamic>>? data = [
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    },
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie Fake Faker FakerName",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    },
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie Fake Faker FakerName",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    }
-  ];
+  List<Map<String, dynamic>>? data = Constants.fakeFollwers;
   bool _loading = false;
 
   @override

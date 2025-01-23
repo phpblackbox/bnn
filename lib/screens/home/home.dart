@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/ChatView.dart';
 import 'package:bnn/screens/home/Reels.dart';
@@ -13,7 +11,6 @@ import 'package:bnn/screens/profile/profile.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/main.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';

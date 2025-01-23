@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/ChatView.dart';
@@ -8,14 +6,11 @@ import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/live/live.dart';
 import 'package:bnn/screens/profile/all.dart';
-import 'package:bnn/screens/profile/bookmark.dart';
 import 'package:bnn/screens/profile/followers.dart';
-import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:bnn/screens/setting/edit.dart';
 import 'package:bnn/screens/setting/settings.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Profile extends StatefulWidget {

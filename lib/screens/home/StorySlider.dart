@@ -3,7 +3,6 @@ import 'package:bnn/screens/home/gallery.dart';
 import 'package:bnn/screens/home/story.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StorySlider extends StatefulWidget {
   const StorySlider({super.key});

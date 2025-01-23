@@ -20,29 +20,7 @@ class Friends extends StatefulWidget {
 class _FriendsState extends State<Friends> {
   final TextEditingController searchController = TextEditingController();
 
-  List<Map<String, dynamic>>? data = [
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    },
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie Fake Faker FakerName",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    },
-    {
-      "id": "66cffab6-e17c-4a8d-a08c-6f6b8d118d31",
-      "username": "Charlie Fake Faker FakerName",
-      "avatar":
-          "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/66cffab6-e17c-4a8d-a08c-6f6b8d118d31_156069.png",
-      "mutal": "1 mutal friend",
-    }
-  ];
+  List<Map<String, dynamic>>? data = Constants.fakeFollwers;
 
   bool _loading = true;
 
@@ -194,9 +172,9 @@ class _FriendsState extends State<Friends> {
                 ],
               ),
               Divider(
-                color: Colors.grey, // Color of the divider
-                thickness: 1, // Thickness of the divider
-                height: 30, // Space around the divider
+                color: Colors.grey,
+                thickness: 1,
+                height: 30,
               ),
               GestureDetector(
                 onTap: () async {

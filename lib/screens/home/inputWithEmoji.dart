@@ -10,11 +10,6 @@ class InputWithEmoji extends StatefulWidget {
 class _InputWithEmojiState extends State<InputWithEmoji> {
   final TextEditingController _controller = TextEditingController();
 
-  // Method to show emoji selection dialog
-  void _showEmojiDialog() {
-    // Logic to show emoji dialog can be added here
-  }
-
   @override
   Widget build(BuildContext context) {
     return TextField(
