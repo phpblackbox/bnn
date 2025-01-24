@@ -52,6 +52,14 @@ class _ReelCommandsState extends State<ReelCommands> {
           '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
 
       data[i]["time"] = Constants().formatDuration(difference);
+
+      dynamic likes =
+          await supabase.rpc('get_count_reel_comment_likes_by_reelid', params: {
+                'param_reel_comment_id': data[i]["id"],
+              }) ??
+              0;
+
+      data[i]['likes'] = likes;
     }
 
     return data;
@@ -106,6 +114,14 @@ class _ReelCommandsState extends State<ReelCommands> {
           '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
 
       data[i]["time"] = Constants().formatDuration(difference);
+
+      dynamic likes =
+          await supabase.rpc('get_count_reel_comment_likes_by_reelid', params: {
+                'param_reel_comment_id': data[i]["id"],
+              }) ??
+              0;
+
+      data[i]['likes'] = likes;
     }
 
     return data;
@@ -238,15 +254,40 @@ class _ReelCommandsState extends State<ReelCommands> {
             ),
             GestureDetector(
               onTap: () async {
-                var currentLikes = comment['likes'] + 1;
+                final userId = supabase.auth.currentUser!.id;
 
-                await supabase.from('reel_comments').update({
-                  'likes': currentLikes,
-                }).eq('id', comment['id']);
+                final existingLikeResponse = await supabase
+                    .from('reel_comment_likes')
+                    .select()
+                    .eq('author_id', userId)
+                    .eq('reel_comment_id', comment['id'])
+                    .maybeSingle();
 
-                setState(() {
-                  comment['likes']++;
-                });
+                if (existingLikeResponse != null) {
+                  bool currentLikeStatus = existingLikeResponse['is_like'];
+                  await supabase
+                      .from('reel_comment_likes')
+                      .update({
+                        'is_like': !currentLikeStatus,
+                      })
+                      .eq('author_id', userId)
+                      .eq('reel_comment_id', comment['id']);
+
+                  setState(() {
+                    if (currentLikeStatus) comment['likes']--;
+                    if (!currentLikeStatus) comment['likes']++;
+                  });
+                } else {
+                  await supabase.from('reel_comment_likes').upsert({
+                    'author_id': userId,
+                    'reel_comment_id': comment['id'],
+                    'is_like': true,
+                  });
+
+                  setState(() {
+                    comment['likes']++;
+                  });
+                }
               },
               child: Column(
                 children: [

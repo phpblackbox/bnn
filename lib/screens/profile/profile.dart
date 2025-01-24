@@ -338,10 +338,12 @@ class _ProfileState extends State<Profile> {
                   if (_allorbookmark == 0)
                     AllPost(param_allorbookmakr: _allorbookmark),
                   if (_allorbookmark == 1)
-                    Container(
-                        padding:
-                            EdgeInsets.only(left: 12, right: 12, bottom: 8),
-                        child: PostView(bookmark: true)),
+                    Expanded(
+                      child: Container(
+                          padding:
+                              EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                          child: PostView(bookmark: true)),
+                    ),
                 ],
               )
             : null,

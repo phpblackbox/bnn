@@ -21,7 +21,7 @@ class _CreatePostState extends State<CreatePost> {
   final TextEditingController _postController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  late List<XFile>? _selectedImages;
+  final List<XFile> _selectedImages = [];
 
   bool isLoading = false;
 
@@ -276,13 +276,13 @@ class _CreatePostState extends State<CreatePost> {
                       child: Image.asset(
                         "assets/images/post/camera.png",
                         fit: BoxFit.fill,
-                        height: 64, // This is the height of the image
+                        height: 64,
                       ),
                     ),
                     SizedBox(width: 8),
                     Expanded(
                       child: SizedBox(
-                        height: 80, // Set your desired height here
+                        height: 80,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: _selectedImages!.length,

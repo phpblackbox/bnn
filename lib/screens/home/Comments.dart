@@ -52,6 +52,14 @@ class _CommentsModalState extends State<CommentsModal> {
           '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
 
       data[i]["time"] = Constants().formatDuration(difference);
+
+      dynamic likes =
+          await supabase.rpc('get_count_post_comment_likes_by_postid', params: {
+                'param_post_comment_id': data[i]["id"],
+              }) ??
+              0;
+
+      data[i]['likes'] = likes;
     }
 
     return data;
@@ -112,6 +120,14 @@ class _CommentsModalState extends State<CommentsModal> {
           '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
 
       data[i]["time"] = Constants().formatDuration(difference);
+
+      dynamic likes =
+          await supabase.rpc('get_count_post_comment_likes_by_postid', params: {
+                'param_post_comment_id': data[i]["id"],
+              }) ??
+              0;
+
+      data[i]['likes'] = likes;
     }
 
     return data;
@@ -244,15 +260,40 @@ class _CommentsModalState extends State<CommentsModal> {
             ),
             GestureDetector(
               onTap: () async {
-                var currentLikes = comment['likes'] + 1;
+                final userId = supabase.auth.currentUser!.id;
 
-                await supabase.from('post_comments').update({
-                  'likes': currentLikes,
-                }).eq('id', comment['id']);
+                final existingLikeResponse = await supabase
+                    .from('post_comment_likes')
+                    .select()
+                    .eq('author_id', userId)
+                    .eq('post_comment_id', comment['id'])
+                    .maybeSingle();
 
-                setState(() {
-                  comment['likes']++;
-                });
+                if (existingLikeResponse != null) {
+                  bool currentLikeStatus = existingLikeResponse['is_like'];
+                  await supabase
+                      .from('post_comment_likes')
+                      .update({
+                        'is_like': !currentLikeStatus,
+                      })
+                      .eq('author_id', userId)
+                      .eq('post_comment_id', comment['id']);
+
+                  setState(() {
+                    if (currentLikeStatus) comment['likes']--;
+                    if (!currentLikeStatus) comment['likes']++;
+                  });
+                } else {
+                  await supabase.from('post_comment_likes').upsert({
+                    'author_id': userId,
+                    'post_comment_id': comment['id'],
+                    'is_like': true,
+                  });
+
+                  setState(() {
+                    comment['likes']++;
+                  });
+                }
               },
               child: Column(
                 children: [

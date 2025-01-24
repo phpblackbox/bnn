@@ -37,7 +37,7 @@ class _reelState extends State<reel> with SingleTickerProviderStateMixin {
 
     _slideAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: Offset(0, 1),
+      end: Offset(0, -0.99),
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,

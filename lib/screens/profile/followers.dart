@@ -189,11 +189,10 @@ class _FollowersState extends State<Followers> {
                               onTap: () {},
                               child: Row(
                                 children: [
-                                  Image.network(
-                                    data[index]['avatar'],
-                                    fit: BoxFit.fill,
-                                    width: 50,
-                                    height: 50,
+                                  CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(data![index]['avatar']),
+                                    radius: 25,
                                   ),
                                   SizedBox(width: 12),
                                   Expanded(
@@ -225,24 +224,25 @@ class _FollowersState extends State<Followers> {
                                     ),
                                   ),
                                   SizedBox(width: 40),
-                                  Expanded(
-                                    child: ButtonGradientMain(
-                                      label: 'Follow',
-                                      onPressed: () {
-                                        followUser(data[index]['id']);
-                                      },
-                                      textColor: Colors.white,
-                                      gradientColors: _loading
-                                          ? [
-                                              Colors.transparent,
-                                              Colors.transparent
-                                            ]
-                                          : [
-                                              Color(0xFF000000),
-                                              Color(0xFF820200)
-                                            ],
+                                  if (data[index]['status'] == 'following')
+                                    Expanded(
+                                      child: ButtonGradientMain(
+                                        label: 'Follow',
+                                        onPressed: () {
+                                          followUser(data[index]['id']);
+                                        },
+                                        textColor: Colors.white,
+                                        gradientColors: _loading
+                                            ? [
+                                                Colors.transparent,
+                                                Colors.transparent
+                                              ]
+                                            : [
+                                                Color(0xFF000000),
+                                                Color(0xFF820200)
+                                              ],
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),

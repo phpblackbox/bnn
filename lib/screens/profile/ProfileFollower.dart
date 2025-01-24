@@ -65,7 +65,7 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
     final userId = supabase.auth.currentUser!.id;
 
     List<Map<String, dynamic>> res =
-        await supabase.rpc('get_following', params: {
+        await supabase.rpc('get_other_following', params: {
       'param_user_id': widget.userId,
     });
 
@@ -141,11 +141,10 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
                           onTap: () {},
                           child: Row(
                             children: [
-                              Image.network(
-                                data![index]['avatar'],
-                                fit: BoxFit.fill,
-                                width: 50,
-                                height: 50,
+                              CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(data![index]['avatar']),
+                                radius: 25,
                               ),
                               SizedBox(width: 12),
                               Expanded(
