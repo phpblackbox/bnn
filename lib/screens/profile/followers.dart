@@ -29,6 +29,28 @@ class _FollowersState extends State<Followers> {
   Future<void> followUser(String followerId) async {
     final followedId = supabase.auth.currentUser!.id;
 
+    if (followerId == followedId) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("You can't follow yourself"),
+      ));
+      return;
+    }
+
+    dynamic res = await supabase
+        .from('relationships')
+        .select()
+        .eq('follower_id', followerId)
+        .eq('followed_id', followedId)
+        .or('status.eq.following, status.eq.friend');
+
+    if (res.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Already Followed!')),
+      );
+
+      return;
+    }
+
     await supabase
         .from('relationships')
         .update({

@@ -137,10 +137,7 @@ class _Username extends State<Username> with SingleTickerProviderStateMixin {
                         icon: Icon(Icons.arrow_back,
                             size: 20.0, color: Color(0xFF4D4C4A)),
                         onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => EditProfile()));
+                          Navigator.pop(context);
                         },
                       ),
                       SizedBox(width: 5),

@@ -40,6 +40,21 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
       return;
     }
 
+    dynamic res = await supabase
+        .from('relationships')
+        .select()
+        .eq('follower_id', followerId)
+        .eq('followed_id', followedId)
+        .or('status.eq.following, status.eq.friend');
+
+    if (res.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Already Followed!')),
+      );
+
+      return;
+    }
+
     await supabase.from('relationships').upsert({
       'status': 'following',
       'follower_id': followerId,

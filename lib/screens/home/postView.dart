@@ -363,8 +363,8 @@ class _PostViewState extends State<PostView> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.bookmark != null ? 200 : 360.0,
+    return Expanded(
+      // height: widget.bookmark != null ? 220 : 360.0,
       child: Skeletonizer(
           enabled: _loading,
           enableSwitchAnimation: true,

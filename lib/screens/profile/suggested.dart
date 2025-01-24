@@ -90,6 +90,50 @@ class _SuggestedState extends State<Suggested> {
   Future<void> followUser(String followedId) async {
     final followerId = supabase.auth.currentUser!.id;
 
+    dynamic res = await supabase
+        .from('relationships')
+        .select()
+        .eq('follower_id', followerId)
+        .eq('followed_id', followedId)
+        .or('status.eq.following, status.eq.friend');
+
+    if (res.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Already Followed!')),
+      );
+
+      return;
+    }
+
+    res = await supabase
+        .from('relationships')
+        .select()
+        .eq('follower_id', followedId)
+        .eq('followed_id', followerId)
+        .or('status.eq.following, status.eq.friend');
+
+    if (res.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You are friend')),
+      );
+
+      await supabase
+          .from('relationships')
+          .update({
+            'status': 'friend',
+          })
+          .eq("follower_id", followedId)
+          .eq("followed_id", followerId);
+
+      await supabase.from('notifications').insert({
+        'actor_id': followedId,
+        'user_id': followerId,
+        'action_type': 'follow'
+      });
+
+      return;
+    }
+
     await supabase.from('relationships').upsert({
       'follower_id': followerId,
       'followed_id': followedId,

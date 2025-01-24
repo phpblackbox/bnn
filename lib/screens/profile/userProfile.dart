@@ -80,6 +80,8 @@ class _UserProfileState extends State<UserProfile> {
         data["last_name"] = userInfo["last_name"];
         data["avatar"] = userInfo["avatar"];
         data["views"] = userInfo["views"];
+        data["bio"] = userInfo["bio"];
+        data["age"] = '${userInfo["age"]}yrs';
       });
     }
     setState(() {
@@ -131,10 +133,11 @@ class _UserProfileState extends State<UserProfile> {
     return MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(4),
           child: _loading
               ? Center(child: CircularProgressIndicator())
               : Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       decoration: BoxDecoration(
@@ -142,8 +145,7 @@ class _UserProfileState extends State<UserProfile> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                            16), // Clip with rounded corners
+                        borderRadius: BorderRadius.circular(16),
                         child: Column(
                           children: [
                             Stack(
@@ -161,7 +163,7 @@ class _UserProfileState extends State<UserProfile> {
                                 ),
                                 Container(
                                   width: double.infinity,
-                                  height: 400,
+                                  height: 350,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     gradient: LinearGradient(
@@ -316,165 +318,168 @@ class _UserProfileState extends State<UserProfile> {
                     // about and ...
                     Container(
                       padding: EdgeInsets.all(8),
-                      child: Column(children: [
-                        Column(
+                      child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Text(
-                              'ABOUT',
-                              style: TextStyle(
-                                color: Color(0xFF4D4C4A),
-                                fontSize: 14,
-                                fontFamily: 'Abel',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              data['about'],
-                              style: TextStyle(
-                                color: Color(0xFF4D4C4A),
-                                fontSize: 12,
-                                fontFamily: 'Abel',
-                                fontWeight: FontWeight.w400,
-                                height: 1.50,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
+                                SizedBox(height: 8),
+                                Text(
+                                  'ABOUT',
+                                  style: TextStyle(
+                                    color: Color(0xFF4D4C4A),
+                                    fontSize: 14,
+                                    fontFamily: 'Abel',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  data['bio'],
+                                  style: TextStyle(
+                                    color: Color(0xFF4D4C4A),
+                                    fontSize: 12,
+                                    fontFamily: 'Abel',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.50,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/speedometer.png'),
-                                      size: 22.0,
-                                      color: Color(0xFF4D4C4A),
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/speedometer.png'),
+                                          size: 22.0,
+                                          color: Color(0xFF4D4C4A),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          data["age"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 12,
+                                            fontFamily: 'Abel',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      data["year"],
-                                      style: TextStyle(
-                                        color: Color(0xFF4D4C4A),
-                                        fontSize: 12,
-                                        fontFamily: 'Abel',
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/heart.png'),
+                                          size: 22.0,
+                                          color: Color(0xFF4D4C4A),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          data["marital"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 12,
+                                            fontFamily: 'Abel',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/flag.png'),
+                                          size: 22.0,
+                                          color: Color(0xFF4D4C4A),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          data["nationality"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 12,
+                                            fontFamily: 'Abel',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/location.png'),
+                                          size: 22.0,
+                                          color: Color(0xFF4D4C4A),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          data["location"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 12,
+                                            fontFamily: 'Abel',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        ImageIcon(
+                                          AssetImage(
+                                              'assets/images/icons/content.png'),
+                                          size: 22.0,
+                                          color: Color(0xFF4D4C4A),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          data["content"],
+                                          style: TextStyle(
+                                            color: Color(0xFF4D4C4A),
+                                            fontSize: 12,
+                                            fontFamily: 'Abel',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      ],
                                     )
                                   ],
                                 ),
-                                SizedBox(height: 4),
-                                Row(
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/heart.png'),
-                                      size: 22.0,
-                                      color: Color(0xFF4D4C4A),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      data["marital"],
-                                      style: TextStyle(
-                                        color: Color(0xFF4D4C4A),
-                                        fontSize: 12,
-                                        fontFamily: 'Abel',
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/flag.png'),
-                                      size: 22.0,
-                                      color: Color(0xFF4D4C4A),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      data["nationality"],
-                                      style: TextStyle(
-                                        color: Color(0xFF4D4C4A),
-                                        fontSize: 12,
-                                        fontFamily: 'Abel',
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/location.png'),
-                                      size: 22.0,
-                                      color: Color(0xFF4D4C4A),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      data["location"],
-                                      style: TextStyle(
-                                        color: Color(0xFF4D4C4A),
-                                        fontSize: 12,
-                                        fontFamily: 'Abel',
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/content.png'),
-                                      size: 22.0,
-                                      color: Color(0xFF4D4C4A),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      data["content"],
-                                      style: TextStyle(
-                                        color: Color(0xFF4D4C4A),
-                                        fontSize: 12,
-                                        fontFamily: 'Abel',
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
+                                    GestureDetector(
+                                        onTap: message,
+                                        child: Image.asset(
+                                          'assets/images/profile_msg_btn.png',
+                                          width: 75,
+                                          height: 75,
+                                        )),
                                   ],
                                 )
                               ],
                             ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                    onTap: message,
-                                    child: Image.asset(
-                                      'assets/images/profile_msg_btn.png',
-                                      width: 75,
-                                      height: 75,
-                                    )),
-                              ],
-                            )
-                          ],
-                        ),
-                      ]),
+                          ]),
                     ),
 
                     // Posts
