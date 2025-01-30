@@ -271,7 +271,7 @@ class _StoryState extends State<Story> {
                 ),
           if (story['profiles'] != null)
             Positioned(
-              top: 20.0,
+              top: 40.0,
               left: 10,
               right: 10,
               child: Column(children: [
@@ -356,7 +356,7 @@ class _StoryState extends State<Story> {
               ]),
             ),
           Positioned(
-            bottom: 20.0,
+            bottom: 40.0,
             left: 10,
             right: 10,
             child: Row(

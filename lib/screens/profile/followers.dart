@@ -213,7 +213,7 @@ class _FollowersState extends State<Followers> {
                                 children: [
                                   CircleAvatar(
                                     backgroundImage:
-                                        NetworkImage(data![index]['avatar']),
+                                        NetworkImage(data[index]['avatar']),
                                     radius: 25,
                                   ),
                                   SizedBox(width: 12),

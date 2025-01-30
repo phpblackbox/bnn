@@ -139,7 +139,7 @@ class _LoginDash extends State<LoginDash> with SingleTickerProviderStateMixin {
             height: 200,
             child: Center(
               child: Image.asset(
-                Constants.splashLogo, // Replace with your logo asset
+                'assets/images/splash_bnn_logo.png',
                 height: 200, // Adjust height as necessary
                 fit: BoxFit.cover,
               ),

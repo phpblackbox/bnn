@@ -50,7 +50,7 @@ class _ChatViewState extends State<ChatView> {
       backgroundColor: Colors.white, // Customize according to your theme
 
       body: Padding(
-        padding: EdgeInsets.only(left: 16, top: 32, right: 16),
+        padding: EdgeInsets.only(left: 16, top: 48, right: 16),
         child: Column(children: [
           ChatOrGroup(index: _ChatViewOrGroup, onPressed: _onChatViewOrGroup),
           SizedBox(height: 15),

@@ -57,7 +57,7 @@ class _MediaPreferencesState extends State<MediaPreferences> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.only(top: 48, left: 16, right: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,54 +88,54 @@ class _MediaPreferencesState extends State<MediaPreferences> {
               'AUTOPLAY OPTIONS',
               style: TextStyle(
                 color: Color(0xFF4D4C4A),
-                fontSize: 9,
+                fontSize: 11,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w300,
               ),
             ),
-            Expanded(
-              child: Container(
-                // padding: const EdgeInsets.only(top: 6, bottom: 6),
-                decoration: BoxDecoration(
-                  color: Color(0xFFE9E9E9), // Grey background color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
-                ),
-                child: ListView.builder(
-                  itemCount: _selectedAutoPlay.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _toggleAutoPlay(index),
-                      child: Column(children: [
-                        Container(
-                          padding: const EdgeInsets.only(left: 14, right: 14),
-                          child: Row(
-                            children: [
-                              Text(
-                                _selectedAutoPlay[index]['content'],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
+            Container(
+              padding: EdgeInsets.zero,
+              decoration: BoxDecoration(
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _selectedAutoPlay.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => _toggleAutoPlay(index),
+                    child: Column(children: [
+                      Container(
+                        padding: const EdgeInsets.only(left: 14, right: 14),
+                        child: Row(
+                          children: [
+                            Text(
+                              _selectedAutoPlay[index]['content'],
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
                               ),
-                              Spacer(),
-                              Icon(
-                                _selectedAutoPlay[index]['status']
-                                    ? Icons.check
-                                    : null,
-                                color: _selectedAutoPlay[index]['status']
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Spacer(),
+                            Icon(
+                              _selectedAutoPlay[index]['status']
+                                  ? Icons.check
+                                  : null,
+                              color: _selectedAutoPlay[index]['status']
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ],
                         ),
-                        if (index != _selectedAutoPlay.length - 1) Divider(),
-                      ]),
-                    );
-                  },
-                ),
+                      ),
+                      if (index != _selectedAutoPlay.length - 1) Divider(),
+                    ]),
+                  );
+                },
               ),
             ),
             Text(
@@ -157,49 +157,48 @@ class _MediaPreferencesState extends State<MediaPreferences> {
                 fontWeight: FontWeight.w300,
               ),
             ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFE9E9E9), // Grey background color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
-                ),
-                child: ListView.builder(
-                  itemCount: _selectedPhotoQuality.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _togglePhotoQuality(index),
-                      child: Column(children: [
-                        Container(
-                          padding: const EdgeInsets.only(left: 14, right: 14),
-                          child: Row(
-                            children: [
-                              Text(
-                                _selectedPhotoQuality[index]['content'],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
+            Container(
+              decoration: BoxDecoration(
+                color: Color(0xFFE9E9E9), // Grey background color
+                borderRadius: BorderRadius.circular(8.0), // Border radius
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _selectedPhotoQuality.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => _togglePhotoQuality(index),
+                    child: Column(children: [
+                      Container(
+                        padding: const EdgeInsets.only(left: 14, right: 14),
+                        child: Row(
+                          children: [
+                            Text(
+                              _selectedPhotoQuality[index]['content'],
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
                               ),
-                              Spacer(),
-                              Icon(
-                                _selectedPhotoQuality[index]['status']
-                                    ? Icons.check
-                                    : null,
-                                color: _selectedPhotoQuality[index]['status']
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Spacer(),
+                            Icon(
+                              _selectedPhotoQuality[index]['status']
+                                  ? Icons.check
+                                  : null,
+                              color: _selectedPhotoQuality[index]['status']
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ],
                         ),
-                        if (index != _selectedPhotoQuality.length - 1)
-                          Divider(),
-                      ]),
-                    );
-                  },
-                ),
+                      ),
+                      if (index != _selectedPhotoQuality.length - 1) Divider(),
+                    ]),
+                  );
+                },
               ),
             ),
             Text(
@@ -221,48 +220,48 @@ class _MediaPreferencesState extends State<MediaPreferences> {
                 fontWeight: FontWeight.w300,
               ),
             ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFE9E9E9), // Grey background color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
-                ),
-                child: ListView.builder(
-                  itemCount: _selectedVideoQuality.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _toggleVideoQuality(index),
-                      child: Column(children: [
-                        Container(
-                          padding: const EdgeInsets.only(left: 14, right: 14),
-                          child: Row(
-                            children: [
-                              Text(
-                                _selectedVideoQuality[index]['content'],
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
+            Container(
+              decoration: BoxDecoration(
+                color: Color(0xFFE9E9E9), // Grey background color
+                borderRadius: BorderRadius.circular(8.0), // Border radius
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                // physics: NeverScrollableScrollPhysics(),
+                itemCount: _selectedVideoQuality.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => _toggleVideoQuality(index),
+                    child: Column(children: [
+                      Container(
+                        padding: const EdgeInsets.only(left: 14, right: 14),
+                        child: Row(
+                          children: [
+                            Text(
+                              _selectedVideoQuality[index]['content'],
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
                               ),
-                              Spacer(),
-                              Icon(
-                                _selectedVideoQuality[index]['status']
-                                    ? Icons.check
-                                    : null,
-                                color: _selectedVideoQuality[index]['status']
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Spacer(),
+                            Icon(
+                              _selectedVideoQuality[index]['status']
+                                  ? Icons.check
+                                  : null,
+                              color: _selectedVideoQuality[index]['status']
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ],
                         ),
-                        Divider()
-                      ]),
-                    );
-                  },
-                ),
+                      ),
+                      Divider()
+                    ]),
+                  );
+                },
               ),
             ),
           ],

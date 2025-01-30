@@ -6,7 +6,6 @@ import 'package:bnn/screens/setting/GenderSelectionModal.dart';
 import 'package:bnn/screens/setting/email.dart';
 import 'package:bnn/screens/setting/phone.dart';
 import 'package:bnn/screens/setting/username.dart';
-import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
@@ -197,6 +196,27 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Container(
+          child: Text(
+            'Edit Profile',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF4D4C4A),
+              fontSize: 14,
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, size: 20.0),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: Colors.transparent,
+      ),
       body: SingleChildScrollView(
         child: loadedProfile == null
             ? null
@@ -207,28 +227,6 @@ class _EditProfileState extends State<EditProfile> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back,
-                              size: 20.0, color: Color(0xFF4D4C4A)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          'Edit Profile',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF4D4C4A),
-                            fontSize: 14,
-                            fontFamily: 'Nunito',
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
                     // Image(image: NetworkImage(loadedProfile!.avatar)),
                     SizedBox(
                       width: double.infinity,

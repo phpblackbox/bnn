@@ -21,7 +21,7 @@ class Splash extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white, // Customize according to your theme
       body: Center(
-        child: Image.asset(Constants.splashLogo),
+        child: Image.asset('assets/images/splash_bnn_logo.png'),
       ),
     );
   }

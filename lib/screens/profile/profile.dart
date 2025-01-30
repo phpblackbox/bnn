@@ -2,6 +2,7 @@ import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/ChatView.dart';
 import 'package:bnn/screens/home/createPost.dart';
+import 'package:bnn/screens/home/header.dart';
 import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/live/live.dart';
@@ -106,7 +107,7 @@ class _ProfileState extends State<Profile> {
             ? Column(
                 children: [
                   Container(
-                    height: 300,
+                    height: 330,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage("assets/images/profile/rect.png"),
@@ -117,24 +118,28 @@ class _ProfileState extends State<Profile> {
                         child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Settings()));
-                              },
-                              child: Image(
-                                image: AssetImage(
-                                    'assets/images/icons/setting2.png'),
-                                width: 32,
-                                height: 32,
+                        Container(
+                          padding: EdgeInsets.only(top: 32, right: 16),
+                          child: Row(
+                            children: [
+                              Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  print("hello");
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Settings()));
+                                },
+                                child: Image(
+                                  image: AssetImage(
+                                      'assets/images/icons/setting2.png'),
+                                  width: 32,
+                                  height: 32,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         SizedBox(height: 10),
                         Stack(

@@ -1,5 +1,4 @@
 import 'package:bnn/main.dart';
-import 'package:bnn/screens/login/accountrecovery.dart';
 import 'package:bnn/screens/signup/signupDash.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
@@ -138,7 +137,7 @@ class _EmailLogin extends State<EmailLogin>
               height: 200,
               child: Center(
                 child: Image.asset(
-                  Constants.splashLogo, // Replace with your logo asset
+                  'assets/images/splash_bnn_logo.png', // Replace with your logo asset
                   height: 200, // Adjust height as necessary
                   fit: BoxFit.cover,
                 ),

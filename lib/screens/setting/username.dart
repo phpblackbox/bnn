@@ -1,6 +1,5 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
-import 'package:bnn/screens/setting/edit.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -126,7 +125,7 @@ class _Username extends State<Username> with SingleTickerProviderStateMixin {
     return Scaffold(
       body: Container(
         color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(top: 48, left: 16, right: 16),
         child: loadedProfile == null
             ? null
             : Column(

@@ -23,7 +23,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.only(top: 48, left: 16, right: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,

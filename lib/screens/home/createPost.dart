@@ -71,7 +71,7 @@ class _CreatePostState extends State<CreatePost> {
       final List<XFile> pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles.isNotEmpty) {
         setState(() {
-          _selectedImages!.addAll(pickedFiles);
+          _selectedImages.addAll(pickedFiles);
         });
       }
     } catch (e) {
@@ -86,7 +86,7 @@ class _CreatePostState extends State<CreatePost> {
 
       if (image != null) {
         setState(() {
-          _selectedImages!.add(image);
+          _selectedImages.add(image);
         });
       }
     } catch (e) {
@@ -106,14 +106,12 @@ class _CreatePostState extends State<CreatePost> {
       return;
     }
 
-    if (_selectedImages == null) return;
-
     List imgUrls = [];
     try {
       setState(() {
         isLoading = true;
       });
-      for (var image in _selectedImages!) {
+      for (var image in _selectedImages) {
         String randomNumStr = Constants().generateRandomNumberString(8);
         final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
 
@@ -285,10 +283,10 @@ class _CreatePostState extends State<CreatePost> {
                         height: 80,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: _selectedImages!.length,
+                          itemCount: _selectedImages.length,
                           itemBuilder: (context, index) {
                             return Row(children: [
-                              Image.file(File(_selectedImages![index].path),
+                              Image.file(File(_selectedImages[index].path),
                                   fit: BoxFit.fill, height: 64),
                               SizedBox(width: 8),
                             ]);

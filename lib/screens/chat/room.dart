@@ -305,7 +305,8 @@ class _RoomPageState extends State<RoomPage> {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(170),
           child: Container(
-            margin: EdgeInsets.all(16.0),
+            margin: EdgeInsets.all(16),
+            padding: EdgeInsets.only(top: 32),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -319,7 +320,6 @@ class _RoomPageState extends State<RoomPage> {
             child: Column(
               children: [
                 Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
                       icon: Icon(
@@ -460,9 +460,9 @@ class _RoomPageState extends State<RoomPage> {
                 ),
                 sendButtonMargin: EdgeInsets.all(0),
                 attachmentButtonMargin: EdgeInsets.all(0),
-                inputPadding: EdgeInsets.only(top: 12, bottom: 12),
-                inputMargin:
-                    EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 12),
+                inputPadding: EdgeInsets.only(top: 0, bottom: 0),
+                // inputMargin:
+                //     EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 12),
                 inputBackgroundColor: Color(0xFFE9E9E9),
                 inputBorderRadius: BorderRadius.circular(40.0),
                 messageMaxWidth: 550,

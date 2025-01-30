@@ -9,8 +9,9 @@
             "request": "launch",
             "type": "dart",
             "args": [
+                "--no-enable-impeller",
                 "-d",
-                "emulator-5554" // Specify the emulator ID here
+                "4E4DBE1A-F1C8-4F6D-8739-3846DF35B4B8" // Specify the emulator ID here
             ]
         },
         {

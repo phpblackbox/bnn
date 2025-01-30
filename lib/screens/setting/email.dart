@@ -1,4 +1,3 @@
-import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter/material.dart';
 
 class Email extends StatefulWidget {
@@ -54,7 +53,7 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
     return Scaffold(
       body: Container(
         color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(top: 48, left: 16, right: 16),
         child: Column(
           children: [
             Row(

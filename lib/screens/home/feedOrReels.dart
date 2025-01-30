@@ -1,4 +1,3 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/screens/home/reel.dart';
 import 'package:flutter/material.dart';
 

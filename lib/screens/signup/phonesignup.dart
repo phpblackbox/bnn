@@ -1,8 +1,6 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
-import 'package:bnn/screens/signup/otp.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'ButtonGradientMain.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:country_flags/country_flags.dart';

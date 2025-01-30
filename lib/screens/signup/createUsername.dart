@@ -1,10 +1,8 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/signup/gender.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import './CustomInputField.dart';
 import 'ButtonGradientMain.dart';
-import './setupPassword.dart';
 
 class CreateUserName extends StatefulWidget {
   const CreateUserName({super.key});
@@ -19,7 +17,6 @@ class _CreateUserName extends State<CreateUserName>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final _formKey = GlobalKey<FormState>();
   final TextEditingController usernameController = TextEditingController();
 
   @override

@@ -19,13 +19,16 @@ class BnnProState extends State<BnnPro> {
             Row(
               children: [
                 Spacer(),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  iconSize: 28,
-                  color: Colors.black,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                Container(
+                  padding: EdgeInsets.only(top: 48, right: 16),
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    iconSize: 28,
+                    color: Colors.black,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
               ],
             ),

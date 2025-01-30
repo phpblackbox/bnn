@@ -146,7 +146,7 @@ class _SignUpDash extends State<SignUpDash>
             height: 200,
             child: Center(
               child: Image.asset(
-                Constants.splashLogo, // Replace with your logo asset
+                'assets/images/splash_bnn_logo.png', // Replace with your logo asset
                 height: 200, // Adjust height as necessary
                 fit: BoxFit.cover,
               ),
