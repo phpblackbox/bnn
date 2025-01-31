@@ -1,6 +1,7 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:cube_transition_plus/cube_transition_plus.dart';
@@ -201,11 +202,6 @@ class _StoryState extends State<Story> {
   void _onEmojiSelected(BuildContext context, String emoji) {
     // Close the modal
     Navigator.pop(context);
-
-    // Show a snackbar or handle the event as needed
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('You selected: $emoji')),
-    );
   }
 
   @override
@@ -397,9 +393,8 @@ class _StoryState extends State<Story> {
                   onPressed: () async {
                     final meId = supabase.auth.currentUser!.id;
                     if (story['author_id'] == meId) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text("You can't send message to you"),
-                      ));
+                      CustomToast.showToastWarningTop(
+                          context, "You can't send message yourself");
                       return;
                     }
 

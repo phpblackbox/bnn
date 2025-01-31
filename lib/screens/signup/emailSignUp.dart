@@ -1,5 +1,6 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/login/logindash.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -66,11 +67,8 @@ class _EmailSignUp extends State<EmailSignUp>
 
   Future<void> _signUp() async {
     if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'The passwords entered do not match. Let’s give it another try!')),
-      );
+      CustomToast.showToastWarningBottom(context,
+          'The passwords entered do not match. Let’s give it another try!');
 
       return;
     }
@@ -93,13 +91,10 @@ class _EmailSignUp extends State<EmailSignUp>
               MaterialPageRoute(builder: (context) => CreateUserName()));
         }
       } on AuthException catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message)),
-        );
+        CustomToast.showToastWarningBottom(context, error.message);
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('An unexpected error occurred')),
-        );
+        CustomToast.showToastDangerBottom(
+            context, 'An unexpected error occurred');
       } finally {
         if (mounted) {
           setState(() {

@@ -1,4 +1,5 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'ButtonGradientMain.dart';
 import './CustomInputField.dart';
@@ -64,10 +65,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
         Navigator.push(context, MaterialPageRoute(builder: (context) => Age()));
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $error')),
-        );
-        print(error);
+        CustomToast.showToastWarningBottom(
+            context, 'Error updating profile: $error');
       }
     }
   }

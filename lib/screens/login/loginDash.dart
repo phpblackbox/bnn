@@ -1,6 +1,7 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/login/emailLogin.dart';
 import 'package:bnn/screens/signup/signupDash.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,6 +10,7 @@ import './phoneLogin.dart';
 import '../signup/ButtonPrimary.dart';
 import '../signup/ButtonGradientPrimary.dart';
 import '../signup//BottomTermsOfService.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 class LoginDash extends StatefulWidget {
   const LoginDash({super.key});
@@ -178,9 +180,7 @@ class _LoginDash extends State<LoginDash> with SingleTickerProviderStateMixin {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                EmailLogin()), // Replace with your sign-in page widget
+                        MaterialPageRoute(builder: (context) => EmailLogin()),
                       );
                     }, // Handle email signup
                   ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/signup/ButtonGradientPrimary.dart';
 import 'package:bnn/screens/signup/ButtonPrimary.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'ButtonGradientMain.dart';
@@ -80,7 +81,6 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
 
         final publicUrl =
             supabase.storage.from('avatars').getPublicUrl(filename);
-        print('Image uploaded successfully! URL: $publicUrl');
 
         final userId = supabase.auth.currentUser!.id;
 
@@ -88,15 +88,12 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
           'id': userId,
           'avatar': publicUrl,
         });
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('Profile updated successfully! File: $path')),
-        // );
+        CustomToast.showToastSuccessTop(
+            context, 'Profile updated successfully!');
         Navigator.pushNamed(context, '/home');
       } catch (e) {
-        print(e.toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading image: ${e.toString()}')),
-        );
+        CustomToast.showToastWarningTop(
+            context, 'Error uploading image: ${e.toString()}');
       }
     }
   }

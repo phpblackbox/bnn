@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -90,18 +91,15 @@ class _CreatePostState extends State<CreatePost> {
         });
       }
     } catch (e) {
-      print('Error camera images: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('No camera found. Please check your device settings.'),
-      ));
+      CustomToast.showToastDangerTop(
+          context, 'No camera found. Please check your device settings.');
     }
   }
 
   Future<void> post() async {
     if (_postController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please describe what’s happening')),
-      );
+      CustomToast.showToastWarningTop(
+          context, 'Please describe what’s happening');
 
       return;
     }
@@ -137,16 +135,12 @@ class _CreatePostState extends State<CreatePost> {
         isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("You've posted"),
-      ));
+      CustomToast.showToastSuccessTop(context, "You've posted.");
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      print(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading image: ${e.toString()}')),
-      );
+      CustomToast.showToastDangerTop(
+          context, 'Error uploading image: ${e.toString()}');
       setState(() {
         isLoading = false;
       });

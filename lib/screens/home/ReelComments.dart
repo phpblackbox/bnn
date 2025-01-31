@@ -1,4 +1,5 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/utils/constants.dart';
@@ -330,9 +331,7 @@ class _ReelCommandsState extends State<ReelCommands> {
               controller: _commentController,
               onSubmitted: (value) async {
                 if (value.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Add a comment')),
-                  );
+                  CustomToast.showToastWarningTop(context, "Add a comment");
                   return;
                 }
 

@@ -4,6 +4,7 @@ import 'package:bnn/screens/home/OnePost.dart';
 import 'package:bnn/screens/home/reel.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -266,11 +267,8 @@ class _NotificationsState extends State<Notifications> {
                                 case "comment story":
                                   final meId = supabase.auth.currentUser!.id;
                                   if (data[index]['actor_id'] == meId) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content:
-                                          Text("You can't send message to you"),
-                                    ));
+                                    CustomToast.showToastWarningTop(context,
+                                        "You can't send message to you");
                                     return;
                                   }
 

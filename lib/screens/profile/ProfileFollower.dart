@@ -1,6 +1,7 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -34,9 +35,7 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
     final followerId = supabase.auth.currentUser!.id;
 
     if (followerId == followedId) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("You can't follow yourself"),
-      ));
+      CustomToast.showToastSuccessTop(context, "You can't follow yourself");
       return;
     }
 
@@ -48,9 +47,7 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
         .or('status.eq.following, status.eq.friend');
 
     if (res.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Already Followed!')),
-      );
+      CustomToast.showToastWarningTop(context, "Already Followed!");
 
       return;
     }
@@ -67,9 +64,7 @@ class _ProfileFollowersState extends State<ProfileFollowers> {
       'action_type': 'follow'
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Followed!"),
-    ));
+    CustomToast.showToastSuccessTop(context, "Followed!");
   }
 
   void fetchData() async {

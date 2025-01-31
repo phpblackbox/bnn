@@ -2,6 +2,7 @@ import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/profile/suggested.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -180,9 +181,8 @@ class _FriendsState extends State<Friends> {
                 onTap: () async {
                   final meId = supabase.auth.currentUser!.id;
                   if (data![index]['id'] == meId) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("You can't send message to you"),
-                    ));
+                    CustomToast.showToastWarningTop(
+                        context, "You can't send message to you");
 
                     return;
                   }

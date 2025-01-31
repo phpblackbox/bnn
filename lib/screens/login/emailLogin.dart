@@ -1,11 +1,15 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/signup/signupDash.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './BottomLogin.dart';
 import '../signup/CustomInputField.dart';
 import '../signup/ButtonGradientMain.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 
 class EmailLogin extends StatefulWidget {
   const EmailLogin({super.key});
@@ -55,6 +59,70 @@ class _EmailLogin extends State<EmailLogin>
         passwordController.text.isNotEmpty;
   }
 
+  Future<void> fetchUser() async {
+    if (supabase.auth.currentUser != null) {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) {
+        print('User is not logged in!');
+        return;
+      }
+
+      try {
+        final data =
+            await supabase.from('profiles').select().eq("id", userId).single();
+
+        if (data.isNotEmpty) {
+          Constants().profile = Profiles(
+            id: data['id'],
+            firstName: data['first_name'],
+            lastName: data['last_name'],
+            username: data['username'],
+            age: data['age'],
+            bio: data['bio'],
+            gender: data['gender'],
+            avatar: data['avatar'],
+          );
+
+          Profiles profile = Profiles(
+            id: data['id'],
+            firstName: data['first_name'],
+            lastName: data['last_name'],
+            username: data['username'],
+            age: data['age'],
+            bio: data['bio'],
+            gender: data['gender'],
+            avatar: data['avatar'],
+          );
+
+          await Constants.saveProfile(profile);
+
+          await SupabaseChatCore.instance.updateUser(
+            types.User(
+                firstName: data['first_name'],
+                id: data['id'],
+                lastName: data['last_name'],
+                imageUrl: data['avatar']),
+          );
+
+          Profiles? loadedProfile = await Constants.loadProfile();
+          if (loadedProfile != null) {
+            print(
+                'Loaded Profile: ${loadedProfile.firstName} ${loadedProfile.lastName}');
+          } else {
+            print('No profile found.');
+            return;
+          }
+        }
+      } catch (e) {
+        print('Caught error: $e');
+        if (e.toString().contains("JWT expired")) {
+          await supabase.auth.signOut();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      }
+    }
+  }
+
   Future<void> _login() async {
     try {
       final response = await supabase.auth.signInWithPassword(
@@ -63,18 +131,15 @@ class _EmailLogin extends State<EmailLogin>
       );
 
       if (response.user != null) {
+        fetchUser();
         Navigator.pushReplacementNamed(context, '/home');
+        CustomToast.showToastSuccessTop(context, "Welcome to BNN");
       }
     } on AuthException catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
-      print(error);
+      CustomToast.showToastWarningBottom(context, error.message);
     } catch (error) {
-      print(error);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An unexpected error occurred')),
-      );
+      CustomToast.showToastDangerBottom(
+          context, 'An unexpected error occurred');
     }
   }
 

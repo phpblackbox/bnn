@@ -7,6 +7,7 @@ import 'package:bnn/screens/setting/email.dart';
 import 'package:bnn/screens/setting/phone.dart';
 import 'package:bnn/screens/setting/username.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -91,10 +92,8 @@ class _EditProfileState extends State<EditProfile> {
 
         fetchUser();
       } catch (e) {
-        print(e.toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading image: ${e.toString()}')),
-        );
+        CustomToast.showToastWarningBottom(
+            context, 'Error uploading image: ${e.toString()}');
       }
     }
 

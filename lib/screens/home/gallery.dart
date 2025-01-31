@@ -4,6 +4,7 @@ import 'package:bnn/screens/home/createStory.dart';
 import 'package:bnn/screens/home/home.dart';
 import 'package:bnn/screens/signup/ButtonGradientMain.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -78,10 +79,8 @@ class _GalleyState extends State<Galley> {
         });
       }
     } catch (e) {
-      print('Error camera images: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('No camera found. Please check your device settings.'),
-      ));
+      CustomToast.showToastDangerTop(
+          context, 'No camera found. Please check your device settings.');
     }
   }
 
@@ -125,10 +124,8 @@ class _GalleyState extends State<Galley> {
             MaterialPageRoute(
                 builder: (context) => CreateStory(storyId: newStory[0]["id"])));
       } catch (e) {
-        print(e.toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading image: ${e.toString()}')),
-        );
+        CustomToast.showToastDangerTop(
+            context, 'Error uploading image: ${e.toString()}');
       }
     }
   }

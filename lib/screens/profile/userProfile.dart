@@ -2,6 +2,7 @@ import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/postView.dart';
 import 'package:bnn/screens/profile/ProfileFollower.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -99,9 +100,7 @@ class _UserProfileState extends State<UserProfile> {
   void message() async {
     final meId = supabase.auth.currentUser!.id;
     if (data['id'] == meId) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("You can't send message to you"),
-      ));
+      CustomToast.showToastWarningTop(context, "You can't send message to you");
       return;
     }
 

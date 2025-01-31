@@ -4,6 +4,7 @@ import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/Comments.dart';
 import 'package:bnn/screens/profile/userProfile.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/utils/toast.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -227,9 +228,8 @@ class _OnePostState extends State<OnePost> {
                       onTap: () async {
                         final meId = supabase.auth.currentUser!.id;
                         if (post!['author_id'] == meId) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("You can't send message to you"),
-                          ));
+                          CustomToast.showToastWarningTop(
+                              context, "You can't send message to you");
                           return;
                         }
 

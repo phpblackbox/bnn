@@ -57,8 +57,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // If not logged in, navigate to the login screen
-    print(supabase.auth.currentUser);
     supabase.auth.startAutoRefresh();
 
     if (supabase.auth.currentUser == null) {
