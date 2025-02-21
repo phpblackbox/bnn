@@ -1,8 +1,10 @@
 import 'package:bnn/main.dart';
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/models/profiles.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,14 +28,12 @@ class _ReelCommandsState extends State<ReelCommands> {
   late int parentId = 0;
   late FocusNode commentFocusNode;
   final TextEditingController _commentController = TextEditingController();
-  Profiles? loadedProfile;
   bool _loading = true;
 
   Future<List<dynamic>> fetchParentComments() async {
     final res = await Constants.loadProfile();
 
     setState(() {
-      loadedProfile = res;
       _loading = true;
     });
 
@@ -160,7 +160,7 @@ class _ReelCommandsState extends State<ReelCommands> {
               ),
             ),
           ),
-          if (loadedProfile != null) buildCommentInput(),
+          buildCommentInput(),
         ],
       ),
     );
@@ -169,7 +169,6 @@ class _ReelCommandsState extends State<ReelCommands> {
   Widget buildCommentItem(dynamic comment) {
     bool isExpanded = _expandedComments.contains(comment['id'].toString());
     List<dynamic>? childComments = _childCommentsMap[comment['id'].toString()];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -316,6 +315,8 @@ class _ReelCommandsState extends State<ReelCommands> {
   }
 
   Widget buildCommentInput() {
+    final AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    final meProfile = authProvider.profile!;
     return SizedBox(
       height: 30,
       child: Row(
@@ -323,7 +324,7 @@ class _ReelCommandsState extends State<ReelCommands> {
         children: [
           CircleAvatar(
             radius: 15,
-            backgroundImage: NetworkImage(loadedProfile!.avatar),
+            backgroundImage: NetworkImage(meProfile.avatar!),
             backgroundColor: Colors.grey[200],
           ),
           SizedBox(width: 10),
@@ -349,60 +350,57 @@ class _ReelCommandsState extends State<ReelCommands> {
                     .select()
                     .single();
 
-                if (loadedProfile != null) {
-                  final nowString = await supabase.rpc('get_server_time');
-                  DateTime now = DateTime.parse(nowString);
-                  DateTime createdAt = DateTime.parse(res["created_at"]);
-                  Duration difference = now.difference(createdAt);
+                final nowString = await supabase.rpc('get_server_time');
+                DateTime now = DateTime.parse(nowString);
+                DateTime createdAt = DateTime.parse(res["created_at"]);
+                Duration difference = now.difference(createdAt);
 
-                  dynamic temp = {
-                    "id": res["id"],
-                    "author_id": userId,
-                    "name":
-                        '${loadedProfile!.firstName} ${loadedProfile!.lastName}',
-                    "reel_id": widget.reelId,
-                    "parent_id": parentId,
-                    "content": value,
-                    "likes": res["likes"],
-                    "created_at": res["created_at"],
-                    "time": Constants().formatDuration(difference),
-                    "profiles": {
-                      "avatar": loadedProfile!.avatar,
-                      "first_name": loadedProfile!.firstName,
-                      "last_name": loadedProfile!.lastName,
-                    }
-                  };
-
-                  if (parentId == 0) {
-                    setState(() {
-                      _parentComments.insert(0, temp);
-                    });
-                  } else {
-                    print(_expandedComments);
-                    final childComments =
-                        await fetchChildComments(parentId.toString());
-                    setState(() {
-                      _childCommentsMap[parentId.toString()] = childComments;
-                      _expandedComments.add(parentId.toString());
-                    });
+                dynamic temp = {
+                  "id": res["id"],
+                  "author_id": userId,
+                  "name": '${meProfile.firstName} ${meProfile.lastName}',
+                  "reel_id": widget.reelId,
+                  "parent_id": parentId,
+                  "content": value,
+                  "likes": res["likes"],
+                  "created_at": res["created_at"],
+                  "time": Constants().formatDuration(difference),
+                  "profiles": {
+                    "avatar": meProfile.avatar,
+                    "first_name": meProfile.firstName,
+                    "last_name": meProfile.lastName,
                   }
+                };
 
-                  final reel_author_userInfo = await supabase
-                      .from('reels')
-                      .select()
-                      .eq('id', widget.reelId)
-                      .single();
+                if (parentId == 0) {
+                  setState(() {
+                    _parentComments.insert(0, temp);
+                  });
+                } else {
+                  print(_expandedComments);
+                  final childComments =
+                      await fetchChildComments(parentId.toString());
+                  setState(() {
+                    _childCommentsMap[parentId.toString()] = childComments;
+                    _expandedComments.add(parentId.toString());
+                  });
+                }
 
-                  if (reel_author_userInfo.isNotEmpty) {
-                    if (userId != reel_author_userInfo['author_id']) {
-                      await supabase.from('notifications').upsert({
-                        'actor_id': userId,
-                        'user_id': reel_author_userInfo['author_id'],
-                        'action_type': 'comment reel',
-                        'target_id': widget.reelId,
-                        'content': value,
-                      });
-                    }
+                final reel_author_userInfo = await supabase
+                    .from('reels')
+                    .select()
+                    .eq('id', widget.reelId)
+                    .single();
+
+                if (reel_author_userInfo.isNotEmpty) {
+                  if (userId != reel_author_userInfo['author_id']) {
+                    await supabase.from('notifications').upsert({
+                      'actor_id': userId,
+                      'user_id': reel_author_userInfo['author_id'],
+                      'action_type': 'comment reel',
+                      'target_id': widget.reelId,
+                      'content': value,
+                    });
                   }
                 }
 

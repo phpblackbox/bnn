@@ -44,8 +44,7 @@ class AuthService {
         return null;
       }
     } catch (error) {
-      print('Error during Google sign-in: $error');
-      return null; // Or throw the error to be handled by the UI
+      rethrow;
     }
   }
 

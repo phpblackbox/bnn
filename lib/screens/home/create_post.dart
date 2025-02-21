@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:bnn/models/profiles.dart';
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreatePost extends StatefulWidget {
@@ -16,7 +18,6 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   final supabase = Supabase.instance.client;
 
-  String userAvatar = "";
   final List<String> images = [
     'assets/images/post/camera.png',
   ];
@@ -31,42 +32,14 @@ class _CreatePostState extends State<CreatePost> {
   @override
   void initState() {
     super.initState();
-    fetchdata();
+    initialData();
   }
 
-  Future<void> fetchdata() async {
-    Profiles? loadedProfile = await Constants.loadProfile();
-
-    if (loadedProfile != null) {
-      setState(() {
-        userAvatar = loadedProfile.avatar;
-      });
-    } else {
-      return;
-    }
-
-    if (supabase.auth.currentUser != null) {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        return;
-      }
-
-      try {
-        final data =
-            await supabase.from('profiles').select().eq("id", userId).single();
-
-        if (data.isNotEmpty) {
-          setState(() {
-            userAvatar = data["avatar"];
-          });
-        }
-      } catch (e) {
-        if (e.toString().contains("JWT expired")) {
-          await supabase.auth.signOut();
-          Navigator.pushReplacementNamed(context, '/login');
-        }
-      }
-    }
+  Future<void> initialData() async {
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<PostProvider>(context, listen: false)
+    //       .getStoryById(widget.storyId);
+    // });
   }
 
   Future<void> pickImages() async {
@@ -151,6 +124,9 @@ class _CreatePostState extends State<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
+    final AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    final meProfile = authProvider.profile!;
+
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -225,13 +201,13 @@ class _CreatePostState extends State<CreatePost> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (userAvatar.isNotEmpty)
+                  if (meProfile.id != null)
                     Container(
                       width: 30,
                       height: 30,
                       decoration: ShapeDecoration(
                         image: DecorationImage(
-                          image: NetworkImage(userAvatar),
+                          image: NetworkImage(meProfile.avatar!),
                           fit: BoxFit.fill,
                         ),
                         shape: OvalBorder(),

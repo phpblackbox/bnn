@@ -27,10 +27,10 @@ class _PostsState extends State<Posts> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    initialData();
   }
 
-  Future<void> _loadInitialData() async {
+  Future<void> initialData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final postProvider = Provider.of<PostProvider>(context, listen: false);

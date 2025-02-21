@@ -1,18 +1,13 @@
-import 'dart:io';
-
-import 'package:bnn/main.dart';
-import 'package:bnn/models/profiles.dart';
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/screens/setting/GenderSelectionModal.dart';
 import 'package:bnn/screens/setting/email.dart';
 import 'package:bnn/screens/setting/phone.dart';
 import 'package:bnn/screens/setting/username.dart';
-import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
-import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditProfile extends StatefulWidget {
@@ -28,7 +23,7 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController aboutController = TextEditingController();
   int? selectedOption;
   var age = 25;
-  Profiles? loadedProfile;
+
   final ImagePicker _picker = ImagePicker();
   bool _loading = false;
 
@@ -38,157 +33,54 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     super.initState();
-    fetchdata();
+    initialData();
   }
 
-  void fetchdata() async {
-    final res = await Constants.loadProfile();
-
+  void initialData() async {
+    final AuthProvider authProvider =
+        Provider.of<AuthProvider>(context, listen: false);
+    final meProfile = authProvider.profile!;
     setState(() {
-      loadedProfile = res;
       _loading = true;
-      aboutController.text = loadedProfile!.bio ?? '';
-      selectedOption = loadedProfile!.gender;
+      aboutController.text = meProfile.bio ?? '';
+      selectedOption = meProfile.gender;
     });
-  }
-
-  void _bioSubmitted(String value) async {
-    if (value.isNotEmpty) {
-      await supabase.from('profiles').update({
-        'bio': value,
-      }).eq('id', loadedProfile!.id);
-
-      fetchUser();
-    }
-
-    // aboutController.clear();
   }
 
   Future<void> _uploadImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      _loading = false;
-    });
-
     if (image != null) {
       try {
-        String randomNumStr = Constants().generateRandomNumberString(6);
-        final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
-        final fileBytes = await File(image.path).readAsBytes();
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final publicUrl = await authProvider.uploadAvatar(image: image);
 
-        await supabase.storage.from('avatars').uploadBinary(
-              filename,
-              fileBytes,
-            );
+        final profile = {"avatar": publicUrl};
+        await authProvider.setProfile(profile);
+        await authProvider.updateProfile();
 
-        final publicUrl =
-            supabase.storage.from('avatars').getPublicUrl(filename);
-        print('Image uploaded successfully! URL: $publicUrl');
-
-        final userId = supabase.auth.currentUser!.id;
-
-        await supabase.from('profiles').upsert({
-          'id': userId,
-          'avatar': publicUrl,
-        });
-
-        fetchUser();
+        CustomToast.showToastSuccessTop(
+            context, 'Profile updated successfully!');
+        Navigator.pushNamed(context, '/home');
       } catch (e) {
-        CustomToast.showToastWarningBottom(
+        CustomToast.showToastWarningTop(
             context, 'Error uploading image: ${e.toString()}');
       }
     }
-
-    setState(() {
-      _loading = true;
-    });
   }
 
-  Future<void> fetchUser() async {
-    if (supabase.auth.currentUser != null) {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        print('User is not logged in!');
-        return;
-      }
-
-      try {
-        final data =
-            await supabase.from('profiles').select().eq("id", userId).single();
-
-        if (data.isNotEmpty) {
-          Constants().profile = Profiles(
-            id: data['id'],
-            firstName: data['first_name'],
-            lastName: data['last_name'],
-            username: data['username'],
-            age: data['age'],
-            bio: data['bio'],
-            gender: data['gender'],
-            avatar: data['avatar'],
-          );
-
-          Profiles profile = Profiles(
-            id: data['id'],
-            firstName: data['first_name'],
-            lastName: data['last_name'],
-            username: data['username'],
-            age: data['age'],
-            bio: data['bio'],
-            gender: data['gender'],
-            avatar: data['avatar'],
-          );
-
-          await Constants.saveProfile(profile);
-
-          await SupabaseChatCore.instance.updateUser(
-            types.User(
-                firstName: data['first_name'],
-                id: data['id'],
-                lastName: data['last_name'],
-                imageUrl: data['avatar']),
-          );
-
-          final res = await Constants.loadProfile();
-          if (loadedProfile != null) {
-            print(
-                'Loaded Profile: ${loadedProfile!.firstName} ${loadedProfile!.lastName}');
-          } else {
-            print('No profile found.');
-            return;
-          }
-
-          setState(() {
-            loadedProfile = res;
-          });
-        }
-      } catch (e) {
-        print('Caught error: $e');
-        if (e.toString().contains("JWT expired")) {
-          await supabase.auth.signOut();
-          Navigator.pushReplacementNamed(context, '/login');
-        }
-      }
-    }
-  }
-
-  void _showGender(BuildContext context) {
+  void _showGender(BuildContext context, AuthProvider authProvider) {
+    final meProfile = authProvider.profile;
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allow full-height modal
+      isScrollControlled: true,
       builder: (BuildContext context) {
         return GenderSelectionModal(
-          initialSelectedOption:
-              loadedProfile!.gender, // Pass current selection if needed
+          initialSelectedOption: meProfile!.gender,
           onContinue: (selectedGender) async {
-            // Handle the continue action here
-            await supabase.from('profiles').upsert({
-              'id': loadedProfile!.id,
-              'gender': selectedGender,
-            });
-
-            fetchUser(); // Call your fetch user function here
+            final profile = {"gender": selectedGender};
+            await authProvider.setProfile(profile);
+            await authProvider.updateProfile();
           },
         );
       },
@@ -197,6 +89,8 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    final meProfile = authProvider.profile!;
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -220,298 +114,291 @@ class _EditProfileState extends State<EditProfile> {
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        child: loadedProfile == null
-            ? null
-            : Container(
-                padding:
-                    const EdgeInsets.only(left: 8, top: 4, right: 8, bottom: 4),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          padding: const EdgeInsets.only(left: 8, top: 4, right: 8, bottom: 4),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image(image: NetworkImage(meProfile.avatar)),
+              SizedBox(
+                width: double.infinity,
+                height: 270,
+                child: Stack(
                   children: [
-                    // Image(image: NetworkImage(loadedProfile!.avatar)),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 270,
-                      child: Stack(
-                        children: [
-                          _loading
-                              ? Container(
-                                  decoration: BoxDecoration(
-                                    image: _loading
-                                        ? DecorationImage(
-                                            image: NetworkImage(
-                                                loadedProfile!.avatar),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null,
-                                  ),
-                                )
-                              : Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: GestureDetector(
-                              onTap: _uploadImage,
-                              child: Image(
-                                image: AssetImage(
-                                    'assets/images/settings/profile.png'),
-                                width: 32,
-                                height: 32,
-                              ),
+                    _loading
+                        ? Container(
+                            decoration: BoxDecoration(
+                              image: _loading
+                                  ? DecorationImage(
+                                      image: NetworkImage(meProfile.avatar!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
+                          )
+                        : Center(
+                            child: CircularProgressIndicator(),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Container(
-                      padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                      child: Text(
-                        'Profile Information',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w400,
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: GestureDetector(
+                        onTap: _uploadImage,
+                        child: Image(
+                          image:
+                              AssetImage('assets/images/settings/profile.png'),
+                          width: 32,
+                          height: 32,
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 16, top: 12, right: 16, bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE9E9E9), // Grey background color
-                        borderRadius:
-                            BorderRadius.circular(15.0), // Border radius
-                      ),
-                      child: Column(children: [
-                        Column(children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Username()));
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Username',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.06,
-                                    letterSpacing: -0.11,
-                                  ),
-                                ),
-                                Spacer(),
-                                Icon(Icons.arrow_forward_ios,
-                                    size: 12, color: Color(0xFF8A8B8F)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Divider(),
-                          SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Email()));
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Email',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.06,
-                                    letterSpacing: -0.11,
-                                  ),
-                                ),
-                                Spacer(),
-                                Icon(Icons.arrow_forward_ios,
-                                    size: 12, color: Color(0xFF8A8B8F)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Divider(),
-                          SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => PhoneNumber()));
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Phone Number',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.06,
-                                    letterSpacing: -0.11,
-                                  ),
-                                ),
-                                Spacer(),
-                                Icon(Icons.arrow_forward_ios,
-                                    size: 12, color: Color(0xFF8A8B8F)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                        ]),
-                      ]),
-                    ),
-                    Container(
-                      padding:
-                          EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
-                      child: Text(
-                        'About',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        style: TextStyle(fontSize: 12.0, fontFamily: "Poppins"),
-                        controller: aboutController,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          hintText: loadedProfile!.bio,
-                          contentPadding: EdgeInsets.all(12),
-                          // border: InputBorder.none,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          filled: true,
-                          fillColor: Color(0xFFEAEAEA),
-                        ),
-                        onSubmitted: _bioSubmitted,
-                      ),
-                    ),
-                    Container(
-                      padding:
-                          EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
-                      child: Text(
-                        'Additional Information',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 16, top: 12, right: 16, bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE9E9E9), // Grey background color
-                        borderRadius:
-                            BorderRadius.circular(15.0), // Border radius
-                      ),
-                      child: Column(children: [
-                        Column(children: [
-                          GestureDetector(
-                            onTap: () => showMaterialNumberPicker(
-                              context: context,
-                              title: 'Select Your Age',
-                              maxNumber: 100,
-                              minNumber: 15,
-                              selectedNumber: loadedProfile!.age,
-                              onChanged: (value) async {
-                                await supabase.from('profiles').upsert({
-                                  'id': loadedProfile!.id,
-                                  'age': value,
-                                });
-
-                                fetchUser();
-                              },
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Age',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.06,
-                                    letterSpacing: -0.11,
-                                  ),
-                                ),
-                                Spacer(),
-                                Icon(Icons.arrow_forward_ios,
-                                    size: 12, color: Color(0xFF8A8B8F)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Divider(),
-                          SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {
-                              _showGender(context);
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Gender',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Nunito',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.06,
-                                    letterSpacing: -0.11,
-                                  ),
-                                ),
-                                Spacer(),
-                                Icon(Icons.arrow_forward_ios,
-                                    size: 12, color: Color(0xFF8A8B8F)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                        ]),
-                      ]),
-                    ),
-                    SizedBox(height: 8),
                   ],
                 ),
               ),
+              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: Text(
+                  'Profile Information',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.only(
+                    left: 16, top: 12, right: 16, bottom: 12),
+                decoration: BoxDecoration(
+                  color: Color(0xFFE9E9E9), // Grey background color
+                  borderRadius: BorderRadius.circular(15.0), // Border radius
+                ),
+                child: Column(children: [
+                  Column(children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Username()));
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'Username',
+                            style: TextStyle(
+                              color: Color(0xFF4D4C4A),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w700,
+                              height: 1.06,
+                              letterSpacing: -0.11,
+                            ),
+                          ),
+                          Spacer(),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 12, color: Color(0xFF8A8B8F)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Divider(),
+                    SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Email()));
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'Email',
+                            style: TextStyle(
+                              color: Color(0xFF4D4C4A),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w700,
+                              height: 1.06,
+                              letterSpacing: -0.11,
+                            ),
+                          ),
+                          Spacer(),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 12, color: Color(0xFF8A8B8F)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Divider(),
+                    SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PhoneNumber()));
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'Phone Number',
+                            style: TextStyle(
+                              color: Color(0xFF4D4C4A),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w700,
+                              height: 1.06,
+                              letterSpacing: -0.11,
+                            ),
+                          ),
+                          Spacer(),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 12, color: Color(0xFF8A8B8F)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                  ]),
+                ]),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
+                child: Text(
+                  'About',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  style: TextStyle(fontSize: 12.0, fontFamily: "Poppins"),
+                  controller: aboutController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText: meProfile.bio,
+                    contentPadding: EdgeInsets.all(12),
+                    // border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFFEAEAEA),
+                  ),
+                  onSubmitted: (value) async {
+                    if (value.isNotEmpty) {
+                      final profile = {"bio": value};
+                      await authProvider.setProfile(profile);
+                      await authProvider.updateProfile();
+                    }
+                  },
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
+                child: Text(
+                  'Additional Information',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.only(
+                    left: 16, top: 12, right: 16, bottom: 12),
+                decoration: BoxDecoration(
+                  color: Color(0xFFE9E9E9), // Grey background color
+                  borderRadius: BorderRadius.circular(15.0), // Border radius
+                ),
+                child: Column(children: [
+                  Column(children: [
+                    GestureDetector(
+                      onTap: () => showMaterialNumberPicker(
+                        context: context,
+                        title: 'Select Your Age',
+                        maxNumber: 100,
+                        minNumber: 15,
+                        selectedNumber: meProfile.age,
+                        onChanged: (value) async {
+                          final profile = {"age": value};
+                          await authProvider.setProfile(profile);
+                          await authProvider.updateProfile();
+                        },
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Age',
+                            style: TextStyle(
+                              color: Color(0xFF4D4C4A),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w700,
+                              height: 1.06,
+                              letterSpacing: -0.11,
+                            ),
+                          ),
+                          Spacer(),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 12, color: Color(0xFF8A8B8F)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Divider(),
+                    SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        _showGender(context, authProvider);
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'Gender',
+                            style: TextStyle(
+                              color: Color(0xFF4D4C4A),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w700,
+                              height: 1.06,
+                              letterSpacing: -0.11,
+                            ),
+                          ),
+                          Spacer(),
+                          Icon(Icons.arrow_forward_ios,
+                              size: 12, color: Color(0xFF8A8B8F)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                  ]),
+                ]),
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
       ),
     );
   }

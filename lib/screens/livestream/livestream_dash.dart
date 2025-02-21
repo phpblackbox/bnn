@@ -11,8 +11,6 @@ class LivestreamDash extends StatefulWidget {
 }
 
 class _LivestreamDashState extends State<LivestreamDash> {
-  Profiles? loadedProfile;
-
   @override
   void initState() {
     super.initState();
@@ -20,12 +18,6 @@ class _LivestreamDashState extends State<LivestreamDash> {
   }
 
   void fetchdata() async {
-    final res = await Constants.loadProfile();
-
-    setState(() {
-      loadedProfile = res;
-    });
-
     // StreamVideo(
     //   'udqd594zzqub',
     //   user: User(
@@ -52,16 +44,14 @@ class _LivestreamDashState extends State<LivestreamDash> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        child: loadedProfile == null
-            ? Text("No user")
-            : Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _createLivestream(),
-                    child: const Text('Create Livestream'),
-                  ),
-                ],
-              ),
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () => _createLivestream(),
+              child: const Text('Create Livestream'),
+            ),
+          ],
+        ),
       ),
     );
   }

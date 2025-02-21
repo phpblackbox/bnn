@@ -1,5 +1,3 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/models/profiles.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/comments.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
@@ -26,7 +24,6 @@ class _OnePostState extends State<OnePost> {
 
   List<dynamic>? comments = [];
   Map<String, dynamic>? post;
-  Profiles? loadedProfile;
 
   int parent_id = 0;
 
@@ -47,8 +44,6 @@ class _OnePostState extends State<OnePost> {
   }
 
   Future<void> fetchdata() async {
-    loadedProfile = await Constants.loadProfile();
-
     if (supabase.auth.currentUser != null) {
       setState(() {
         _loading = true;
