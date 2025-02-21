@@ -1,9 +1,11 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/screens/signup/interests.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
-import 'ButtonGradientMain.dart';
-import './interests.dart';
+import 'package:provider/provider.dart';
 
 class Age extends StatefulWidget {
   const Age({super.key});
@@ -13,10 +15,6 @@ class Age extends StatefulWidget {
 }
 
 class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
   var age = 25;
 
   final List<String> ageList =
@@ -25,26 +23,6 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
-
-    _slideAnimation = Tween<Offset>(begin: Offset(0, 0.5), end: Offset(0, 0))
-        .animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    ));
-
-    // Start the animation
-    _controller.forward();
   }
 
   bool get isButtonEnabled {
@@ -53,13 +31,11 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
 
   Future<void> _update() async {
     if (isButtonEnabled) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       try {
-        final userId = supabase.auth.currentUser!.id;
+        final profile = {"age": age};
 
-        await supabase.from('profiles').upsert({
-          'id': userId,
-          'age': age,
-        });
+        await authProvider.setProfile(profile);
 
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => Interests()));
@@ -88,43 +64,37 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
       body: Container(
           child: Column(
         children: [
-          SlideTransition(
-            position: _slideAnimation,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: 150.0,
-                      child: TextButton(
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Your age',
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          ),
-                        ),
-                        onPressed: () => showMaterialNumberPicker(
-                          context: context,
-                          title: 'Select Your Age',
-                          maxNumber: 100,
-                          minNumber: 15,
-                          selectedNumber: age,
-                          onChanged: (value) => setState(() => age = value),
-                        ),
-                      ),
-                    ),
-                    Expanded(
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 150.0,
+                  child: TextButton(
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
                       child: Text(
-                        age.toString(),
-                        textAlign: TextAlign.right,
+                        'Your age',
+                        style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
-                  ],
+                    onPressed: () => showMaterialNumberPicker(
+                      context: context,
+                      title: 'Select Your Age',
+                      maxNumber: 100,
+                      minNumber: 15,
+                      selectedNumber: age,
+                      onChanged: (value) => setState(() => age = value),
+                    ),
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: Text(
+                    age.toString(),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
             ),
           ),
           Spacer(),
@@ -133,10 +103,10 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
             onPressed: _update,
             textColor: Colors.white,
             gradientColors: isButtonEnabled
-                ? [Color(0xFF000000), Color(0xFF820200)] // Active gradient
+                ? [AppColors.primaryBlack, AppColors.primaryRed]
                 : [
-                    Color(0xFF820200).withOpacity(0.5),
-                    Color(0xFF000000).withOpacity(0.5)
+                    AppColors.primaryRed.withOpacity(0.5),
+                    AppColors.primaryBlack.withOpacity(0.5)
                   ],
           ),
         ],

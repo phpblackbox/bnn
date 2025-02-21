@@ -1,5 +1,6 @@
 import 'package:bnn/screens/home/home.dart';
-import 'package:bnn/screens/signup/ButtonGradientMain.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:flutter/material.dart';
 
 class ApplyBNN extends StatefulWidget {
@@ -198,7 +199,10 @@ class _ApplyBNNState extends State<ApplyBNN> {
                       );
                     },
                     textColor: Colors.white,
-                    gradientColors: [Color(0xFF000000), Color(0xFF820200)]),
+                    gradientColors: [
+                      AppColors.primaryBlack,
+                      AppColors.primaryRed
+                    ]),
               ),
             ),
           ],

@@ -1,4 +1,3 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/screens/setting/blocked.dart';
 import 'package:bnn/screens/setting/bnnPro.dart';
 import 'package:bnn/screens/setting/edit.dart';
@@ -6,8 +5,10 @@ import 'package:bnn/screens/setting/mediaPreferences.dart';
 import 'package:bnn/screens/setting/notifications.dart';
 import 'package:bnn/screens/setting/permission.dart';
 import 'package:bnn/screens/setting/visibility.dart';
-import 'package:bnn/screens/signup/ButtonGradientMain.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -17,6 +18,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  final supabase = Supabase.instance.client;
   Future<void> signOutUser(BuildContext context) async {
     try {
       // Sign out from Supabase
@@ -350,7 +352,7 @@ class _SettingsState extends State<Settings> {
               onPressed: () async {
                 await signOutUser(context);
               },
-              gradientColors: [Color(0xFF000000), Color(0xFF820200)],
+              gradientColors: [AppColors.primaryBlack, AppColors.primaryRed],
             ),
           ],
         ),

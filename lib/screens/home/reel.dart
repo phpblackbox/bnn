@@ -1,6 +1,6 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/screens/home/ReelComments.dart';
+import 'package:bnn/screens/home/reel_comments.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class reel extends StatefulWidget {
@@ -12,6 +12,8 @@ class reel extends StatefulWidget {
 }
 
 class _reelState extends State<reel> with SingleTickerProviderStateMixin {
+  final supabase = Supabase.instance.client;
+
   VideoPlayerController? _controller;
   Future<void>? _initializeVideoPlayerFuture;
   bool _loading = false;

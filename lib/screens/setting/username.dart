@@ -1,8 +1,9 @@
 import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
-import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/widgets/inputs/custom-input-field.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Username extends StatefulWidget {
   const Username({super.key});
@@ -12,6 +13,8 @@ class Username extends StatefulWidget {
 }
 
 class _Username extends State<Username> with SingleTickerProviderStateMixin {
+  final supabase = Supabase.instance.client;
+
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;

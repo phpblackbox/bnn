@@ -1,8 +1,8 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/post_comment_provider.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:bnn/models/profiles.dart';
-import 'package:bnn/utils/constants.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class CommentsModal extends StatefulWidget {
@@ -15,127 +15,28 @@ class CommentsModal extends StatefulWidget {
 }
 
 class _CommentsModalState extends State<CommentsModal> {
-  // late List<dynamic> _parentComments = [];
-  final Map<String, List<dynamic>> _childCommentsMap = {};
-
-  late List<dynamic> _parentComments = Constants.fakeParentComments;
-
-  final List<String> _expandedComments = [];
-  late int parentId = 0;
   late FocusNode commentFocusNode;
   final TextEditingController _commentController = TextEditingController();
-  Profiles? loadedProfile;
-  bool _loading = true;
 
-  Future<List<dynamic>> fetchParentComments() async {
-    final res = await Constants.loadProfile();
-
-    setState(() {
-      loadedProfile = res;
-      _loading = true;
-    });
-
-    final data = await supabase
-        .from('post_comments')
-        .select('*, profiles(username, avatar, first_name, last_name)')
-        .eq('parent_id', 0)
-        .eq('post_id', widget.postId)
-        .order('created_at', ascending: false);
-
-    for (int i = 0; i < data.length; i++) {
-      final nowString = await supabase.rpc('get_server_time');
-      DateTime now = DateTime.parse(nowString);
-      DateTime createdAt = DateTime.parse(data[i]["created_at"]);
-
-      Duration difference = now.difference(createdAt);
-
-      data[i]['name'] =
-          '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
-
-      data[i]["time"] = Constants().formatDuration(difference);
-
-      dynamic likes =
-          await supabase.rpc('get_count_post_comment_likes_by_postid', params: {
-                'param_post_comment_id': data[i]["id"],
-              }) ??
-              0;
-
-      data[i]['likes'] = likes;
-    }
-
-    return data;
-  }
-
-  void fetchData() async {
-    final comments = await fetchParentComments();
-    setState(() {
-      _parentComments = comments;
-      _loading = false;
+  void initialData() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final PostCommentProvider postCommentProvider =
+          Provider.of<PostCommentProvider>(context, listen: false);
+      await postCommentProvider.getParentComments(widget.postId);
     });
   }
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _loading = true;
-    });
     commentFocusNode = FocusNode();
-    fetchData();
-
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  Future<void> _toggleChildComments(String parentId) async {
-    if (_expandedComments.contains(parentId)) {
-      setState(() {
-        _expandedComments.remove(parentId);
-      });
-    } else {
-      final childComments = await fetchChildComments(parentId);
-      setState(() {
-        _childCommentsMap[parentId] = childComments;
-        _expandedComments.add(parentId);
-      });
-    }
-  }
-
-  Future<List<dynamic>> fetchChildComments(String parentId) async {
-    final data = await supabase
-        .from('post_comments')
-        .select('*, profiles(username, avatar, first_name, last_name)')
-        .eq('parent_id', parentId)
-        .eq('post_id', widget.postId)
-        .order('created_at', ascending: false);
-
-    for (int i = 0; i < data.length; i++) {
-      final nowString = await supabase.rpc('get_server_time');
-      DateTime now = DateTime.parse(nowString);
-      DateTime createdAt = DateTime.parse(data[i]["created_at"]);
-
-      Duration difference = now.difference(createdAt);
-
-      data[i]['name'] =
-          '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
-
-      data[i]["time"] = Constants().formatDuration(difference);
-
-      dynamic likes =
-          await supabase.rpc('get_count_post_comment_likes_by_postid', params: {
-                'param_post_comment_id': data[i]["id"],
-              }) ??
-              0;
-
-      data[i]['likes'] = likes;
-    }
-
-    return data;
+    initialData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final PostCommentProvider postCommentProvider =
+        Provider.of<PostCommentProvider>(context);
     return Container(
       padding: EdgeInsets.all(16.0),
       height: MediaQuery.of(context).size.height * 0.5,
@@ -153,26 +54,29 @@ class _CommentsModalState extends State<CommentsModal> {
           ),
           Expanded(
             child: Skeletonizer(
-              enabled: _loading,
+              enabled: postCommentProvider.loading,
               enableSwitchAnimation: true,
               child: ListView.builder(
-                itemCount: _parentComments.length,
+                itemCount: postCommentProvider.parentComments.length,
                 itemBuilder: (context, index) {
-                  final comment = _parentComments[index];
-                  return buildCommentItem(comment);
+                  final comment = postCommentProvider.parentComments[index];
+                  return buildCommentItem(comment, postCommentProvider);
                 },
               ),
             ),
           ),
-          if (loadedProfile != null) buildCommentInput(),
+          buildCommentInput(postCommentProvider),
         ],
       ),
     );
   }
 
-  Widget buildCommentItem(dynamic comment) {
-    bool isExpanded = _expandedComments.contains(comment['id'].toString());
-    List<dynamic>? childComments = _childCommentsMap[comment['id'].toString()];
+  Widget buildCommentItem(
+      dynamic comment, PostCommentProvider postCommentProvider) {
+    bool isExpanded =
+        postCommentProvider.expandedComments.contains(comment['id'].toString());
+    List<dynamic>? childComments =
+        postCommentProvider.childCommentsMap[comment['id'].toString()];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,9 +130,7 @@ class _CommentsModalState extends State<CommentsModal> {
                     SizedBox(width: 6),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          parentId = comment["id"];
-                        });
+                        postCommentProvider.parentId = comment["id"];
                         commentFocusNode.requestFocus();
                       },
                       child: Text(
@@ -244,7 +146,8 @@ class _CommentsModalState extends State<CommentsModal> {
                   ]),
                   SizedBox(height: 6),
                   GestureDetector(
-                    onTap: () => _toggleChildComments(comment['id'].toString()),
+                    onTap: () => postCommentProvider.toggleChildComments(
+                        widget.postId, comment['id'].toString()),
                     child: Text(
                       isExpanded ? 'Hide Replies' : 'View more replies',
                       style: TextStyle(
@@ -261,40 +164,10 @@ class _CommentsModalState extends State<CommentsModal> {
             ),
             GestureDetector(
               onTap: () async {
-                final userId = supabase.auth.currentUser!.id;
-
-                final existingLikeResponse = await supabase
-                    .from('post_comment_likes')
-                    .select()
-                    .eq('author_id', userId)
-                    .eq('post_comment_id', comment['id'])
-                    .maybeSingle();
-
-                if (existingLikeResponse != null) {
-                  bool currentLikeStatus = existingLikeResponse['is_like'];
-                  await supabase
-                      .from('post_comment_likes')
-                      .update({
-                        'is_like': !currentLikeStatus,
-                      })
-                      .eq('author_id', userId)
-                      .eq('post_comment_id', comment['id']);
-
-                  setState(() {
-                    if (currentLikeStatus) comment['likes']--;
-                    if (!currentLikeStatus) comment['likes']++;
-                  });
-                } else {
-                  await supabase.from('post_comment_likes').upsert({
-                    'author_id': userId,
-                    'post_comment_id': comment['id'],
-                    'is_like': true,
-                  });
-
-                  setState(() {
-                    comment['likes']++;
-                  });
-                }
+                final bool status =
+                    await postCommentProvider.togglePostLike(comment['id']);
+                if (status) comment['likes']--;
+                if (!status) comment['likes']++;
               },
               child: Column(
                 children: [
@@ -311,7 +184,7 @@ class _CommentsModalState extends State<CommentsModal> {
             padding: const EdgeInsets.only(left: 16.0),
             child: Column(
               children: childComments.map((childComment) {
-                return buildCommentItem(childComment);
+                return buildCommentItem(childComment, postCommentProvider);
               }).toList(),
             ),
           ),
@@ -319,7 +192,8 @@ class _CommentsModalState extends State<CommentsModal> {
     );
   }
 
-  Widget buildCommentInput() {
+  Widget buildCommentInput(PostCommentProvider postCommentProvider) {
+    final me = Provider.of<AuthProvider>(context, listen: false).profile!;
     return SizedBox(
       height: 30,
       child: Row(
@@ -327,7 +201,7 @@ class _CommentsModalState extends State<CommentsModal> {
         children: [
           CircleAvatar(
             radius: 15,
-            backgroundImage: NetworkImage(loadedProfile!.avatar),
+            backgroundImage: NetworkImage(me.avatar!),
             backgroundColor: Colors.grey[200],
           ),
           SizedBox(width: 10),
@@ -338,84 +212,11 @@ class _CommentsModalState extends State<CommentsModal> {
               onSubmitted: (value) async {
                 if (value.isEmpty) {
                   CustomToast.showToastWarningTop(context, 'Add a comment');
-
                   return;
                 }
 
                 _commentController.clear();
-
-                final userId = supabase.auth.currentUser!.id;
-                final res = await supabase
-                    .from('post_comments')
-                    .upsert({
-                      'author_id': userId,
-                      'post_id': widget.postId,
-                      'parent_id': parentId,
-                      'content': value,
-                    })
-                    .select()
-                    .single();
-
-                if (loadedProfile != null) {
-                  final nowString = await supabase.rpc('get_server_time');
-                  DateTime now = DateTime.parse(nowString);
-                  DateTime createdAt = DateTime.parse(res["created_at"]);
-                  Duration difference = now.difference(createdAt);
-
-                  dynamic temp = {
-                    "id": res["id"],
-                    "author_id": userId,
-                    "name":
-                        '${loadedProfile!.firstName} ${loadedProfile!.lastName}',
-                    "post_id": widget.postId,
-                    "parent_id": parentId,
-                    "content": value,
-                    "likes": res["likes"],
-                    "created_at": res["created_at"],
-                    "time": Constants().formatDuration(difference),
-                    "profiles": {
-                      "avatar": loadedProfile!.avatar,
-                      "first_name": loadedProfile!.firstName,
-                      "last_name": loadedProfile!.lastName,
-                    }
-                  };
-
-                  if (parentId == 0) {
-                    setState(() {
-                      _parentComments.insert(0, temp);
-                    });
-                  } else {
-                    print(_expandedComments);
-                    final childComments =
-                        await fetchChildComments(parentId.toString());
-                    setState(() {
-                      _childCommentsMap[parentId.toString()] = childComments;
-                      _expandedComments.add(parentId.toString());
-                    });
-                  }
-
-                  final post_author_userInfo = await supabase
-                      .from('posts')
-                      .select()
-                      .eq('id', widget.postId)
-                      .single();
-
-                  if (post_author_userInfo.isNotEmpty) {
-                    if (userId != post_author_userInfo['author_id']) {
-                      await supabase.from('notifications').upsert({
-                        'actor_id': userId,
-                        'user_id': post_author_userInfo['author_id'],
-                        'action_type': 'comment post',
-                        'target_id': widget.postId,
-                        'content': value,
-                      });
-                    }
-                  }
-                }
-
-                setState(() {
-                  parentId = 0;
-                });
+                postCommentProvider.sendPostComment(widget.postId, value, me);
               },
               style: TextStyle(
                 fontSize: 10.0,

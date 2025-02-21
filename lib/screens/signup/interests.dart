@@ -1,7 +1,11 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
-import 'ButtonGradientMain.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import './InterestItem.dart';
 import './termsofservice.dart';
 
@@ -14,6 +18,8 @@ class Interests extends StatefulWidget {
 
 class _InterestsState extends State<Interests>
     with SingleTickerProviderStateMixin {
+  final supabase = Supabase.instance.client;
+
   late AnimationController _controller;
 
   final List<String> interests = [
@@ -78,22 +84,15 @@ class _InterestsState extends State<Interests>
   }
 
   bool get isButtonEnabled {
-    return selectedInterests
-        .isNotEmpty; // Enable button if at least one interest is selected
+    return selectedInterests.isNotEmpty;
   }
 
   Future<void> _update() async {
     if (isButtonEnabled) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       try {
-        final userId = supabase.auth.currentUser!.id;
-
-        print(selectedInterests);
-
-        await supabase.from('profiles').upsert({
-          'id': userId,
-          'interests': selectedInterests,
-        });
-
+        final profile = {"interests": selectedInterests};
+        await authProvider.setProfile(profile);
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => TermsOfService()));
       } catch (error) {
@@ -143,10 +142,10 @@ class _InterestsState extends State<Interests>
               onPressed: _update,
               textColor: Colors.white,
               gradientColors: isButtonEnabled
-                  ? [Color(0xFF000000), Color(0xFF820200)] // Active gradient
+                  ? [AppColors.primaryBlack, AppColors.primaryRed]
                   : [
-                      Color(0xFF820200).withOpacity(0.5),
-                      Color(0xFF000000).withOpacity(0.5)
+                      AppColors.primaryRed.withOpacity(0.5),
+                      AppColors.primaryBlack.withOpacity(0.5)
                     ],
             ),
           ],

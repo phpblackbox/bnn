@@ -1,3 +1,4 @@
+import 'package:bnn/screens/livestream/livestream_dash.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/screens/home/notifications.dart';
 import 'package:bnn/screens/profile/suggested.dart';
@@ -26,13 +27,18 @@ class _HeaderState extends State<Header> {
           Row(
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LivestreamDash()));
+                },
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Image.asset(
-                    'assets/images/icons/live.png', // Path to your image
+                    'assets/images/icons/live.png',
                     width: 20.0,
                     height: 20.0,
                   ),
@@ -46,10 +52,10 @@ class _HeaderState extends State<Header> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Image.asset(
-                    'assets/images/icons/profile_plus.png', // Path to your image
+                    'assets/images/icons/profile_plus.png',
                     width: 20.0,
                     height: 20.0,
                   ),

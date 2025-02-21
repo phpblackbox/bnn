@@ -1,11 +1,6 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/models/profiles.dart';
-import 'package:bnn/screens/chat/ChatView.dart';
-import 'package:bnn/screens/home/createPost.dart';
-import 'package:bnn/screens/home/header.dart';
-import 'package:bnn/screens/home/home.dart';
-import 'package:bnn/screens/home/postView.dart';
-import 'package:bnn/screens/live/live.dart';
+import 'package:bnn/widgets/sub/bottom-navigation.dart';
+import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/screens/profile/all.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/screens/setting/edit.dart';
@@ -13,6 +8,7 @@ import 'package:bnn/screens/setting/settings.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -22,6 +18,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final supabase = Supabase.instance.client;
+
   int _followers = 0;
   int _posts = 0;
   int _views = 124;
@@ -75,27 +73,6 @@ class _ProfileState extends State<Profile> {
     setState(() {
       _allorbookmark = index; // Update the selected index
     });
-  }
-
-  void _onBottomNavigationTapped(int index) {
-    if (index == 0) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
-    }
-    if (index == 1) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ChatView()));
-    }
-    if (index == 2) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CreatePost()));
-    }
-    if (index == 3) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Live()));
-    }
-    if (index == 4) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Profile()));
-    }
   }
 
   @override
@@ -347,61 +324,13 @@ class _ProfileState extends State<Profile> {
                       child: Container(
                           padding:
                               EdgeInsets.only(left: 12, right: 12, bottom: 8),
-                          child: PostView(bookmark: true)),
+                          child: Posts(bookmark: true)),
                     ),
                 ],
               )
             : null,
       ),
-      bottomNavigationBar: SizedBox(
-        height: 67.0,
-        child: Padding(
-          padding: EdgeInsets.only(left: 10, right: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(0),
-                  child: Image.asset(
-                    'assets/images/icons/home.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(1),
-                  child: Image.asset(
-                    'assets/images/icons/comment.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                onTap: () => _onBottomNavigationTapped(2),
-                child: Image.asset(
-                  'assets/images/navigation_add_post.png',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(3),
-                  child: Image.asset(
-                    'assets/images/icons/video.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(4),
-                  child: Image.asset(
-                    'assets/images/icons/user_active.png',
-                    width: 20,
-                    height: 20,
-                  )),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: BottomNavigation(currentIndex: 4),
     );
   }
 }

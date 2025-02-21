@@ -3,6 +3,7 @@ import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PostBookmarks extends StatefulWidget {
   const PostBookmarks({super.key});
@@ -12,6 +13,8 @@ class PostBookmarks extends StatefulWidget {
 }
 
 class _PostBookmarksState extends State<PostBookmarks> {
+  final supabase = Supabase.instance.client;
+
   bool _loading = false;
   List<dynamic>? posts = [];
 

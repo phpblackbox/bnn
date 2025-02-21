@@ -8,11 +8,11 @@
             "name": "bnn",
             "request": "launch",
             "type": "dart",
-            "args": [
-                "--no-enable-impeller",
-                "-d",
-                "emulator-5554" // Specify the emulator ID here
-            ]
+            // "args": [
+            //     "--no-enable-impeller",
+            //     "-d",
+            //     "emulator-5554" // Specify the emulator ID here
+            // ]
         },
         {
             "name": "bnn (profile mode)",

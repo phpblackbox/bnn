@@ -1,5 +1,6 @@
-import 'package:bnn/screens/chat/oneVideoCall.dart';
-import 'package:bnn/screens/chat/oneVoiceCall.dart';
+import 'package:bnn/screens/chat/one_video_call.dart';
+import 'package:bnn/screens/chat/one_voice_call.dart';
+import 'package:bnn/utils/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
@@ -311,7 +312,7 @@ class _RoomPageState extends State<RoomPage> {
                 gradient: LinearGradient(
                   colors: [
                     Colors.black,
-                    Color(0xFF820200),
+                    AppColors.primaryRed,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,

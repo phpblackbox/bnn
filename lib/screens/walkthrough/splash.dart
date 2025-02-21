@@ -1,20 +1,22 @@
 import 'dart:async';
-import 'package:bnn/main.dart';
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './walkthroughPage.dart';
-import 'package:bnn/utils/constants.dart';
 
 class Splash extends StatelessWidget {
   const Splash({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-    Timer(Duration(seconds: 1), () async {
-      if (supabase.auth.currentUser == null) {
-        Navigator.pushReplacementNamed(context, '/login');
-      } else {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    Timer(Duration(seconds: 2), () async {
+      await authProvider.init();
+      if (authProvider.isLoggedIn) {
         Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/login');
       }
     });
 

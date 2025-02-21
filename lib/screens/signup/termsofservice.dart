@@ -1,6 +1,7 @@
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:flutter/material.dart';
-import 'ButtonGradientMain.dart';
-import './addphoto.dart';
+import 'add_photo.dart';
 
 class TermsOfService extends StatefulWidget {
   const TermsOfService({super.key});
@@ -110,12 +111,12 @@ class _TermsOfServiceState extends State<TermsOfService>
                   textColor: Colors.white,
                   gradientColors: isButtonEnabled
                       ? [
-                          Color(0xFF000000),
-                          Color(0xFF820200)
+                          AppColors.primaryBlack,
+                          AppColors.primaryRed
                         ] // Active gradient
                       : [
-                          Color(0xFF820200).withOpacity(0.5),
-                          Color(0xFF000000).withOpacity(0.5)
+                          AppColors.primaryRed.withOpacity(0.5),
+                          AppColors.primaryBlack.withOpacity(0.5)
                         ],
                 ),
               ],

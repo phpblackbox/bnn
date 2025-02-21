@@ -3,6 +3,7 @@ import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AllPost extends StatefulWidget {
   final int param_allorbookmakr;
@@ -14,6 +15,8 @@ class AllPost extends StatefulWidget {
 }
 
 class _AllPostState extends State<AllPost> {
+  final supabase = Supabase.instance.client;
+
   bool _loading = false;
   List<dynamic>? posts = [];
 

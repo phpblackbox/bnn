@@ -217,4 +217,64 @@ class Constants {
       "mutal": "1 mutal friend",
     }
   ];
+
+  static const List<dynamic> fakeNotifications = [
+    {
+      "id": 11,
+      "created_at": "2025-01-21T07:02:44.7553+00:00",
+      "user_id": "e09e81d7-5e8c-4885-9e68-b9725745f79e",
+      "actor_id": "9e2a1bcb-0367-4998-8ecd-ac741907e893",
+      "action_type": "like reel",
+      "target_id": 2,
+      "timeDiff": "today",
+      "action": "Liked your post",
+      "is_read": false,
+      "content": null,
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/9e2a1bcb-0367-4998-8ecd-ac741907e893_350906.png",
+        "username": "slack",
+        "last_name": "Reynolds",
+        "first_name": "Dennis"
+      }
+    },
+    {
+      "id": 10,
+      "created_at": "2025-01-21T06:55:38.607353+00:00",
+      "user_id": "e09e81d7-5e8c-4885-9e68-b9725745f79e",
+      "actor_id": "9e2a1bcb-0367-4998-8ecd-ac741907e893",
+      "action_type": "comment reel",
+      "target_id": 2,
+      "timeDiff": "today",
+      "action": "Liked your post",
+      "is_read": false,
+      "content": "notification test",
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/9e2a1bcb-0367-4998-8ecd-ac741907e893_350906.png",
+        "username": "slack",
+        "last_name": "Reynolds",
+        "first_name": "Dennis"
+      }
+    },
+    {
+      "id": 10,
+      "created_at": "2025-01-21T06:55:38.607353+00:00",
+      "user_id": "e09e81d7-5e8c-4885-9e68-b9725745f79e",
+      "actor_id": "9e2a1bcb-0367-4998-8ecd-ac741907e893",
+      "action_type": "comment reel",
+      "target_id": 2,
+      "timeDiff": "today",
+      "action": "Liked your post",
+      "is_read": false,
+      "content": "notification test",
+      "profiles": {
+        "avatar":
+            "https://prrbylvucoyewsezqcjn.supabase.co/storage/v1/object/public/avatars/9e2a1bcb-0367-4998-8ecd-ac741907e893_350906.png",
+        "username": "slack",
+        "last_name": "Reynolds",
+        "first_name": "Dennis"
+      }
+    }
+  ];
 }

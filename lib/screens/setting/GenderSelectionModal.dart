@@ -1,5 +1,7 @@
-import 'package:bnn/screens/signup/ButtonGradientMain.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GenderSelectionModal extends StatefulWidget {
   final int? initialSelectedOption;
@@ -16,6 +18,8 @@ class GenderSelectionModal extends StatefulWidget {
 }
 
 class _GenderSelectionModalState extends State<GenderSelectionModal> {
+  final supabase = Supabase.instance.client;
+
   int? selectedOption;
 
   @override
@@ -80,7 +84,7 @@ class _GenderSelectionModalState extends State<GenderSelectionModal> {
                 widget.onContinue(selectedOption);
                 Navigator.pop(context);
               },
-              gradientColors: [Color(0xFF000000), Color(0xFF820200)]),
+              gradientColors: [AppColors.primaryBlack, AppColors.primaryRed]),
         ],
       ),
     );

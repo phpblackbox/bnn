@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/reel.dart';
 import 'package:bnn/utils/constants.dart';
@@ -10,6 +9,7 @@ import 'package:get_thumbnail_video/index.dart';
 import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Reels extends StatefulWidget {
   const Reels({super.key});
@@ -19,6 +19,8 @@ class Reels extends StatefulWidget {
 }
 
 class _ReelsState extends State<Reels> {
+  final supabase = Supabase.instance.client;
+
   List<dynamic>? reels = [];
 
   bool _loading = false;

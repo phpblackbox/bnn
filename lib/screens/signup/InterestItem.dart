@@ -1,3 +1,4 @@
+import 'package:bnn/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class InterestItem extends StatefulWidget {
@@ -28,7 +29,8 @@ class _InterestItemState extends State<InterestItem> {
       child: Container(
         decoration: BoxDecoration(
           gradient: isSelected
-              ? LinearGradient(colors: [Color(0xFF000000), Color(0xFF5A0000)])
+              ? LinearGradient(
+                  colors: [AppColors.primaryBlack, Color(0xFF5A0000)])
               : null,
           color: isSelected
               ? null // No solid color when selected

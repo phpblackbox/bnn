@@ -1,5 +1,6 @@
-import 'package:bnn/screens/chat/GroupVideoCall.dart';
-import 'package:bnn/screens/chat/GroupVoiceCall.dart';
+import 'package:bnn/screens/chat/group_video_call.dart';
+import 'package:bnn/screens/chat/group_voice_call.dart';
+import 'package:bnn/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class Group extends StatefulWidget {
@@ -129,8 +130,8 @@ class _GroupState extends State<Group> {
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black, // Start color
-                    Color(0xFF820200), // End color
+                    Colors.black,
+                    AppColors.primaryRed,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,

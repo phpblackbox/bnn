@@ -1,4 +1,4 @@
-import 'package:bnn/screens/signup/CustomInputField.dart';
+import 'package:bnn/widgets/inputs/custom-input-field.dart';
 import 'package:flutter/material.dart';
 
 class BlockedUsers extends StatefulWidget {

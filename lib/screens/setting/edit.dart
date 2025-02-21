@@ -7,12 +7,13 @@ import 'package:bnn/screens/setting/email.dart';
 import 'package:bnn/screens/setting/phone.dart';
 import 'package:bnn/screens/setting/username.dart';
 import 'package:bnn/utils/constants.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -22,6 +23,8 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  final supabase = Supabase.instance.client;
+
   final TextEditingController aboutController = TextEditingController();
   int? selectedOption;
   var age = 25;

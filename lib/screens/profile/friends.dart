@@ -1,10 +1,9 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/profile/suggested.dart';
 import 'package:bnn/utils/constants.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/widgets/inputs/custom-input-field.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -19,6 +18,7 @@ class Friends extends StatefulWidget {
 }
 
 class _FriendsState extends State<Friends> {
+  final supabase = Supabase.instance.client;
   final TextEditingController searchController = TextEditingController();
 
   List<Map<String, dynamic>>? data = Constants.fakeFollwers;

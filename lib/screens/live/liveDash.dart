@@ -1,4 +1,4 @@
-import 'package:bnn/screens/home/inputWithEmoji.dart';
+import 'package:bnn/widgets/inputs/input-with-emoji.dart';
 import 'package:bnn/screens/live/liveEnd.dart';
 import 'package:flutter/material.dart';
 

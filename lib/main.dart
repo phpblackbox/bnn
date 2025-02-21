@@ -1,26 +1,39 @@
+import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/notification_provider.dart';
+import 'package:bnn/providers/post_comment_provider.dart';
+import 'package:bnn/providers/post_provider.dart';
+import 'package:bnn/providers/story_provider.dart';
+import 'package:bnn/providers/story_view_provider.dart';
+import 'package:bnn/services/supabase_client.dart';
+import 'package:bnn/widgets/sub/not-found-404.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'routes/app_routes.dart';
 import 'dart:io';
 
-Future<void> ensureSession() async {
-  supabase.auth.startAutoRefresh();
-}
-
 Future<void> main() async {
-  await Supabase.initialize(
-    url: 'https://prrbylvucoyewsezqcjn.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBycmJ5bHZ1Y295ZXdzZXpxY2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ4OTI2NTQsImV4cCI6MjA1MDQ2ODY1NH0.x8WeQI2hxqrgSa7ERSE7e1ROOCBRVemEY9VhMoD_JAY',
-  );
-
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseService.initialize();
+  await dotenv.load(fileName: ".env");
   HttpOverrides.global = MyHttpOverrides();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  runApp(MyApp());
-}
 
-final supabase = Supabase.instance.client;
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => StoryProvider()),
+        ChangeNotifierProvider(create: (_) => StoryViewProvider()),
+        ChangeNotifierProvider(create: (_) => PostProvider()),
+        ChangeNotifierProvider(create: (_) => PostCommentProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,28 +48,6 @@ class MyApp extends StatelessWidget {
       onUnknownRoute: (settings) {
         return MaterialPageRoute(builder: (context) => NotFoundScreen());
       },
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Poppins', // Set your custom font family here
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black),
-          bodyMedium: TextStyle(fontSize: 14.0, color: Colors.black),
-          displayLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-          // Add more styles as needed
-        ),
-      ),
-    );
-  }
-}
-
-class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Not Found')),
-      body: Center(child: Text('404 - Page Not Found')),
     );
   }
 }

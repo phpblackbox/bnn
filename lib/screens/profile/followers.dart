@@ -1,9 +1,9 @@
-import 'package:bnn/main.dart';
-import 'package:bnn/screens/signup/ButtonGradientMain.dart';
+import 'package:bnn/utils/colors.dart';
 import 'package:bnn/utils/constants.dart';
-import 'package:bnn/utils/toast.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
+import 'package:bnn/widgets/inputs/custom-input-field.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:bnn/screens/signup/CustomInputField.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +15,8 @@ class Followers extends StatefulWidget {
 }
 
 class _FollowersState extends State<Followers> {
+  final supabase = Supabase.instance.client;
+
   final TextEditingController searchController = TextEditingController();
 
   List<Map<String, dynamic>>? data = Constants.fakeFollwers;
@@ -257,8 +259,8 @@ class _FollowersState extends State<Followers> {
                                                 Colors.transparent
                                               ]
                                             : [
-                                                Color(0xFF000000),
-                                                Color(0xFF820200)
+                                                AppColors.primaryBlack,
+                                                AppColors.primaryRed
                                               ],
                                       ),
                                     ),

@@ -1,4 +1,4 @@
-import 'package:bnn/screens/signup/CustomInputField.dart';
+import 'package:bnn/widgets/inputs/custom-input-field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;

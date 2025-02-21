@@ -1,8 +1,5 @@
-import 'package:bnn/screens/chat/ChatView.dart';
-import 'package:bnn/screens/home/createPost.dart';
-import 'package:bnn/screens/home/home.dart';
+import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:bnn/screens/live/liveDash.dart';
-import 'package:bnn/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 
 class Live extends StatefulWidget {
@@ -13,27 +10,6 @@ class Live extends StatefulWidget {
 }
 
 class _LiveState extends State<Live> {
-  void _onBottomNavigationTapped(int index) {
-    if (index == 0) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
-    }
-    if (index == 1) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ChatView()));
-    }
-    if (index == 2) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CreatePost()));
-    }
-    if (index == 3) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Live()));
-    }
-    if (index == 4) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Profile()));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,55 +246,7 @@ class _LiveState extends State<Live> {
         ],
       ),
 
-      bottomNavigationBar: SizedBox(
-        height: 67.0,
-        child: Padding(
-          padding: EdgeInsets.only(left: 10, right: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(0),
-                  child: Image.asset(
-                    'assets/images/icons/home.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(1),
-                  child: Image.asset(
-                    'assets/images/icons/comment.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                onTap: () => _onBottomNavigationTapped(2),
-                child: Image.asset(
-                  'assets/images/navigation_add_post.png',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(3),
-                  child: Image.asset(
-                    'assets/images/icons/video_active.png',
-                    width: 20,
-                    height: 20,
-                  )),
-              GestureDetector(
-                  onTap: () => _onBottomNavigationTapped(4),
-                  child: Image.asset(
-                    'assets/images/icons/user.png',
-                    width: 20,
-                    height: 20,
-                  )),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: BottomNavigation(currentIndex: 3),
     );
   }
 }

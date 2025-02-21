@@ -1,6 +1,7 @@
+import 'package:bnn/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
-import '../signup/signupDash.dart';
+import '../signup/signup_dash.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
@@ -12,7 +13,6 @@ class WalkthroughPage extends StatefulWidget {
 class _WalkthroughPageState extends State<WalkthroughPage> {
   int currentIndex = 0;
 
-  // Define your images and texts
   final List<String> images = [
     Constants.walkthroughImage1,
     Constants.walkthroughImage2,
@@ -59,8 +59,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
           width: 8.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color:
-                currentIndex == index ? Color(0xFFF30802) : Color(0xFF000000),
+            color: currentIndex == index
+                ? Color(0xFFF30802)
+                : AppColors.primaryBlack,
           ),
         );
       }),
