@@ -82,6 +82,12 @@ class NotificationService {
     }
   }
 
+  Future<void> updateNotification(int noificationId) async {
+    await _supabase
+        .from('notifications')
+        .update({'is_read': true}).eq('id', noificationId);
+  }
+
   Future<void> upsertCommentNotification(
       String userId, String action, int postId, String content) async {
     final meId = _supabase.auth.currentUser?.id;

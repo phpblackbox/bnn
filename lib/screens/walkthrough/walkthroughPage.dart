@@ -1,6 +1,5 @@
 import 'package:bnn/utils/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:bnn/utils/constants.dart';
 import '../signup/signup_dash.dart';
 
 class WalkthroughPage extends StatefulWidget {
@@ -14,9 +13,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   int currentIndex = 0;
 
   final List<String> images = [
-    Constants.walkthroughImage1,
-    Constants.walkthroughImage2,
-    Constants.walkthroughImage3,
+    'assets/images/walkthrough1.png',
+    'assets/images/walkthrough2.png',
+    'assets/images/walkthrough3.png',
   ];
 
   final List<String> titles = [
@@ -168,16 +167,15 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
           ],
         ),
         Positioned(
-          right: 0, // Distance from the right edge
-          bottom: 0, // Distance from the bottom edge
+          right: 0,
+          bottom: 0,
           child: GestureDetector(
-            onTap:
-                _nextPage, // Call the _nextPage method when the image is tapped
+            onTap: _nextPage,
             child: Image.asset(
-              Constants.walkthroughNextButton,
+              'assets/images/walkthrough_btn.png',
               key: ValueKey<int>(currentIndex),
-              width: 150, // Set your desired width
-              height: 150.0, // Set your desired height
+              width: 150,
+              height: 150.0,
               fit: BoxFit.cover,
             ),
           ),

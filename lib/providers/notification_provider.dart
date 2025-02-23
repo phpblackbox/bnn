@@ -24,4 +24,8 @@ class NotificationProvider with ChangeNotifier {
     data = await _notificationService.getNotificationsByUserId(meId!);
     loading = false;
   }
+
+  Future<void> readNotificaiton(int noificationId) async {
+    await _notificationService.updateNotification(noificationId);
+  }
 }

@@ -7,7 +7,6 @@ import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,8 +16,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final supabase = Supabase.instance.client;
-
   int _feedorReels = 0; // 0: feed, 1; reels
   void _onFeedOrReel(int index) {
     setState(() {

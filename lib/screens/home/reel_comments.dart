@@ -1,8 +1,6 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:bnn/models/profiles.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -31,8 +29,6 @@ class _ReelCommandsState extends State<ReelCommands> {
   bool _loading = true;
 
   Future<List<dynamic>> fetchParentComments() async {
-    final res = await Constants.loadProfile();
-
     setState(() {
       _loading = true;
     });
@@ -350,7 +346,7 @@ class _ReelCommandsState extends State<ReelCommands> {
                     .select()
                     .single();
 
-                final nowString = await supabase.rpc('get_server_time');
+                final nowString = await supabase.rpc('');
                 DateTime now = DateTime.parse(nowString);
                 DateTime createdAt = DateTime.parse(res["created_at"]);
                 Duration difference = now.difference(createdAt);

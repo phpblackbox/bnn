@@ -1,4 +1,3 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';

@@ -15,8 +15,8 @@ import 'dart:io';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SupabaseService.initialize();
   await dotenv.load(fileName: ".env");
+  await SupabaseService.initialize();
   HttpOverrides.global = MyHttpOverrides();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 

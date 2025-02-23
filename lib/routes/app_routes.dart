@@ -1,5 +1,6 @@
 import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
+import 'package:bnn/screens/signup/signup_dash.dart';
 import 'package:bnn/widgets/sub/chat_view.dart';
 import 'package:bnn/screens/home/create_post.dart';
 import 'package:bnn/screens/home/home.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static final Map<String, WidgetBuilder> routes = {
     '/': (context) => Splash(),
     '/login': (context) => LoginDash(),
+    '/signup': (context) => SignUpDash(),
     '/home': (context) => Home(),
     '/create-profile': (context) => CreateUserName(),
     '/chat': (context) => ChatView(),

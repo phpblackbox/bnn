@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './walkthroughPage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Splash extends StatelessWidget {
   const Splash({super.key});
@@ -10,6 +10,8 @@ class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final supabase = Supabase.instance.client;
+    supabase.auth.signOut();
 
     Timer(Duration(seconds: 2), () async {
       await authProvider.init();

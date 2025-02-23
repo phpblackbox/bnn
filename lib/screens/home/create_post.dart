@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'package:bnn/models/profiles.dart';
 import 'package:bnn/providers/auth_provider.dart';
-import 'package:bnn/utils/constants.dart';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -16,8 +14,6 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
-  final supabase = Supabase.instance.client;
-
   final List<String> images = [
     'assets/images/post/camera.png',
   ];
@@ -27,19 +23,9 @@ class _CreatePostState extends State<CreatePost> {
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _selectedImages = [];
 
-  bool isLoading = false;
-
   @override
   void initState() {
     super.initState();
-    initialData();
-  }
-
-  Future<void> initialData() async {
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Provider.of<PostProvider>(context, listen: false)
-    //       .getStoryById(widget.storyId);
-    // });
   }
 
   Future<void> pickImages() async {
@@ -71,54 +57,21 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
-  Future<void> post() async {
+  Future<void> post(PostProvider postProvider) async {
     if (_postController.text.isEmpty) {
       CustomToast.showToastWarningTop(
           context, 'Please describe what’s happening');
 
       return;
     }
-
-    List imgUrls = [];
     try {
-      setState(() {
-        isLoading = true;
-      });
-      for (var image in _selectedImages) {
-        String randomNumStr = Constants().generateRandomNumberString(8);
-        final filename = '${supabase.auth.currentUser!.id}_$randomNumStr.png';
-
-        final fileBytes = await File(image.path).readAsBytes();
-
-        await supabase.storage.from('posts').uploadBinary(
-              filename,
-              fileBytes,
-            );
-
-        final publicUrl = supabase.storage.from('posts').getPublicUrl(filename);
-        imgUrls.add(publicUrl);
-      }
-
-      final userId = supabase.auth.currentUser!.id;
-      await supabase.from('posts').upsert({
-        'author_id': userId,
-        'content': _postController.text,
-        'img_urls': imgUrls,
-      });
-
-      setState(() {
-        isLoading = false;
-      });
-
-      CustomToast.showToastSuccessTop(context, "You've posted.");
-
+      await postProvider.newPost(
+          context, _selectedImages, _postController.text);
+      CustomToast.showToastSuccessTop(context, "You've posted successfully!");
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       CustomToast.showToastDangerTop(
           context, 'Error uploading image: ${e.toString()}');
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -126,6 +79,8 @@ class _CreatePostState extends State<CreatePost> {
   Widget build(BuildContext context) {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     final meProfile = authProvider.profile!;
+
+    final PostProvider postProvider = Provider.of<PostProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -170,9 +125,9 @@ class _CreatePostState extends State<CreatePost> {
                     ),
                   ),
                 ),
-                if (isLoading) CircularProgressIndicator(),
+                if (postProvider.loading) CircularProgressIndicator(),
                 GestureDetector(
-                  onTap: post,
+                  onTap: () => post(postProvider),
                   child: Container(
                     decoration: ShapeDecoration(
                       color: Color(0xFFF30802),

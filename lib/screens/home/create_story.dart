@@ -4,7 +4,6 @@ import 'package:bnn/utils/colors.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateStory extends StatefulWidget {
   final int storyId;
@@ -19,8 +18,6 @@ class CreateStory extends StatefulWidget {
 }
 
 class _CreateStoryState extends State<CreateStory> {
-  final supabase = Supabase.instance.client;
-
   final TextEditingController _storyController = TextEditingController();
 
   @override

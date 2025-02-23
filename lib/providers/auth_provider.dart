@@ -152,25 +152,30 @@ class AuthProvider with ChangeNotifier {
   Future<void> googleSignIn(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
-    _user = await _authService.nativeGoogleSignIn();
+    try {
+      _user = await _authService.nativeGoogleSignIn();
 
-    if (_user != null) {
-      _isLoading = false;
-      notifyListeners();
-      final userId = _user?.id;
-      if (userId != null) {
-        _profile = await _profileService.getUserProfileById(userId);
+      if (_user != null) {
+        _isLoading = false;
+        notifyListeners();
+        final userId = _user?.id;
+        if (userId != null) {
+          _profile = await _profileService.getUserProfileById(userId);
 
-        if (_profile != null) {
-          Navigator.pushReplacementNamed(context, '/home');
-        } else {
-          Navigator.pushReplacementNamed(context, '/create-profile');
+          if (_profile != null) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else {
+            Navigator.pushReplacementNamed(context, '/create-profile');
+          }
         }
+      } else {
+        _isLoading = false;
+        _errorMessage = 'Google sign-in failed.';
+        notifyListeners();
       }
-    } else {
-      _isLoading = false;
-      _errorMessage = 'Google sign-in failed.';
-      notifyListeners();
+    } catch (e) {
+      print(e);
+      rethrow;
     }
   }
 

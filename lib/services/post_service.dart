@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -273,5 +275,27 @@ class PostService {
         .single();
 
     return data;
+  }
+
+  Future<String> uploadImage(String userId, String imagePath) async {
+    String randomNumStr = Constants().generateRandomNumberString(8);
+    final filename = '${userId}_$randomNumStr.png';
+    final fileBytes = await File(imagePath).readAsBytes();
+
+    await _supabase.storage.from('story').uploadBinary(
+          filename,
+          fileBytes,
+        );
+
+    return _supabase.storage.from('story').getPublicUrl(filename);
+  }
+
+  Future<void> newPost(
+      String userId, String content, List<String> imgUrls) async {
+    await _supabase.from('posts').upsert({
+      'author_id': userId,
+      'content': content,
+      'img_urls': imgUrls,
+    });
   }
 }

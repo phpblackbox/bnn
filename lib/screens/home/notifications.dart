@@ -1,3 +1,4 @@
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/one_post.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});
@@ -19,8 +19,6 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  final supabase = Supabase.instance.client;
-
   @override
   void initState() {
     super.initState();
@@ -116,10 +114,8 @@ class _NotificationsState extends State<Notifications> {
                           Spacer(),
                           GestureDetector(
                             onTap: () async {
-                              await supabase
-                                  .from('notifications')
-                                  .update({'is_read': true}).eq('id',
-                                      notificationProvider.data[index]['id']);
+                              await notificationProvider.readNotificaiton(
+                                  notificationProvider.data[index]['id']!);
 
                               switch (notificationProvider.data[index]
                                   ['action_type']) {
@@ -162,7 +158,11 @@ class _NotificationsState extends State<Notifications> {
 
                                 case "like story":
                                 case "comment story":
-                                  final meId = supabase.auth.currentUser!.id;
+                                  final meId = Provider.of<AuthProvider>(
+                                          context,
+                                          listen: false)
+                                      .user
+                                      ?.id;
                                   if (notificationProvider.data[index]
                                           ['actor_id'] ==
                                       meId) {

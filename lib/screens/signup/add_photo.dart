@@ -7,7 +7,6 @@ import 'package:bnn/widgets/buttons/button-primary.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:bnn/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -172,8 +171,8 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
                     height: 200,
                     child: Center(
                       child: Image.asset(
-                        Constants.addphoto, // Replace with your logo asset
-                        height: 200, // Adjust height as necessary
+                        'assets/images/addphoto.png',
+                        height: 200,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -204,7 +203,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
             SizedBox(height: 5),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/home');
+                handleSkip();
               },
               child: Text(
                 "Skip",

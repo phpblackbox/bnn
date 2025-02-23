@@ -15,8 +15,7 @@ class ProfileService {
         return null;
       }
     } catch (e) {
-      print('Error fetching profile: $e');
-      rethrow;
+      return null;
     }
   }
 

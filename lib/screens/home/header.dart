@@ -1,5 +1,4 @@
 import 'package:bnn/screens/livestream/livestream_dash.dart';
-import 'package:bnn/utils/constants.dart';
 import 'package:bnn/screens/home/notifications.dart';
 import 'package:bnn/screens/profile/suggested.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ class _HeaderState extends State<Header> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Image.asset(
-            Constants.logo,
+            'assets/images/bnn_logo.png',
             height: 140,
           ),
           Row(

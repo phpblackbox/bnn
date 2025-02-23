@@ -14,6 +14,9 @@ class AuthService {
     final webClientId = dotenv.env['WEB_CLIENT_ID'] ?? '';
     final androidClientId = dotenv.env['ANDROID_CLIENT_ID'] ?? '';
 
+    print(webClientId);
+    print(androidClientId);
+
     try {
       final googleSignIn = GoogleSignIn(
         clientId: androidClientId,

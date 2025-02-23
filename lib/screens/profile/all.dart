@@ -1,4 +1,3 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +22,10 @@ class _AllPostState extends State<AllPost> {
   @override
   void initState() {
     super.initState();
-    fetchdata();
+    initialData();
   }
 
-  void fetchdata() async {
+  void initialData() async {
     final userId = supabase.auth.currentUser!.id;
     dynamic data;
     if (widget.param_allorbookmakr == 0) {
@@ -35,7 +34,6 @@ class _AllPostState extends State<AllPost> {
           }) ??
           0;
     } else {
-      print("111111111111");
       final userId = supabase.auth.currentUser!.id;
       data = await supabase
           .from('post_bookmarks')

@@ -1,4 +1,4 @@
-package com.bossnationnetwork.bnn
+package com.bnnsoftware.bnn
 
 import io.flutter.embedding.android.FlutterActivity
 
