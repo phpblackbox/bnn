@@ -1,9 +1,7 @@
 import 'package:bnn/screens/reel/reel_comments.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:video_player/video_player.dart';
-// import 'package:stream_video/stream_video.dart';
-// import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class reel extends StatefulWidget {
   final int? reelId;
@@ -16,7 +14,7 @@ class reel extends StatefulWidget {
 class _reelState extends State<reel> with SingleTickerProviderStateMixin {
   final supabase = Supabase.instance.client;
 
-  VideoPlayerController? _controller;
+  VlcPlayerController? _controller;
   Future<void>? _initializeVideoPlayerFuture;
   bool _loading = false;
 
@@ -94,19 +92,33 @@ class _reelState extends State<reel> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void dispose() {
-    _controller?.dispose();
-    _animationController.dispose();
+  void dispose() async {
     super.dispose();
+    await _controller?.dispose();
+    await _controller?.stopRendererScanning();
   }
 
   void loadVideo(Map<String, dynamic> currentReel) {
     if (currentReel['video_url'] != null) {
       _controller?.dispose();
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(currentReel['video_url']),
-        // videoPlayerOptions: VideoPlayerOptions(),
+      _controller = VlcPlayerController.network(
+        Uri.parse(currentReel['video_url']).toString(),
+        hwAcc: HwAcc.full,
+        autoPlay: true,
+        options: VlcPlayerOptions(),
       );
+
+      _controller!.addOnInitListener(() async {
+        _controller!.startRendererScanning();
+      });
+
+      _controller!.addListener(() async {
+        if (!mounted) return;
+        if (_controller!.value.isEnded) {
+          _controller!.stop();
+          _controller!.play();
+        }
+      });
 
       _initializeVideoPlayerFuture = _controller!.initialize().then((_) {
         setState(() {
@@ -120,10 +132,6 @@ class _reelState extends State<reel> with SingleTickerProviderStateMixin {
       print("Video URL is not available");
     }
   }
-
-// video_player_avfoundation
-// video_player_platform_interface
-// video_player_web
 
   Future<Map<String, dynamic>?> fetchdata(reelId) async {
     final oneReel =
@@ -221,7 +229,10 @@ class _reelState extends State<reel> with SingleTickerProviderStateMixin {
                   future: _initializeVideoPlayerFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      return VideoPlayer(_controller!);
+                      return VlcPlayer(
+                        controller: _controller!,
+                        aspectRatio: 9 / 16,
+                      );
                     } else {
                       return Center(child: CircularProgressIndicator());
                     }

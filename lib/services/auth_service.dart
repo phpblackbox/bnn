@@ -1,5 +1,7 @@
 import 'dart:io';
-
+import 'package:bnn/models/profiles_model.dart';
+import 'package:bnn/services/profile_service.dart';
+import 'package:bnn/services/stream_service.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,12 +12,15 @@ import '../models/user_model.dart';
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  final ProfileService _profileService = ProfileService();
+
+  StreamService streamService = StreamService();
+
+  ProfilesModel? profile;
+
   Future<UserModel?> nativeGoogleSignIn() async {
     final webClientId = dotenv.env['WEB_CLIENT_ID'] ?? '';
     final androidClientId = dotenv.env['ANDROID_CLIENT_ID'] ?? '';
-
-    print(webClientId);
-    print(androidClientId);
 
     try {
       final googleSignIn = GoogleSignIn(
@@ -40,9 +45,15 @@ class AuthService {
         idToken: idToken,
         accessToken: accessToken,
       );
-
       if (response.user != null) {
-        return UserModel.fromSupabase(response.user!.toJson());
+        final userModel = UserModel.fromSupabase(response.user!.toJson());
+
+        ProfilesModel? profile =
+            await _profileService.getUserProfileById(userModel.id!);
+
+        streamService.initStream(
+            profile!.id!, profile.username!, profile.avatar!);
+        return userModel;
       } else {
         return null;
       }
@@ -64,13 +75,22 @@ class AuthService {
   }
 
   Future<void> signOut() async {
+    await streamService.disconnect();
     await _supabase.auth.signOut();
   }
 
   Future<AuthResponse> signInWithEmailAndPassword(
       String email, String password) async {
-    return await _supabase.auth
+    final response = await _supabase.auth
         .signInWithPassword(email: email, password: password);
+
+    final userModel = UserModel.fromSupabase(response.user!.toJson());
+
+    ProfilesModel? profile =
+        await _profileService.getUserProfileById(userModel.id!);
+
+    streamService.initStream(profile!.id!, profile.username!, profile.avatar!);
+    return response;
   }
 
   Future<AuthResponse> signUp(String email, String password) async {

@@ -1,4 +1,3 @@
-import 'package:bnn/main.dart';
 import 'package:bnn/screens/profile/friends.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/utils/colors.dart';

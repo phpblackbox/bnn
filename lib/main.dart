@@ -1,7 +1,9 @@
 import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/livestream_provider.dart';
 import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/providers/post_comment_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
+import 'package:bnn/providers/reel_provider.dart';
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
 import 'package:bnn/services/supabase_client.dart';
@@ -29,6 +31,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => PostCommentProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ReelProvider()),
+        ChangeNotifierProvider(create: (_) => LivestreamProvider()),
       ],
       child: const MyApp(),
     ),

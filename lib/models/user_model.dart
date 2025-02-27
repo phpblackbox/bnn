@@ -9,7 +9,6 @@ class UserModel {
     return UserModel(
       id: data['id'],
       email: data['email'],
-      // Map other fields as needed
     );
   }
 }

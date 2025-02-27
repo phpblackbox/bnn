@@ -2,8 +2,8 @@ import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/one_post.dart';
-import 'package:bnn/screens/home/reel.dart';
 import 'package:bnn/screens/profile/followers.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -148,7 +148,7 @@ class _NotificationsState extends State<Notifications> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => reel(
+                                          builder: (context) => ReelScreen(
                                                 reelId: notificationProvider
                                                     .data[index]['target_id'],
                                               ))).then((value) {

@@ -39,6 +39,16 @@ class Constants {
     }
   }
 
+  String generateCallId() {
+    final random = Random();
+    const availableChars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    final randomString = List.generate(12,
+            (index) => availableChars[random.nextInt(availableChars.length)])
+        .join();
+    return randomString;
+  }
+
   // these are fake data for skeleton
   static const List<dynamic> fakeAddParticipants = [
     {

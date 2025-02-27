@@ -27,4 +27,9 @@ class ProfileService {
       rethrow;
     }
   }
+
+  Future<bool> isFriend(String userId1, String userId2) async {
+    return await _supabase
+        .rpc('is_friend', params: {'me_id': userId1, 'user_id': userId2});
+  }
 }

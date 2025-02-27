@@ -1,4 +1,5 @@
 import 'package:bnn/screens/home/posts.dart';
+import 'package:bnn/screens/livestream/livestream_view.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/screens/signup/signup_dash.dart';
 import 'package:bnn/widgets/sub/chat_view.dart';
@@ -32,5 +33,6 @@ class AppRoutes {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
       return UserProfile(userId: args['userId']);
     },
+    '/livestream-view': (context) => LiveStreamView(),
   };
 }

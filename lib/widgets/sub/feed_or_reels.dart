@@ -1,4 +1,4 @@
-import 'package:bnn/screens/home/reel.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:flutter/material.dart';
 
 class FeedOrReel extends StatelessWidget {
@@ -49,7 +49,7 @@ class FeedOrReel extends StatelessWidget {
         InkWell(
           onTap: () async {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => reel()));
+                context, MaterialPageRoute(builder: (context) => ReelScreen()));
           },
           child: Text(
             '9:16s',

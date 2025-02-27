@@ -1,5 +1,10 @@
+import 'package:bnn/providers/livestream_provider.dart';
 import 'package:bnn/screens/livestream/livestream_screen.dart';
+import 'package:bnn/screens/livestream/livestream_view.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class LivestreamDash extends StatefulWidget {
   const LivestreamDash({super.key});
@@ -9,45 +14,115 @@ class LivestreamDash extends StatefulWidget {
 }
 
 class _LivestreamDashState extends State<LivestreamDash> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
-    fetchdata();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LivestreamProvider>(context, listen: false).initData();
+    });
   }
 
-  void fetchdata() async {
-    // StreamVideo(
-    //   'udqd594zzqub',
-    //   user: User(
-    //     info: UserInfo(
-    //       name: 'John Doe',
-    //       id: loadedProfile!.id,
-    //     ),
-    //   ),
-    //   userToken:
-    //       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJAc3RyZWFtLWlvL2Rhc2hib2FyZCIsImlhdCI6MTczODYwMjI3MSwiZXhwIjoxNzM4Njg4NjcxLCJ1c2VyX2lkIjoiIWFub24iLCJyb2xlIjoidmlld2VyIiwiY2FsbF9jaWRzIjpbImxpdmVzdHJlYW06bGl2ZXN0cmVhbV8yNDAwOWQ3Ni1jOTViLTRlZmUtOTAwMC00Y2Q2ZmRmOTZiYjMiXX0.O_CP-Qb3V9ElxShtRdFQ86YeqfB0jL36QOZuhbSgPTs',
-    // );
-  }
-
-  Future<void> _createLivestream() async {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const LiveStreamScreen(),
-      ),
-    );
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final LivestreamProvider livestreamProvider =
+        Provider.of<LivestreamProvider>(context);
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
       body: Container(
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () => _createLivestream(),
+              onPressed: () async {
+                final result = await livestreamProvider.createLivestream();
+                if (result.isSuccess == true) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => LiveStreamScreen(),
+                    ),
+                  );
+                } else {
+                  CustomToast.showToastDangerTop(context,
+                      'Error for create livestream: ${result.toString()}');
+                }
+              },
               child: const Text('Create Livestream'),
             ),
+            ElevatedButton(
+              onPressed: () async {
+                String callId = "sm23C4G9eBqO";
+                final result = await livestreamProvider.joinLivestream(callId);
+
+                if (result.isSuccess == true) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => LiveStreamView(),
+                    ),
+                  );
+                } else {
+                  CustomToast.showToastDangerTop(context,
+                      'Error for create livestream: ${result.toString()}');
+                }
+              },
+              child: const Text('Create Livestream'),
+            ),
+            livestreamProvider.loading
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: livestreamProvider.getData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      final data = snapshot.data ?? [];
+                      print("data =  ${data.toString()}");
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: livestreamProvider.channels.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            padding: EdgeInsets.all(8),
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (mounted) {
+                                  String callId = livestreamProvider
+                                      .channels[index]["call_id"];
+                                  final result = await livestreamProvider
+                                      .joinLivestream(callId);
+                                  if (result.isSuccess == true) {
+                                    _navigatorKey.currentState
+                                        ?.pushNamed('/livestream-view');
+                                  } else {
+                                    CustomToast.showToastDangerTop(context,
+                                        'Error join livestream: ${result.toString()}');
+                                  }
+                                }
+                              },
+                              child: Column(children: [
+                                Text(
+                                    'userId: ${livestreamProvider.channels[index]["user_id"]}'),
+                                Text(
+                                    'callId: ${livestreamProvider.channels[index]["call_id"]}')
+                              ]),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ],
         ),
       ),

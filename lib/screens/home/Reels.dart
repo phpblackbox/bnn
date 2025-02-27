@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:bnn/screens/chat/room.dart';
-import 'package:bnn/screens/home/reel.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -281,7 +281,7 @@ class _ReelsState extends State<Reels> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => reel(
+                            builder: (context) => ReelScreen(
                                   reelId: reels![index]['id'],
                                 )));
                   },
