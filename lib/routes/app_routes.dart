@@ -33,6 +33,6 @@ class AppRoutes {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
       return UserProfile(userId: args['userId']);
     },
-    '/livestream-view': (context) => LiveStreamView(),
+    // '/livestream-view': (context) => LiveStreamView(),
   };
 }

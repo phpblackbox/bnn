@@ -1,14 +1,14 @@
 import 'package:bnn/models/reel_model.dart';
 import 'package:bnn/services/reel_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
-// import 'package:video_player/video_player.dart';
+// import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:video_player/video_player.dart';
 
 class ReelProvider extends ChangeNotifier {
   final ReelService reelService = ReelService();
-  // VideoPlayerController? controller;
+  VideoPlayerController? controller;
   // late VlcPlayerController controller;
-  VlcPlayerController? controller;
+  // VlcPlayerController? controller;
 
   bool loading = false;
 
@@ -76,33 +76,45 @@ class ReelProvider extends ChangeNotifier {
 
     if (currentReel.videoUrl.isNotEmpty) {
       // if (controller != null) {
-      controller = VlcPlayerController.network(
-        Uri.parse(currentReel.videoUrl).toString(),
-        hwAcc: HwAcc.full,
-        autoPlay: true,
-        options: VlcPlayerOptions(),
+      controller = VideoPlayerController.networkUrl(
+        Uri.parse(currentReel.videoUrl),
       );
 
       initializeVideoPlayerFuture = controller!.initialize().then((_) {
         controller!.setLooping(true);
         controller!.play();
         notifyListeners();
+      }).catchError((error) {
+        print("Error initializing video: $error");
       });
 
-      print(initializeVideoPlayerFuture);
+      // controller = VlcPlayerController.network(
+      //   Uri.parse(currentReel.videoUrl).toString(),
+      //   hwAcc: HwAcc.full,
+      //   autoPlay: true,
+      //   options: VlcPlayerOptions(),
+      // );
 
-      controller!.addOnInitListener(() async {
-        controller!.startRendererScanning();
-      });
+      // initializeVideoPlayerFuture = controller!.initialize().then((_) {
+      //   controller!.setLooping(true);
+      //   controller!.play();
+      //   notifyListeners();
+      // });
 
-      controller!.addListener(() async {
-        if (controller!.value.isEnded) {
-          controller!.stop();
-          controller!.play();
-        }
+      // print(initializeVideoPlayerFuture);
 
-        notifyListeners();
-      });
+      // controller!.addOnInitListener(() async {
+      //   controller!.startRendererScanning();
+      // });
+
+      // controller!.addListener(() async {
+      //   if (controller!.value.isEnded) {
+      //     controller!.stop();
+      //     controller!.play();
+      //   }
+
+      //   notifyListeners();
+      // });
       // }
     } else {
       print("Video URL is not available");

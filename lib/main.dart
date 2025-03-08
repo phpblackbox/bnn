@@ -32,7 +32,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PostCommentProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => ReelProvider()),
-        ChangeNotifierProvider(create: (_) => LivestreamProvider()),
+        // ChangeNotifierProvider(create: (_) => LivestreamProvider()),
       ],
       child: const MyApp(),
     ),

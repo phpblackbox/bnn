@@ -42,11 +42,6 @@ dependencies:
   provider: ^6.1.2
   open_filex: ^4.6.0
   video_player: ^2.9.3
-  flutter_vlc_player: ^7.4.2
-  stream_video_push_notification: ^0.7.2
-  stream_video: ^0.7.2
-  stream_video_flutter: ^0.7.2
-  stream_chat: ^9.3.0
 
 dev_dependencies:
   flutter_test:

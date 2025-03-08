@@ -14,7 +14,7 @@ class AuthService {
 
   final ProfileService _profileService = ProfileService();
 
-  StreamService streamService = StreamService();
+  // StreamService streamService = StreamService();
 
   ProfilesModel? profile;
 
@@ -51,8 +51,8 @@ class AuthService {
         ProfilesModel? profile =
             await _profileService.getUserProfileById(userModel.id!);
 
-        streamService.initStream(
-            profile!.id!, profile.username!, profile.avatar!);
+        // streamService.initStream(
+        //     profile!.id!, profile.username!, profile.avatar!);
         return userModel;
       } else {
         return null;
@@ -75,7 +75,7 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    await streamService.disconnect();
+    // await streamService.disconnect();
     await _supabase.auth.signOut();
   }
 
@@ -89,7 +89,7 @@ class AuthService {
     ProfilesModel? profile =
         await _profileService.getUserProfileById(userModel.id!);
 
-    streamService.initStream(profile!.id!, profile.username!, profile.avatar!);
+    // streamService.initStream(profile!.id!, profile.username!, profile.avatar!);
     return response;
   }
 

@@ -3,8 +3,9 @@ import 'package:bnn/screens/reel/reel_video_player.dart';
 import 'package:bnn/screens/reel/user_info_section.dart';
 import 'package:bnn/widgets/buttons/button-reel-action.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+// import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../providers/reel_provider.dart';
 
 class ReelScreen extends StatefulWidget {
@@ -20,7 +21,8 @@ class _ReelScreenState extends State<ReelScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
-  late VlcPlayerController _controller;
+  // late VideoPlayerController _controller;
+  // late VlcPlayerController _controller;
 
   // final ReelProvider _provider = ReelProvider();
 
@@ -112,10 +114,11 @@ class _ReelScreenState extends State<ReelScreen>
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.done) {
-                            return VlcPlayer(
-                              controller: reelProvider.controller!,
-                              aspectRatio: 9 / 16,
-                            );
+                            return VideoPlayer(reelProvider.controller!);
+                            // return VlcPlayer(
+                            //   controller: reelProvider.controller!,
+                            //   aspectRatio: 9 / 16,
+                            // );
                           } else {
                             return Center(child: CircularProgressIndicator());
                           }

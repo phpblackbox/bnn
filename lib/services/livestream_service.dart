@@ -13,6 +13,17 @@ class LivestreamService {
     return data;
   }
 
+  Future<Map<String, dynamic>> getLivestreamByCallId(String callId) async {
+    final data = await _supabase
+        .from('livestream')
+        .select('*')
+        .eq('is_active', true)
+        .eq('call_id', callId)
+        .order('created_at', ascending: false)
+        .single();
+    return data;
+  }
+
   Future<List<Map<String, dynamic>>> getLivestreams() async {
     final data = await _supabase
         .from('livestream')
