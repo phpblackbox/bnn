@@ -28,14 +28,31 @@ class Constants {
   }
 
   String formatDuration(Duration duration) {
-    if (duration.inMinutes < 60) {
+    const int minutesInHour = 60;
+    const int hoursInDay = 24;
+    const int daysInMonth = 30;
+    const int daysInYear = 365;
+
+    if (duration.inMinutes < minutesInHour) {
       return '${duration.inMinutes}m';
-    } else if (duration.inHours < 24) {
+    } else if (duration.inHours < hoursInDay) {
       return '${duration.inHours}h';
-    } else if (duration.inDays <= 30) {
+    } else if (duration.inDays < daysInMonth) {
       return '${duration.inDays}d';
+    } else if (duration.inDays < daysInYear) {
+      int months = duration.inDays ~/ daysInMonth;
+      if (months == 1) {
+        return 'a month';
+      } else {
+        return '${months} months';
+      }
     } else {
-      return '30+d'; // For any duration greater than 30 days
+      int years = duration.inDays ~/ daysInYear;
+      if (years == 1) {
+        return 'a year';
+      } else {
+        return '${years} years';
+      }
     }
   }
 
