@@ -37,7 +37,7 @@ class BottomNavigation extends StatelessWidget {
         Navigator.pushReplacementNamed(context, '/chat');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/create-post');
+        Navigator.pushNamed(context, '/create-post');
         break;
       case 3:
         Navigator.pushReplacementNamed(context, '/live');

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/screens/home/reels.dart';
 import 'package:bnn/screens/home/story_slider.dart';
@@ -5,7 +7,9 @@ import 'package:bnn/widgets/sub/feed_or_reels.dart';
 import 'package:bnn/screens/home/header.dart';
 import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -23,6 +27,8 @@ class _HomeState extends State<Home> {
     });
   }
 
+  var currentTime;
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -35,7 +41,21 @@ class _HomeState extends State<Home> {
       });
     }
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () {
+        DateTime now = DateTime.now();
+        if (currentTime == null ||
+            now.difference(currentTime) > const Duration(seconds: 2)) {
+          currentTime = now;
+          CustomToast.showToastWarningTop(context, "Press agian to exit");
+          return Future.value(false);
+        } else {
+          SystemNavigator.pop();
+          exit(0);
+          // Future.value(false);
+        }
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(90),
@@ -55,6 +75,8 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        bottomNavigationBar: BottomNavigation(currentIndex: 0));
+        bottomNavigationBar: BottomNavigation(currentIndex: 0),
+      ),
+    );
   }
 }
