@@ -45,6 +45,7 @@ class _PostsState extends State<Posts> {
   }
 
   void _showFriendDetail(BuildContext context, int index, postProvider) {
+    print(postProvider.posts?[index]);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

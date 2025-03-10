@@ -196,6 +196,7 @@ class PostService {
         'post_id': postId,
         'is_like': status,
       });
+      status = false;
     }
 
     return status; // return like or dislike
@@ -225,6 +226,7 @@ class PostService {
         'post_id': postId,
         'is_bookmark': status,
       });
+      status = false;
     }
 
     return status; // return bookmark or not
