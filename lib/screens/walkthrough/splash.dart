@@ -10,8 +10,8 @@ class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final supabase = Supabase.instance.client;
-    supabase.auth.signOut();
+    // final supabase = Supabase.instance.client;
+    // supabase.auth.signOut();
 
     Timer(Duration(seconds: 2), () async {
       await authProvider.init();
