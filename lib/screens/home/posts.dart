@@ -389,8 +389,8 @@ class _PostsState extends State<Posts> {
                         icon: Icons.mode_comment_outlined,
                         count:
                             postProvider.posts![index]['comments'].toString(),
-                        onTap: () => _showCommentDetail(context,
-                            postProvider.posts?[index]['id']), // Keep it short
+                        onTap: () => _showCommentDetail(
+                            context, postProvider.posts?[index]['id']),
                       ),
                       ButtonPostAction(
                         icon: Icons.bookmark_outline,

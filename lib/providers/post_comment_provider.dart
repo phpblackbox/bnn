@@ -16,6 +16,18 @@ class PostCommentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isSentMsg = false;
+  bool get isSentMsg => _isSentMsg;
+  set isSentMsg(bool value) {
+    _isSentMsg = value;
+  }
+
+  int _postId = 0;
+  int get postId => _postId;
+  set postId(int value) {
+    _postId = value;
+  }
+
   List<dynamic> _parentComments = Constants.fakeParentComments;
   List<dynamic> get parentComments => _parentComments;
 
@@ -112,6 +124,8 @@ class PostCommentProvider extends ChangeNotifier {
     }
 
     parentId = 0;
+    isSentMsg = true;
+    this.postId = postId;
     notifyListeners();
   }
 }

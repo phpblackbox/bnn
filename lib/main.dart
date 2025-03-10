@@ -32,6 +32,16 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PostCommentProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => ReelProvider()),
+        ChangeNotifierProxyProvider<PostCommentProvider, PostProvider>(
+          create: (_) => PostProvider(),
+          update: (context, postCommentProvider, postProvider) {
+            if (postCommentProvider.isSentMsg) {
+              postProvider?.increaseCountComment(postCommentProvider.postId);
+              postCommentProvider.isSentMsg = false;
+            } else {}
+            return postProvider!;
+          },
+        ),
         // ChangeNotifierProvider(create: (_) => LivestreamProvider()),
       ],
       child: const MyApp(),
