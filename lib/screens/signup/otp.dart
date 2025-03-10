@@ -81,128 +81,131 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Enter OTP Code",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Enter OTP Code",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            SlideTransition(
-              position: _slideAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    // crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        '00:${_start < 10 ? '0$_start' : _start}',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
+        body: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      // crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          '00:${_start < 10 ? '0$_start' : _start}',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
 
-                      SizedBox(height: 10),
+                        SizedBox(height: 10),
 
-                      // Instruction Text
-                      Text(
-                        "Type the verification code \n we’ve sent you",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-
-                      SizedBox(height: 10),
-
-                      SizedBox(
-                        width: 150, // Set a smaller width
-                        child: TextField(
-                          controller: _otpController,
-                          maxLength: 4,
-                          keyboardType: TextInputType.number,
+                        // Instruction Text
+                        Text(
+                          "Type the verification code \n we’ve sent you",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16), // Smaller font size
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter OTP',
-                            contentPadding: EdgeInsets.symmetric(
-                                vertical: 8.0), // Adjust padding
+                          style: TextStyle(fontSize: 16),
+                        ),
+
+                        SizedBox(height: 10),
+
+                        SizedBox(
+                          width: 150, // Set a smaller width
+                          child: TextField(
+                            controller: _otpController,
+                            maxLength: 4,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16), // Smaller font size
+                            decoration: InputDecoration(
+                              counterText: '',
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter OTP',
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 8.0), // Adjust padding
+                            ),
                           ),
                         ),
-                      ),
 
-                      SizedBox(height: 10),
+                        SizedBox(height: 10),
 
-                      // Dial Pad
-                      GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                        // Dial Pad
+                        GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
+                          itemCount: 12,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            return _buildDialButton(index);
+                          },
                         ),
-                        itemCount: 12,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return _buildDialButton(index);
-                        },
-                      ),
 
-                      SizedBox(height: 20),
+                        SizedBox(height: 20),
 
-                      // Send Again Text
-                      GestureDetector(
-                        onTap: _sendAgain,
-                        child: Text(
-                          'Send Again',
-                          style: TextStyle(
-                              color: Color(0xFFF30802),
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Poppins"),
+                        // Send Again Text
+                        GestureDetector(
+                          onTap: _sendAgain,
+                          child: Text(
+                            'Send Again',
+                            style: TextStyle(
+                                color: Color(0xFFF30802),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "Poppins"),
+                          ),
                         ),
-                      ),
 
-                      SizedBox(height: 20),
-                    ],
+                        SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: () {
-                if (isButtonEnabled) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignUpDash()));
-                }
-              },
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [
-                      AppColors.primaryBlack,
-                      AppColors.primaryRed
-                    ] // Active gradient
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
-                    ],
-            ),
-          ],
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: () {
+                  if (isButtonEnabled) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => SignUpDash()));
+                  }
+                },
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [
+                        AppColors.primaryBlack,
+                        AppColors.primaryRed
+                      ] // Active gradient
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -28,62 +28,64 @@ class _AccountRecoveryState extends State<AccountRecovery>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Account Recovery"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Account Recovery"),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            Column(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: [
-                    CustomInputField(
-                      placeholder: 'Your email address',
-                      controller: addressController,
-                      onChanged: (value) {
-                        setState(() {}); // Update state on email field change
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "we’ll email you with a link that will instantly recover your account",
-                  style: TextStyle(fontFamily: "Nunito", fontSize: 11),
-                ),
-              ],
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: () {
-                if (isButtonEnabled) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginDash()));
-                }
-              },
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [
-                      AppColors.primaryBlack,
-                      AppColors.primaryRed
-                    ] // Active gradient
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
+        body: Container(
+          child: Column(
+            children: [
+              Column(
+                // mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Column(
+                    children: [
+                      CustomInputField(
+                        placeholder: 'Your email address',
+                        controller: addressController,
+                        onChanged: (value) {
+                          setState(() {}); // Update state on email field change
+                        },
+                      ),
                     ],
-            ),
-          ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "we’ll email you with a link that will instantly recover your account",
+                    style: TextStyle(fontFamily: "Nunito", fontSize: 11),
+                  ),
+                ],
+              ),
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: () {
+                  if (isButtonEnabled) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LoginDash()));
+                  }
+                },
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [
+                        AppColors.primaryBlack,
+                        AppColors.primaryRed
+                      ] // Active gradient
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );

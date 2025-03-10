@@ -140,78 +140,83 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Add Photo",
-            style: TextStyle(
-                fontFamily: "Poppins",
-                fontSize: 16,
-                fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Add Photo",
+              style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Container(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(22.0),
+        body: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Container(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.center, // Centering horizontally
-                mainAxisSize: MainAxisSize
-                    .min, // To prevent Column from taking up more space than necessary
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Image.asset(
-                        'assets/images/addphoto.png',
-                        height: 200,
-                        fit: BoxFit.cover,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(22.0),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // Centering horizontally
+                  mainAxisSize: MainAxisSize
+                      .min, // To prevent Column from taking up more space than necessary
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: Image.asset(
+                          'assets/images/addphoto.png',
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  Text("Add your photo",
+                    Text("Add your photo",
+                        textAlign: TextAlign.center, // Centering text
+                        style: TextStyle(
+                            fontFamily: "Archivo",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20)),
+                    SizedBox(height: 10),
+                    Text(
+                      "Add your photo to be easily recognized via your profile",
                       textAlign: TextAlign.center, // Centering text
-                      style: TextStyle(
-                          fontFamily: "Archivo",
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20)),
-                  SizedBox(height: 10),
-                  Text(
-                    "Add your photo to be easily recognized via your profile",
-                    textAlign: TextAlign.center, // Centering text
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Spacer(),
-            ButtonGradientMain(
-                label: 'Add photos',
-                onPressed: () {
-                  _showUploadMethod(context);
+              Spacer(),
+              ButtonGradientMain(
+                  label: 'Add photos',
+                  onPressed: () {
+                    _showUploadMethod(context);
+                  },
+                  textColor: Colors.white,
+                  gradientColors: [
+                    AppColors.primaryBlack,
+                    AppColors.primaryRed
+                  ]),
+              SizedBox(height: 5),
+              GestureDetector(
+                onTap: () {
+                  handleSkip();
                 },
-                textColor: Colors.white,
-                gradientColors: [AppColors.primaryBlack, AppColors.primaryRed]),
-            SizedBox(height: 5),
-            GestureDetector(
-              onTap: () {
-                handleSkip();
-              },
-              child: Text(
-                "Skip",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            )
-          ],
-        )),
+                child: Text(
+                  "Skip",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              )
+            ],
+          )),
+        ),
       ),
     );
   }

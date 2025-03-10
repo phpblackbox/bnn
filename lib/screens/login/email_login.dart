@@ -40,134 +40,142 @@ class _EmailLogin extends State<EmailLogin>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Log IN button
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: const [
-                      AppColors.primaryBlack,
-                      AppColors.primaryRed
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: SizedBox(
-                  width: 80,
-                  height: 30,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: Colors.transparent,
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Log IN button
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: const [
+                        AppColors.primaryBlack,
+                        AppColors.primaryRed
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignUpDash()));
-                    },
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(fontSize: 12, color: Colors.white),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: SizedBox(
+                    width: 80,
+                    height: 30,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.transparent,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignUpDash()));
+                      },
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            // Logo image
-            SplashLogo(),
+              // Logo image
+              SplashLogo(),
 
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, _) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Email or username',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.black,
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Archivo',
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 10),
-                    Column(
-                      children: [
-                        CustomInputField(
-                          icon: Icons.email,
-                          placeholder: 'Email or username',
-                          controller: _emailController,
-                          onChanged: (value) {
-                            setState(() {});
-                          },
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Email or username',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                          decoration: TextDecoration.none,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Archivo',
                         ),
-                        SizedBox(height: 10),
-                        CustomInputField(
-                            icon: Icons.lock,
-                            placeholder: 'Password',
-                            isPassword: true,
-                            controller: _passwordController,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 10),
+                      Column(
+                        children: [
+                          CustomInputField(
+                            icon: Icons.email,
+                            placeholder: 'Email or username',
+                            controller: _emailController,
                             onChanged: (value) {
                               setState(() {});
-                            }),
-                        SizedBox(height: 16),
-                        ButtonGradientMain(
-                          label: 'Log in',
-                          onPressed: () async {
-                            if (isButtonEnabled) {
-                              bool success =
-                                  await authProvider.loginWithEmailAndPassword(
-                                _emailController.text,
-                                _passwordController.text,
-                                context,
-                              );
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          CustomInputField(
+                              icon: Icons.lock,
+                              placeholder: 'Password',
+                              isPassword: true,
+                              controller: _passwordController,
+                              onChanged: (value) {
+                                setState(() {});
+                              }),
+                          SizedBox(height: 16),
+                          
+                          ButtonGradientMain(
+                            label: 'Log in',
+                            onPressed: () async {
+                              if (isButtonEnabled) {
+                                bool success = await authProvider
+                                    .loginWithEmailAndPassword(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  context,
+                                );
 
-                              if (success) {
-                                CustomToast.showToastSuccessTop(
-                                    context, "Welcome to BNN");
-                              } else {
-                                if (authProvider.errorMessage != null) {
-                                  CustomToast.showToastWarningBottom(
-                                      context, authProvider.errorMessage!);
+                                if (success) {
+                                  CustomToast.showToastSuccessTop(
+                                      context, "Welcome to BNN");
                                 } else {
-                                  CustomToast.showToastDangerBottom(
-                                      context, 'An unexpected error occurred');
+                                  if (authProvider.errorMessage != null) {
+                                    CustomToast.showToastWarningBottom(
+                                        context, authProvider.errorMessage!);
+                                  } else {
+                                    CustomToast.showToastDangerBottom(context,
+                                        'An unexpected error occurred');
+                                  }
                                 }
                               }
-                            }
-                          },
-                          textColor: Colors.white,
-                          gradientColors: isButtonEnabled
-                              ? [AppColors.primaryBlack, AppColors.primaryRed]
-                              : [
-                                  AppColors.primaryRed.withOpacity(0.5),
-                                  AppColors.primaryBlack.withOpacity(0.5)
-                                ],
-                        ),
-                        if (authProvider.isLoading)
-                          const Center(child: CircularProgressIndicator()),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
+                            },
+                            textColor: Colors.white,
+                            gradientColors: isButtonEnabled
+                                ? [AppColors.primaryBlack, AppColors.primaryRed]
+                                : [
+                                    AppColors.primaryRed.withOpacity(0.5),
+                                    AppColors.primaryBlack.withOpacity(0.5)
+                                  ],
+                          ),
+                          SizedBox(height: 10),
+                          
+                          if (authProvider.isLoading)
+                            const Center(child: CircularProgressIndicator()),
 
-            BottomLogin(),
-          ],
+                          SizedBox(height: 10),
+
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+              BottomLogin(),
+            ],
+          ),
         ),
       ),
     );

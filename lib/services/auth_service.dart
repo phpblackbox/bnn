@@ -21,16 +21,27 @@ class AuthService {
   Future<UserModel?> nativeGoogleSignIn() async {
     final webClientId = dotenv.env['WEB_CLIENT_ID'] ?? '';
     final androidClientId = dotenv.env['ANDROID_CLIENT_ID'] ?? '';
+    final iOSClientId = dotenv.env['IOS_CLIENT_ID'] ?? '';
 
     try {
-      final googleSignIn = GoogleSignIn(
-        clientId: androidClientId,
-        serverClientId: webClientId,
-      );
+      GoogleSignIn googleSignIn;
+      if (Platform.isAndroid) {
+        googleSignIn = GoogleSignIn(
+          clientId: androidClientId,
+          serverClientId: webClientId,
+        );
+      } else if (Platform.isIOS) {
+        googleSignIn = GoogleSignIn(
+          clientId: iOSClientId,
+          serverClientId: webClientId,
+        );
+      } else {
+        throw 'Unsupported platform';
+      }
 
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        return null; // Or handle cancellation appropriately
+        return null;
       }
       final googleAuth = await googleUser.authentication;
       final accessToken = googleAuth.accessToken;

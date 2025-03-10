@@ -50,98 +50,100 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Profile",
-          style: TextStyle(fontFamily: "Archivo"),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Profile",
+            style: TextStyle(fontFamily: "Archivo"),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding:
-            const EdgeInsets.only(left: 32, top: 16, right: 32, bottom: 32),
-        child: Column(
-          children: [
-            Column(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Full name",
-                ),
-                SizedBox(height: 10),
-                Column(
-                  children: [
-                    CustomInputField(
-                      placeholder: 'First name',
-                      controller: firstnameController,
-                      onChanged: (value) {
-                        setState(() {}); // Update state on email field change
-                      },
-                    ),
-                    SizedBox(height: 10),
-                    CustomInputField(
-                      placeholder: 'Last name',
-                      controller: lastnameController,
-                      onChanged: (value) {
-                        setState(() {}); // Update state on email field change
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30),
-                Text(
-                  "Bio",
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  style: TextStyle(fontSize: 12.0, fontFamily: "Poppins"),
-                  maxLines: 5,
-                  controller: biocontroller,
-                  decoration: InputDecoration(
-                    hintText: "Create a short bio",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                      borderSide: BorderSide(color: Colors.transparent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                      borderSide: BorderSide(color: Colors.transparent),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                      borderSide: BorderSide(color: Colors.transparent),
-                    ),
-                    filled: true,
-                    fillColor: Color(0xFFEAEAEA),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+        body: Padding(
+          padding:
+              const EdgeInsets.only(left: 32, top: 16, right: 32, bottom: 32),
+          child: Column(
+            children: [
+              Column(
+                // mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Full name",
                   ),
-                ),
-              ],
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: _update,
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [
-                      AppColors.primaryBlack,
-                      AppColors.primaryRed
-                    ] // Active gradient
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
+                  SizedBox(height: 10),
+                  Column(
+                    children: [
+                      CustomInputField(
+                        placeholder: 'First name',
+                        controller: firstnameController,
+                        onChanged: (value) {
+                          setState(() {}); // Update state on email field change
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      CustomInputField(
+                        placeholder: 'Last name',
+                        controller: lastnameController,
+                        onChanged: (value) {
+                          setState(() {}); // Update state on email field change
+                        },
+                      ),
                     ],
-            ),
-          ],
+                  ),
+                  SizedBox(height: 30),
+                  Text(
+                    "Bio",
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    style: TextStyle(fontSize: 12.0, fontFamily: "Poppins"),
+                    maxLines: 5,
+                    controller: biocontroller,
+                    decoration: InputDecoration(
+                      hintText: "Create a short bio",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      filled: true,
+                      fillColor: Color(0xFFEAEAEA),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 10.0),
+                    ),
+                  ),
+                ],
+              ),
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: _update,
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [
+                        AppColors.primaryBlack,
+                        AppColors.primaryRed
+                      ] // Active gradient
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );
