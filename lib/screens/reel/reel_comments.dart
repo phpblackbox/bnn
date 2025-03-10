@@ -1,4 +1,5 @@
 import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/reel_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:bnn/utils/constants.dart';
@@ -346,7 +347,7 @@ class _ReelCommandsState extends State<ReelCommands> {
                     .select()
                     .single();
 
-                final nowString = await supabase.rpc('');
+                final nowString = await supabase.rpc('get_server_time');
                 DateTime now = DateTime.parse(nowString);
                 DateTime createdAt = DateTime.parse(res["created_at"]);
                 Duration difference = now.difference(createdAt);
@@ -399,6 +400,9 @@ class _ReelCommandsState extends State<ReelCommands> {
                     });
                   }
                 }
+
+                Provider.of<ReelProvider>(context, listen: false)
+                    .increaseCountComment();
 
                 _commentController.clear(); // Clear the input field
                 setState(() {

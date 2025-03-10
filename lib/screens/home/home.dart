@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:bnn/providers/auth_provider.dart';
-import 'package:bnn/screens/home/reels.dart';
 import 'package:bnn/screens/home/story_slider.dart';
 import 'package:bnn/widgets/sub/feed_or_reels.dart';
 import 'package:bnn/screens/home/header.dart';
@@ -71,7 +70,6 @@ class _HomeState extends State<Home> {
               FeedOrReel(index: _feedorReels, onPressed: _onFeedOrReel),
               StorySlider(),
               if (_feedorReels == 0) Posts(),
-              if (_feedorReels == 1) Reels(),
             ],
           ),
         ),

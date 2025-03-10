@@ -188,11 +188,9 @@ class _OnePostState extends State<OnePost> {
                   children: [
                     Row(
                       children: [
-                        Image.network(
-                          post!['avatar'],
-                          fit: BoxFit.fill,
-                          width: 70,
-                          height: 70,
+                        CircleAvatar(
+                          radius: 35,
+                          backgroundImage: NetworkImage(post!['avatar']),
                         ),
                         SizedBox(width: 6),
                         Column(

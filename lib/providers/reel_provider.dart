@@ -54,6 +54,12 @@ class ReelProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> increaseCountComment() async {
+    currentReel!.comments += 1;
+    print('count of comments ${currentReel!.comments}');
+    notifyListeners();
+  }
+
   Future<void> nextStep() async {
     currentReelId = nextReelId;
     currentReel = nextReel;
@@ -87,35 +93,6 @@ class ReelProvider extends ChangeNotifier {
       }).catchError((error) {
         print("Error initializing video: $error");
       });
-
-      // controller = VlcPlayerController.network(
-      //   Uri.parse(currentReel.videoUrl).toString(),
-      //   hwAcc: HwAcc.full,
-      //   autoPlay: true,
-      //   options: VlcPlayerOptions(),
-      // );
-
-      // initializeVideoPlayerFuture = controller!.initialize().then((_) {
-      //   controller!.setLooping(true);
-      //   controller!.play();
-      //   notifyListeners();
-      // });
-
-      // print(initializeVideoPlayerFuture);
-
-      // controller!.addOnInitListener(() async {
-      //   controller!.startRendererScanning();
-      // });
-
-      // controller!.addListener(() async {
-      //   if (controller!.value.isEnded) {
-      //     controller!.stop();
-      //     controller!.play();
-      //   }
-
-      //   notifyListeners();
-      // });
-      // }
     } else {
       print("Video URL is not available");
     }
