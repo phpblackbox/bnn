@@ -28,70 +28,73 @@ class _CreateUserNameState extends State<CreateUserName> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Create Username",
-          style: TextStyle(fontFamily: "Archivo"),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Create Username",
+            style: TextStyle(fontFamily: "Archivo"),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: [
-                    CustomInputField(
-                      placeholder: 'Create your username',
-                      controller: usernameController,
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: () async {
-                try {
-                  if (isButtonEnabled) {
-                    final profile = {'username': usernameController.text};
-                    await authProvider.createProfile();
-                    await authProvider.setProfile(profile);
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Gender()),
-                    );
-                  }
-                } catch (error) {
-                  print(error);
-                  CustomToast.showToastWarningBottom(context, error.toString());
-                }
-              },
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [AppColors.primaryBlack, AppColors.primaryRed]
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
+        body: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Column(
+                    children: [
+                      CustomInputField(
+                        placeholder: 'Create your username',
+                        controller: usernameController,
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
                     ],
-            ),
-          ],
+                  ),
+                ],
+              ),
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: () async {
+                  try {
+                    if (isButtonEnabled) {
+                      final profile = {'username': usernameController.text};
+                      await authProvider.createProfile();
+                      await authProvider.setProfile(profile);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Gender()),
+                      );
+                    }
+                  } catch (error) {
+                    print(error);
+                    CustomToast.showToastWarningBottom(
+                        context, error.toString());
+                  }
+                },
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -48,69 +48,71 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "My age is",
-          style: TextStyle(fontFamily: "Archivo"),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "My age is",
+            style: TextStyle(fontFamily: "Archivo"),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Container(
-          child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              children: <Widget>[
-                SizedBox(
-                  width: 150.0,
-                  child: TextButton(
-                    child: const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Your age',
-                        style: TextStyle(fontSize: 16, color: Colors.black),
+        body: Container(
+            child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: 150.0,
+                    child: TextButton(
+                      child: const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Your age',
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                      ),
+                      onPressed: () => showMaterialNumberPicker(
+                        context: context,
+                        title: 'Select Your Age',
+                        maxNumber: 100,
+                        minNumber: 15,
+                        selectedNumber: age,
+                        onChanged: (value) => setState(() => age = value),
                       ),
                     ),
-                    onPressed: () => showMaterialNumberPicker(
-                      context: context,
-                      title: 'Select Your Age',
-                      maxNumber: 100,
-                      minNumber: 15,
-                      selectedNumber: age,
-                      onChanged: (value) => setState(() => age = value),
+                  ),
+                  Expanded(
+                    child: Text(
+                      age.toString(),
+                      textAlign: TextAlign.right,
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    age.toString(),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Spacer(),
-          ButtonGradientMain(
-            label: 'Continue',
-            onPressed: _update,
-            textColor: Colors.white,
-            gradientColors: isButtonEnabled
-                ? [AppColors.primaryBlack, AppColors.primaryRed]
-                : [
-                    AppColors.primaryRed.withOpacity(0.5),
-                    AppColors.primaryBlack.withOpacity(0.5)
-                  ],
-          ),
-        ],
-      )),
+            Spacer(),
+            ButtonGradientMain(
+              label: 'Continue',
+              onPressed: _update,
+              textColor: Colors.white,
+              gradientColors: isButtonEnabled
+                  ? [AppColors.primaryBlack, AppColors.primaryRed]
+                  : [
+                      AppColors.primaryRed.withOpacity(0.5),
+                      AppColors.primaryBlack.withOpacity(0.5)
+                    ],
+            ),
+          ],
+        )),
+      ),
     );
   }
 }

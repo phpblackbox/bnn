@@ -38,96 +38,99 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    return Scaffold(
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SplashLogo(),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              // crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'I am a ',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontFamily: "Archivo",
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => selectGender('man'), // Select Man
-                      child: Image.asset(
-                        selectedGender == 'man'
-                            ? 'assets/images/gender_man_select.png'
-                            : 'assets/images/gender_man.png',
-                        width: 150,
-                        height: 150,
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              SplashLogo(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'I am a ',
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontFamily: "Archivo",
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => selectGender('man'), // Select Man
+                        child: Image.asset(
+                          selectedGender == 'man'
+                              ? 'assets/images/gender_man_select.png'
+                              : 'assets/images/gender_man.png',
+                          width: 150,
+                          height: 150,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: () => selectGender('woman'), // Select Woman
-                      child: Image.asset(
-                        selectedGender == 'woman'
-                            ? 'assets/images/gender_woman_select.png'
-                            : 'assets/images/gender_woman.png',
-                        width: 150,
-                        height: 150,
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () => selectGender('woman'), // Select Woman
+                        child: Image.asset(
+                          selectedGender == 'woman'
+                              ? 'assets/images/gender_woman_select.png'
+                              : 'assets/images/gender_woman.png',
+                          width: 150,
+                          height: 150,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: () async {
-                try {
-                  if (isButtonEnabled) {
-                    int gender = 0;
-                    switch (selectedGender) {
-                      case "no_gender":
-                        gender = 0;
-                        break;
-                      case "man":
-                        gender = 1;
-                        break;
-                      case "woman":
-                        gender = 2;
-                        break;
-                    }
-
-                    final profile = {'gender': gender};
-
-                    await authProvider.setProfile(profile);
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Profile()),
-                    );
-                  }
-                } catch (error) {
-                  print(error);
-                  CustomToast.showToastWarningBottom(context, error.toString());
-                }
-              },
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [AppColors.primaryBlack, AppColors.primaryRed]
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
                     ],
-            ),
-          ],
+                  ),
+                ],
+              ),
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: () async {
+                  try {
+                    if (isButtonEnabled) {
+                      int gender = 0;
+                      switch (selectedGender) {
+                        case "no_gender":
+                          gender = 0;
+                          break;
+                        case "man":
+                          gender = 1;
+                          break;
+                        case "woman":
+                          gender = 2;
+                          break;
+                      }
+
+                      final profile = {'gender': gender};
+
+                      await authProvider.setProfile(profile);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Profile()),
+                      );
+                    }
+                  } catch (error) {
+                    print(error);
+                    CustomToast.showToastWarningBottom(
+                        context, error.toString());
+                  }
+                },
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );

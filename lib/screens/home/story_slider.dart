@@ -30,7 +30,7 @@ class _StorySliderState extends State<StorySlider> {
     return Padding(
       padding: EdgeInsets.all(1.0),
       child: SizedBox(
-        height: 110,
+        height: 100,
         child: Skeletonizer(
           enabled: storyProvider.loading,
           enableSwitchAnimation: true,

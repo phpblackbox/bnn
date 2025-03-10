@@ -52,70 +52,72 @@ class _SetupPassowrd extends State<SetupPassowrd>
   Widget build(BuildContext context) {
     // Start a timer to navigate to the next page after 3 seconds
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Setup Password",
-          style: TextStyle(fontFamily: "Archivo"),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Setup Password",
+            style: TextStyle(fontFamily: "Archivo"),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back), // Back arrow icon
+            onPressed: () {
+              Navigator.pop(context); // Go back to the previous screen
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back), // Back arrow icon
-          onPressed: () {
-            Navigator.pop(context); // Go back to the previous screen
-          },
-        ),
-      ),
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SlideTransition(
-              position: _slideAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Column(
-                      children: [
-                        CustomInputField(
-                          placeholder: 'Type your password',
-                          controller: passwordController,
-                          isPassword: true,
-                          onChanged: (value) {
-                            setState(
-                                () {}); // Update state on email field change
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+        body: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Column(
+                        children: [
+                          CustomInputField(
+                            placeholder: 'Type your password',
+                            controller: passwordController,
+                            isPassword: true,
+                            onChanged: (value) {
+                              setState(
+                                  () {}); // Update state on email field change
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Spacer(),
-            ButtonGradientMain(
-              label: 'Continue',
-              onPressed: () {
-                if (isButtonEnabled) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Gender()));
-                }
-              },
-              textColor: Colors.white,
-              gradientColors: isButtonEnabled
-                  ? [
-                      AppColors.primaryBlack,
-                      AppColors.primaryRed
-                    ] // Active gradient
-                  : [
-                      AppColors.primaryRed.withOpacity(0.5),
-                      AppColors.primaryBlack.withOpacity(0.5)
-                    ],
-            ),
-          ],
+              Spacer(),
+              ButtonGradientMain(
+                label: 'Continue',
+                onPressed: () {
+                  if (isButtonEnabled) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Gender()));
+                  }
+                },
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled
+                    ? [
+                        AppColors.primaryBlack,
+                        AppColors.primaryRed
+                      ] // Active gradient
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
+          ),
         ),
       ),
     );
