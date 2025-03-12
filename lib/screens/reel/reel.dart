@@ -26,22 +26,18 @@ class _ReelScreenState extends State<ReelScreen>
   // late VlcPlayerController _controller;
 
   // final ReelProvider _provider = ReelProvider();
-
+  ReelProvider? _reelProvider;
   @override
   void initState() {
     super.initState();
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   _controller = VlcPlayerController.network(
-    //     "https://firebasestorage.googleapis.com/v0/b/testvideo-91d3a.appspot.com/o/4.mp4?alt=media&token=517ad60c-ca28-400e-ab46-49fb8c122d75",
-    //     hwAcc: HwAcc.full,
-    //     autoPlay: true,
-    //     options: VlcPlayerOptions(),
-    //   );
-    //   await _controller.initialize();
-    //   _provider.controller = _controller;
-    //   _provider.loadVideo(_provider.currentReel!);
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final reelProvider = Provider.of<ReelProvider>(context, listen: false);
+
+      if (reelProvider.currentReel != null) {
+        reelProvider.loadVideo(reelProvider.currentReel!);
+      }
+    });
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -58,9 +54,19 @@ class _ReelScreenState extends State<ReelScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reelProvider = Provider.of<ReelProvider>(context, listen: false);
+  }
+
+  @override
   void dispose() {
     _animationController.dispose();
-    // Provider.of<ReelProvider>(context, listen: false).disposeController();
+
+    _reelProvider?.close();
+
+    print("3");
+
     super.dispose();
   }
 

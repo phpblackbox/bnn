@@ -20,7 +20,10 @@ class ReelProvider extends ChangeNotifier {
   Future<void>? initializeVideoPlayerFuture;
 
   ReelProvider({int? initialReelId}) {
-    initialize(initialReelId);
+    print("init");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initialize(initialReelId);
+    });
   }
 
   Future<void> initialize(int? initialReelId) async {
@@ -65,7 +68,13 @@ class ReelProvider extends ChangeNotifier {
     currentReel = nextReel;
     await loadVideo(currentReel!);
 
-    final randomReelId = await reelService.getRandomReelId();
+    int randomReelId;
+    do {
+      randomReelId = await reelService.getRandomReelId();
+    } while (randomReelId == currentReelId);
+
+    print(randomReelId);
+    print(currentReelId);
 
     final temp = await reelService.getReelById(randomReelId);
     if (temp != null) {
@@ -75,7 +84,17 @@ class ReelProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> close() async {
+    if (controller != null && controller!.value.isInitialized) {
+      await controller?.dispose();
+    }
+    controller = null;
+    initializeVideoPlayerFuture = null;
+    // notifyListeners();
+  }
+
   Future<void> loadVideo(ReelModel currentReel) async {
+    print("load video");
     if (controller != null) {
       await controller?.dispose();
     }
