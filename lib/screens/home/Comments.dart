@@ -81,103 +81,140 @@ class _CommentsModalState extends State<CommentsModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: NetworkImage(comment["profiles"]['avatar']),
-              backgroundColor: Colors.transparent,
-            ),
-            SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Text(
-                      comment['name']!,
-                      style: TextStyle(
-                        color: Color(0xFF8A8B8F),
-                        fontFamily: "Nunito",
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 3),
-                    Text(
-                      comment['time']!,
-                      style: TextStyle(
-                        color: Color(0xFF8A8B8F),
-                        fontFamily: "Nunito",
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ]),
-                  SizedBox(height: 6),
-                  Row(children: [
-                    Text(
-                      comment['content'],
-                      style: TextStyle(
-                        color: Color(0xFF151923),
-                        fontSize: 12,
-                        fontFamily: 'Nunito',
-                        fontWeight: FontWeight.w400,
-                        height: 1.37,
-                      ),
-                    ),
-                    SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () {
-                        postCommentProvider.parentId = comment["id"];
-                        commentFocusNode.requestFocus();
-                      },
-                      child: Text(
-                        'Reply',
+        GestureDetector(
+          onLongPress: () {
+            final me =
+                Provider.of<AuthProvider>(context, listen: false).profile!;
+            me.id == comment['author_id']
+                ? showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: const Text(
+                            'Are you sure you want to remove this comment?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Close'),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            onPressed: () async {
+                              await postCommentProvider.deleteComment(
+                                  comment['id'], widget.postId);
+
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Remove'),
+                          ),
+                        ],
+                      );
+                    },
+                  )
+                : null;
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundImage: NetworkImage(comment["profiles"]['avatar']),
+                backgroundColor: Colors.transparent,
+              ),
+              SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Text(
+                        comment['name']!,
                         style: TextStyle(
-                          color: Color(0xFF939292),
-                          fontSize: 10,
+                          color: Color(0xFF8A8B8F),
+                          fontFamily: "Nunito",
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Text(
+                        comment['time']!,
+                        style: TextStyle(
+                          color: Color(0xFF8A8B8F),
+                          fontFamily: "Nunito",
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ]),
+                    SizedBox(height: 6),
+                    Row(children: [
+                      Text(
+                        comment['content'],
+                        style: TextStyle(
+                          color: Color(0xFF151923),
+                          fontSize: 12,
                           fontFamily: 'Nunito',
                           fontWeight: FontWeight.w400,
+                          height: 1.37,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: () {
+                          postCommentProvider.parentId = comment["id"];
+                          commentFocusNode.requestFocus();
+                        },
+                        child: Text(
+                          'Reply',
+                          style: TextStyle(
+                            color: Color(0xFF939292),
+                            fontSize: 10,
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ]),
+                    SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () => postCommentProvider.toggleChildComments(
+                          widget.postId, comment['id'].toString()),
+                      child: Text(
+                        isExpanded ? 'Hide Replies' : 'View more replies',
+                        style: TextStyle(
+                          color: Color(0xFF8A8B8F),
+                          fontSize: 10,
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ]),
-                  SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: () => postCommentProvider.toggleChildComments(
-                        widget.postId, comment['id'].toString()),
-                    child: Text(
-                      isExpanded ? 'Hide Replies' : 'View more replies',
-                      style: TextStyle(
-                        color: Color(0xFF8A8B8F),
-                        fontSize: 10,
-                        fontFamily: 'Nunito',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                ],
+                    SizedBox(height: 8),
+                  ],
+                ),
               ),
-            ),
-            GestureDetector(
-              onTap: () async {
-                final bool status =
-                    await postCommentProvider.togglePostLike(comment['id']);
-                if (status) comment['likes']--;
-                if (!status) comment['likes']++;
-              },
-              child: Column(
-                children: [
-                  Icon(Icons.favorite_outline, color: Color(0xFF8A8B8F)),
-                  Text(comment['likes'].toString(),
-                      style: TextStyle(color: Color(0xFF8A8B8F))),
-                ],
+              GestureDetector(
+                onTap: () async {
+                  final bool status =
+                      await postCommentProvider.togglePostLike(comment['id']);
+                  if (status) comment['likes']--;
+                  if (!status) comment['likes']++;
+                },
+                child: Column(
+                  children: [
+                    Icon(Icons.favorite_outline, color: Color(0xFF8A8B8F)),
+                    Text(comment['likes'].toString(),
+                        style: TextStyle(color: Color(0xFF8A8B8F))),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (isExpanded && childComments != null && childComments.isNotEmpty)
           Padding(

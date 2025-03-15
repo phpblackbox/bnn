@@ -38,7 +38,12 @@ Future<void> main() async {
             if (postCommentProvider.isSentMsg) {
               postProvider?.increaseCountComment(postCommentProvider.postId);
               postCommentProvider.isSentMsg = false;
-            } else {}
+            }
+
+            if (postCommentProvider.isDeleteMsg) {
+              postProvider?.deleteCountComment(postCommentProvider.postId);
+              postCommentProvider.isDeleteMsg = false;
+            }
             return postProvider!;
           },
         ),

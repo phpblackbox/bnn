@@ -22,6 +22,12 @@ class PostCommentProvider extends ChangeNotifier {
     _isSentMsg = value;
   }
 
+  bool _isDeleteMsg = false;
+  bool get isDeleteMsg => _isDeleteMsg;
+  set isDeleteMsg(bool value) {
+    _isDeleteMsg = value;
+  }
+
   int _postId = 0;
   int get postId => _postId;
   set postId(int value) {
@@ -126,6 +132,31 @@ class PostCommentProvider extends ChangeNotifier {
     parentId = 0;
     isSentMsg = true;
     this.postId = postId;
+    notifyListeners();
+  }
+
+  Future<void> deleteComment(int commentId, int postId) async {
+    await _postService.deleteComment(commentId);
+
+    _parentComments.removeWhere((comment) => comment['id'] == commentId);
+
+    for (var key in _childCommentsMap.keys) {
+      final value = _childCommentsMap[key];
+      final updatedChildComments =
+          value!.where((comment) => comment['id'] != commentId).toList();
+      if (updatedChildComments.isEmpty) {
+        _childCommentsMap.remove(key);
+        _expandedComments.removeWhere((element) => element == key);
+
+        break;
+      } else {
+        _childCommentsMap[key] = updatedChildComments;
+      }
+    }
+
+    this.postId = postId;
+    isDeleteMsg = true;
+
     notifyListeners();
   }
 }

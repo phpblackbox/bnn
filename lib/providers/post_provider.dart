@@ -59,6 +59,15 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteCountComment(int postId) async {
+    posts?.forEach((post) {
+      if (post['id'] == postId) {
+        post['comments'] -= 1;
+      }
+    });
+    notifyListeners();
+  }
+
   Future<void> newPost(
       BuildContext context, List<XFile> _selectedImages, String content) async {
     if (_selectedImages.isNotEmpty) {

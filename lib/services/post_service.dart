@@ -300,4 +300,19 @@ class PostService {
       'img_urls': imgUrls,
     });
   }
+
+  Future<void> deleteComment(int commentId) async {
+    try {
+      final response =
+          await _supabase.from('post_comments').delete().eq('id', commentId);
+
+      if (response.error != null) {
+        print('Error deleting comment: ${response.error}');
+      } else {
+        print('Comment deleted successfully');
+      }
+    } catch (e) {
+      print('Error deleting comment: $e');
+    }
+  }
 }

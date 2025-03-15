@@ -59,7 +59,11 @@ class ReelProvider extends ChangeNotifier {
 
   Future<void> increaseCountComment() async {
     currentReel!.comments += 1;
-    print('count of comments ${currentReel!.comments}');
+    notifyListeners();
+  }
+
+  Future<void> decreaseCountComment() async {
+    currentReel!.comments -= 1;
     notifyListeners();
   }
 
