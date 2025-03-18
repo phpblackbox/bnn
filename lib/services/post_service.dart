@@ -12,9 +12,9 @@ class PostService {
     return data;
   }
 
-  Future<List<dynamic>> getPosts() async {
-    return await _supabase.from('view_posts').select();
-  }
+  // Future<List<dynamic>> getPosts() async {
+  //   return await _supabase.from('view_posts').select();
+  // }
 
   Future<List<dynamic>> getPostsBookmarkByUserId(String? userId) async {
     return await _supabase.rpc('get_post_bookmarks_by_author', params: {
@@ -28,74 +28,73 @@ class PostService {
     });
   }
 
-  Future<List<dynamic>> getCustomePosts(
-      {String? userId, bool? bookmark, String? currentUserId}) async {
-    try {
-      List<dynamic> posts = [];
-      List<Map<String, dynamic>> data = [];
+  Future<List<dynamic>> getPostsInfo(List<dynamic> posts) async {
+    if (posts.isNotEmpty) {
+      for (int i = 0; i < posts.length; i++) {
+        dynamic res =
+            await _supabase.rpc('get_count_post_likes_by_postid', params: {
+                  'param_post_id': posts[i]["id"],
+                }) ??
+                0;
 
-      if (bookmark == true) {
-        data = await _supabase.rpc('get_post_bookmarks_by_author', params: {
-          'param_user_id': currentUserId,
+        posts[i]["likes"] = res;
+
+        res =
+            await _supabase.rpc('get_count_post_bookmarks_by_postid', params: {
+          'param_post_id': posts[i]["id"],
         });
 
-        await _supabase.rpc('get_post_bookmarks_by_author', params: {
-          'param_user_id': currentUserId,
+        posts[i]["bookmarks"] = res;
+
+        res = await _supabase.rpc('get_count_post_comments_by_postid', params: {
+          'param_post_id': posts[i]["id"],
+        });
+
+        posts[i]["comments"] = res;
+        posts[i]["share"] = 2;
+        posts[i]['name'] = '${posts[i]["first_name"]} ${posts[i]["last_name"]}';
+
+        final nowString = await _supabase.rpc('get_server_time');
+        DateTime now = DateTime.parse(nowString);
+        DateTime createdAt = DateTime.parse(posts[i]["created_at"]);
+        Duration difference = now.difference(createdAt);
+        posts[i]["time"] = Constants().formatDuration(difference);
+      }
+    }
+    return posts;
+  }
+
+  Future<List<dynamic>> getPosts(
+      {required int offset,
+      required int limit,
+      String? userId,
+      bool? bookmark,
+      String? currentUserId}) async {
+    List<dynamic> posts = [];
+    List<Map<String, dynamic>> data = [];
+
+    if (bookmark == true) {
+      data = await _supabase.rpc('get_post_bookmarks_by_author', params: {
+        'param_user_id': currentUserId,
+        'limit_value': limit,
+        'offset_value': offset,
+      });
+    } else {
+      if (userId != null) {
+        data = await _supabase.rpc('get_posts_by_userid', params: {
+          'param_user_id': userId,
+          'limit_value': limit,
+          'offset_value': offset,
         });
       } else {
-        if (userId != null) {
-          data = await _supabase.rpc('get_posts_by_userid', params: {
-            'param_user_id': userId,
-          });
-        } else {
-          data = await _supabase.from('view_posts').select();
-        }
+        data = await _supabase.rpc('get_posts', params: {
+          'limit_value': limit,
+          'offset_value': offset,
+        });
       }
-
-      if (data.isNotEmpty) {
-        posts = data;
-        for (int i = 0; i < posts.length; i++) {
-          dynamic res =
-              await _supabase.rpc('get_count_post_likes_by_postid', params: {
-                    'param_post_id': posts[i]["id"],
-                  }) ??
-                  0;
-
-          posts[i]["likes"] = res;
-
-          res = await _supabase
-              .rpc('get_count_post_bookmarks_by_postid', params: {
-            'param_post_id': posts[i]["id"],
-          });
-
-          posts[i]["bookmarks"] = res;
-
-          res =
-              await _supabase.rpc('get_count_post_comments_by_postid', params: {
-            'param_post_id': posts[i]["id"],
-          });
-
-          posts[i]["comments"] = res;
-          posts[i]["share"] = 2;
-          posts[i]['name'] =
-              '${posts[i]["first_name"]} ${posts[i]["last_name"]}';
-
-          final nowString = await _supabase.rpc('get_server_time');
-          DateTime now = DateTime.parse(nowString);
-          DateTime createdAt = DateTime.parse(posts[i]["created_at"]);
-          Duration difference = now.difference(createdAt);
-          posts[i]["time"] = Constants().formatDuration(difference);
-        }
-      }
-      return posts;
-    } catch (e) {
-      print('Caught error: $e');
-      if (e.toString().contains("JWT expired")) {
-        // Handle JWT expiration (e.g., sign out, navigate to login)
-        return Future.error(e); // Re-throw the error for the provider to handle
-      }
-      return Future.error(e); // Re-throw other errors
     }
+    posts = data;
+    return posts;
   }
 
   Future<List<dynamic>> getParentComments(int postId) async {

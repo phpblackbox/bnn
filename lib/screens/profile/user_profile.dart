@@ -131,367 +131,707 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: _loading
-              ? Center(child: CircularProgressIndicator())
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Column(
-                          children: [
-                            Stack(
-                              children: <Widget>[
-                                Container(
-                                  width: double.infinity,
-                                  height: 350,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    image: DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: NetworkImage(data["avatar"]),
+    return Scaffold(
+      body: _loading
+          ? Center(child: CircularProgressIndicator())
+          :
+          // ListView(
+          //     children: [
+          //       Container(
+          //         decoration: BoxDecoration(
+          //           color: Colors.white,
+          //           borderRadius: BorderRadius.circular(16),
+          //         ),
+          //         child: ClipRRect(
+          //           borderRadius: BorderRadius.circular(16),
+          //           child: Column(
+          //             children: [
+          //               Stack(
+          //                 children: <Widget>[
+          //                   Container(
+          //                     width: double.infinity,
+          //                     height: 350,
+          //                     decoration: BoxDecoration(
+          //                       color: Colors.transparent,
+          //                       image: DecorationImage(
+          //                         fit: BoxFit.fill,
+          //                         image: NetworkImage(data["avatar"]),
+          //                       ),
+          //                     ),
+          //                   ),
+          //                   Container(
+          //                     width: double.infinity,
+          //                     height: 350,
+          //                     decoration: BoxDecoration(
+          //                       color: Colors.white,
+          //                       gradient: LinearGradient(
+          //                         begin: FractionalOffset.topCenter,
+          //                         end: FractionalOffset.bottomCenter,
+          //                         colors: [
+          //                           Colors.transparent,
+          //                           Colors.white.withOpacity(1),
+          //                         ],
+          //                         stops: [0.5, 1.0],
+          //                       ),
+          //                     ),
+          //                   ),
+          //                   Positioned(
+          //                     top: 8,
+          //                     left: 8,
+          //                     child: IconButton(
+          //                       icon:
+          //                           Icon(Icons.close, color: Color(0xFF4D4C4A)),
+          //                       onPressed: () {
+          //                         Navigator.pop(context);
+          //                       },
+          //                     ),
+          //                   ),
+          //                   Positioned(
+          //                     bottom: 0,
+          //                     left: 8,
+          //                     child: Skeletonizer(
+          //                       enabled: _loading,
+          //                       enableSwitchAnimation: true,
+          //                       child: Row(
+          //                         mainAxisAlignment:
+          //                             MainAxisAlignment.spaceAround,
+          //                         children: [
+          //                           Text(
+          //                             data["username"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 26,
+          //                               fontFamily: 'Roboto',
+          //                               fontWeight: FontWeight.w400,
+          //                               height: 1.06,
+          //                               letterSpacing: 1,
+          //                             ),
+          //                           ),
+          //                           SizedBox(width: 5, height: 15),
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/verified.png'),
+          //                             color: Colors.red,
+          //                             size: 16.0,
+          //                           ),
+          //                           SizedBox(width: 35),
+          //                           Row(children: [
+          //                             Column(
+          //                               children: [
+          //                                 Text(
+          //                                   'Posts',
+          //                                   style: TextStyle(
+          //                                     color: Color(0xFF4D4C4A),
+          //                                     fontSize: 14,
+          //                                     fontFamily: 'Poppins',
+          //                                     fontWeight: FontWeight.w400,
+          //                                   ),
+          //                                 ),
+          //                                 SizedBox(height: 10),
+          //                                 Text(
+          //                                   data["posts"].toString(),
+          //                                   style: TextStyle(
+          //                                     color: Color(0xFF4D4C4A),
+          //                                     fontSize: 20,
+          //                                     fontFamily: 'Poppins',
+          //                                     fontWeight: FontWeight.w700,
+          //                                   ),
+          //                                 )
+          //                               ],
+          //                             ),
+          //                             SizedBox(width: 10),
+          //                             GestureDetector(
+          //                               onTap: () {
+          //                                 Navigator.push(
+          //                                     context,
+          //                                     MaterialPageRoute(
+          //                                         builder: (context) =>
+          //                                             ProfileFollowers(
+          //                                               userId: data["id"],
+          //                                             )));
+          //                               },
+          //                               child: Column(
+          //                                 children: [
+          //                                   Text(
+          //                                     'Followers',
+          //                                     style: TextStyle(
+          //                                       color: Color(0xFF4D4C4A),
+          //                                       fontSize: 14,
+          //                                       fontFamily: 'Poppins',
+          //                                       fontWeight: FontWeight.w400,
+          //                                     ),
+          //                                   ),
+          //                                   SizedBox(height: 10),
+          //                                   Text(
+          //                                     formatWithCommas(
+          //                                             data["followers"])
+          //                                         .toString(),
+          //                                     style: TextStyle(
+          //                                       color: Color(0xFF4D4C4A),
+          //                                       fontSize: 20,
+          //                                       fontFamily: 'Poppins',
+          //                                       fontWeight: FontWeight.w700,
+          //                                     ),
+          //                                   ),
+          //                                 ],
+          //                               ),
+          //                             ),
+          //                             SizedBox(width: 10),
+          //                             Column(
+          //                               children: [
+          //                                 Text(
+          //                                   'Views',
+          //                                   style: TextStyle(
+          //                                     color: Color(0xFF4D4C4A),
+          //                                     fontSize: 14,
+          //                                     fontFamily: 'Poppins',
+          //                                     fontWeight: FontWeight.w400,
+          //                                   ),
+          //                                 ),
+          //                                 SizedBox(height: 10),
+          //                                 Text(
+          //                                   data["views"].toString(),
+          //                                   style: TextStyle(
+          //                                     color: Color(0xFF4D4C4A),
+          //                                     fontSize: 20,
+          //                                     fontFamily: 'Poppins',
+          //                                     fontWeight: FontWeight.w700,
+          //                                   ),
+          //                                 )
+          //                               ],
+          //                             ),
+          //                             SizedBox(width: 10),
+          //                           ]),
+          //                         ],
+          //                       ),
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //       ),
+
+          //       // about and ...
+          //       Container(
+          //         padding: EdgeInsets.all(8),
+          //         child: Column(
+          //             mainAxisAlignment: MainAxisAlignment.start,
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Column(
+          //                 mainAxisAlignment: MainAxisAlignment.start,
+          //                 crossAxisAlignment: CrossAxisAlignment.start,
+          //                 children: [
+          //                   SizedBox(height: 8),
+          //                   Text(
+          //                     'ABOUT',
+          //                     style: TextStyle(
+          //                       color: Color(0xFF4D4C4A),
+          //                       fontSize: 14,
+          //                       fontFamily: 'Abel',
+          //                       fontWeight: FontWeight.w400,
+          //                     ),
+          //                   ),
+          //                   SizedBox(height: 8),
+          //                   Text(
+          //                     data['bio'],
+          //                     style: TextStyle(
+          //                       color: Color(0xFF4D4C4A),
+          //                       fontSize: 12,
+          //                       fontFamily: 'Abel',
+          //                       fontWeight: FontWeight.w400,
+          //                       height: 1.50,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               SizedBox(height: 10),
+          //               Row(
+          //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //                 crossAxisAlignment: CrossAxisAlignment.center,
+          //                 children: [
+          //                   Column(
+          //                     mainAxisAlignment: MainAxisAlignment.start,
+          //                     crossAxisAlignment: CrossAxisAlignment.start,
+          //                     children: [
+          //                       Row(
+          //                         children: [
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/speedometer.png'),
+          //                             size: 22.0,
+          //                             color: Color(0xFF4D4C4A),
+          //                           ),
+          //                           SizedBox(width: 8),
+          //                           Text(
+          //                             data["age"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 12,
+          //                               fontFamily: 'Abel',
+          //                               fontWeight: FontWeight.w400,
+          //                             ),
+          //                           )
+          //                         ],
+          //                       ),
+          //                       SizedBox(height: 4),
+          //                       Row(
+          //                         children: [
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/heart.png'),
+          //                             size: 22.0,
+          //                             color: Color(0xFF4D4C4A),
+          //                           ),
+          //                           SizedBox(width: 8),
+          //                           Text(
+          //                             data["marital"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 12,
+          //                               fontFamily: 'Abel',
+          //                               fontWeight: FontWeight.w400,
+          //                             ),
+          //                           )
+          //                         ],
+          //                       ),
+          //                       SizedBox(height: 4),
+          //                       Row(
+          //                         children: [
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/flag.png'),
+          //                             size: 22.0,
+          //                             color: Color(0xFF4D4C4A),
+          //                           ),
+          //                           SizedBox(width: 8),
+          //                           Text(
+          //                             data["nationality"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 12,
+          //                               fontFamily: 'Abel',
+          //                               fontWeight: FontWeight.w400,
+          //                             ),
+          //                           )
+          //                         ],
+          //                       ),
+          //                       SizedBox(height: 4),
+          //                       Row(
+          //                         children: [
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/location.png'),
+          //                             size: 22.0,
+          //                             color: Color(0xFF4D4C4A),
+          //                           ),
+          //                           SizedBox(width: 8),
+          //                           Text(
+          //                             data["location"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 12,
+          //                               fontFamily: 'Abel',
+          //                               fontWeight: FontWeight.w400,
+          //                             ),
+          //                           )
+          //                         ],
+          //                       ),
+          //                       SizedBox(height: 4),
+          //                       Row(
+          //                         children: [
+          //                           ImageIcon(
+          //                             AssetImage(
+          //                                 'assets/images/icons/content.png'),
+          //                             size: 22.0,
+          //                             color: Color(0xFF4D4C4A),
+          //                           ),
+          //                           SizedBox(width: 8),
+          //                           Text(
+          //                             data["content"],
+          //                             style: TextStyle(
+          //                               color: Color(0xFF4D4C4A),
+          //                               fontSize: 12,
+          //                               fontFamily: 'Abel',
+          //                               fontWeight: FontWeight.w400,
+          //                             ),
+          //                           )
+          //                         ],
+          //                       )
+          //                     ],
+          //                   ),
+          //                   Column(
+          //                     mainAxisAlignment: MainAxisAlignment.center,
+          //                     crossAxisAlignment: CrossAxisAlignment.center,
+          //                     children: [
+          //                       GestureDetector(
+          //                           onTap: message,
+          //                           child: Image.asset(
+          //                             'assets/images/profile_msg_btn.png',
+          //                             width: 75,
+          //                             height: 75,
+          //                           )),
+          //                     ],
+          //                   )
+          //                 ],
+          //               ),
+          //             ]),
+          //       ),
+
+          //       // Posts
+          //       Padding(
+          //         padding: EdgeInsets.only(left: 8, right: 8, bottom: 16),
+          //         child: Posts(userId: widget.userId),
+          //       )
+          //     ],
+          //   ),
+
+          Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: <Widget>[
+                            Container(
+                              width: double.infinity,
+                              height: 280,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                image: DecorationImage(
+                                  fit: BoxFit.fitHeight,
+                                  image: NetworkImage(data["avatar"]),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              height: 280,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                gradient: LinearGradient(
+                                  begin: FractionalOffset.topCenter,
+                                  end: FractionalOffset.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.white.withOpacity(1),
+                                  ],
+                                  stops: [0.5, 1.0],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 16,
+                              child: IconButton(
+                                icon:
+                                    Icon(Icons.close, color: Color(0xFF4D4C4A)),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              left: 8,
+                              child: Skeletonizer(
+                                enabled: _loading,
+                                enableSwitchAnimation: true,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text(
+                                      data["username"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 26,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
+                                        height: 1.06,
+                                        letterSpacing: 1,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  height: 350,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    gradient: LinearGradient(
-                                      begin: FractionalOffset.topCenter,
-                                      end: FractionalOffset.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.white.withOpacity(1),
-                                      ],
-                                      stops: [0.5, 1.0],
+                                    SizedBox(width: 5, height: 15),
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/verified.png'),
+                                      color: Colors.red,
+                                      size: 16.0,
                                     ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  left: 8,
-                                  child: IconButton(
-                                    icon: Icon(Icons.close,
-                                        color: Color(0xFF4D4C4A)),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  left: 8,
-                                  child: Skeletonizer(
-                                    enabled: _loading,
-                                    enableSwitchAnimation: true,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text(
-                                          data["username"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 26,
-                                            fontFamily: 'Roboto',
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.06,
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
-                                        SizedBox(width: 5, height: 15),
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/verified.png'),
-                                          color: Colors.red,
-                                          size: 16.0,
-                                        ),
-                                        SizedBox(width: 35),
-                                        Row(children: [
-                                          Column(
-                                            children: [
-                                              Text(
-                                                'Posts',
-                                                style: TextStyle(
-                                                  color: Color(0xFF4D4C4A),
-                                                  fontSize: 14,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              SizedBox(height: 10),
-                                              Text(
-                                                data["posts"].toString(),
-                                                style: TextStyle(
-                                                  color: Color(0xFF4D4C4A),
-                                                  fontSize: 20,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(width: 10),
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          ProfileFollowers(
-                                                            userId: data["id"],
-                                                          )));
-                                            },
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  'Followers',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF4D4C4A),
-                                                    fontSize: 14,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  formatWithCommas(
-                                                          data["followers"])
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                    color: Color(0xFF4D4C4A),
-                                                    fontSize: 20,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ],
+                                    SizedBox(width: 35),
+                                    Row(children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Posts',
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w400,
                                             ),
                                           ),
-                                          SizedBox(width: 10),
-                                          Column(
-                                            children: [
-                                              Text(
-                                                'Views',
-                                                style: TextStyle(
-                                                  color: Color(0xFF4D4C4A),
-                                                  fontSize: 14,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w400,
-                                                ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            data["posts"].toString(),
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 20,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(width: 10),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProfileFollowers(
+                                                        userId: data["id"],
+                                                      )));
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Followers',
+                                              style: TextStyle(
+                                                color: Color(0xFF4D4C4A),
+                                                fontSize: 14,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w400,
                                               ),
-                                              SizedBox(height: 10),
-                                              Text(
-                                                data["views"].toString(),
-                                                style: TextStyle(
-                                                  color: Color(0xFF4D4C4A),
-                                                  fontSize: 20,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                              )
-                                            ],
+                                            ),
+                                            SizedBox(height: 10),
+                                            Text(
+                                              formatWithCommas(
+                                                      data["followers"])
+                                                  .toString(),
+                                              style: TextStyle(
+                                                color: Color(0xFF4D4C4A),
+                                                fontSize: 20,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Views',
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w400,
+                                            ),
                                           ),
-                                          SizedBox(width: 10),
-                                        ]),
-                                      ],
-                                    ),
-                                  ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            data["views"].toString(),
+                                            style: TextStyle(
+                                              color: Color(0xFF4D4C4A),
+                                              fontSize: 20,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(width: 10),
+                                    ]),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
-
-                    // about and ...
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: Column(
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 8),
+                            Text(
+                              'ABOUT',
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 16,
+                                fontFamily: 'Abel',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              data['bio'],
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 12,
+                                fontFamily: 'Abel',
+                                fontWeight: FontWeight.w400,
+                                height: 1.50,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(height: 8),
-                                Text(
-                                  'ABOUT',
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 14,
-                                    fontFamily: 'Abel',
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  data['bio'],
-                                  style: TextStyle(
-                                    color: Color(0xFF4D4C4A),
-                                    fontSize: 12,
-                                    fontFamily: 'Abel',
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.50,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Row(
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/speedometer.png'),
-                                          size: 22.0,
-                                          color: Color(0xFF4D4C4A),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          data["age"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Abel',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/speedometer.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
                                     ),
-                                    SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/heart.png'),
-                                          size: 22.0,
-                                          color: Color(0xFF4D4C4A),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          data["marital"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Abel',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/flag.png'),
-                                          size: 22.0,
-                                          color: Color(0xFF4D4C4A),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          data["nationality"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Abel',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/location.png'),
-                                          size: 22.0,
-                                          color: Color(0xFF4D4C4A),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          data["location"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Abel',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(
-                                              'assets/images/icons/content.png'),
-                                          size: 22.0,
-                                          color: Color(0xFF4D4C4A),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          data["content"],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Abel',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["age"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     )
                                   ],
                                 ),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                SizedBox(height: 4),
+                                Row(
                                   children: [
-                                    GestureDetector(
-                                        onTap: message,
-                                        child: Image.asset(
-                                          'assets/images/profile_msg_btn.png',
-                                          width: 75,
-                                          height: 75,
-                                        )),
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/heart.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["marital"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
                                   ],
-                                )
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/flag.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["nationality"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    ImageIcon(
+                                      AssetImage(
+                                          'assets/images/icons/location.png'),
+                                      size: 22.0,
+                                      color: Color(0xFF4D4C4A),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      data["location"],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Abel',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                // SizedBox(height: 4),
+                                // Row(
+                                //   children: [
+                                //     ImageIcon(
+                                //       AssetImage(
+                                //           'assets/images/icons/content.png'),
+                                //       size: 22.0,
+                                //       color: Color(0xFF4D4C4A),
+                                //     ),
+                                //     SizedBox(width: 8),
+                                //     Text(
+                                //       data["content"],
+                                //       style: TextStyle(
+                                //         color: Color(0xFF4D4C4A),
+                                //         fontSize: 12,
+                                //         fontFamily: 'Abel',
+                                //         fontWeight: FontWeight.w400,
+                                //       ),
+                                //     )
+                                //   ],
+                                // )
                               ],
                             ),
-                          ]),
-                    ),
-
-                    // Posts
-                    Padding(
-                      padding: EdgeInsets.only(left: 16, top: 0, right: 16),
-                      child: Posts(userId: widget.userId),
-                    ),
-                  ],
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                    onTap: message,
+                                    child: Image.asset(
+                                      'assets/images/profile_msg_btn.png',
+                                      width: 75,
+                                      height: 75,
+                                    )),
+                              ],
+                            )
+                          ],
+                        ),
+                      ]),
                 ),
-        ),
-      ),
+                Posts(userId: widget.userId)
+              ],
+            ),
     );
   }
 }

@@ -8,7 +8,7 @@
       "args": [
         "--no-enable-impeller",
         "-d",
-        "80E51B7A-DDED-435C-85FD-5BC38F5C2C84"
+        "emulator-5554"
       ]
     },
     {

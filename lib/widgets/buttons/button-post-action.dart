@@ -33,13 +33,21 @@ class ButtonPostAction extends StatelessWidget {
               size: 16.0,
             ),
             const SizedBox(width: 4.0),
-            Text(
-              count,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12.0,
-              ),
-            ),
+            count != "null"
+                ? Text(
+                    count,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.0,
+                    ),
+                  )
+                : Container(
+                    width: 10,
+                    height: 10,
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 1, color: Colors.white),
+                  ),
           ],
         ),
       ),

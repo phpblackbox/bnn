@@ -23,29 +23,85 @@ class Posts extends StatefulWidget {
 
 class _PostsState extends State<Posts> {
   List<dynamic> comments = [];
+  final ScrollController _scrollController =
+      ScrollController(initialScrollOffset: 5.0);
 
   @override
   void initState() {
     super.initState();
-    initialData();
+    initialData(widget.userId, widget.bookmark);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.addListener(_scrollListener);
+    });
   }
 
-  Future<void> initialData() async {
+  _scrollListener() {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    if (_scrollController.hasClients && _scrollController.position != null) {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent * 1 &&
+          !_scrollController.position.outOfRange &&
+          !postProvider.loadingMore) {
+        print("loading more data...");
+
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
+
+          final currentUserId = authProvider.user?.id;
+          postProvider.loadingMore = true;
+          if (currentUserId != null) {
+            await postProvider.loadPosts(
+                userId: widget.userId,
+                bookmark: widget.bookmark,
+                currentUserId: currentUserId);
+          }
+          postProvider.loadingMore = false;
+        });
+      }
+    }
+  }
+
+  // void _onScroll() {
+  //   print("123");
+  //   if (_scrollController.position.pixels ==
+  //       _scrollController.position.maxScrollExtent) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       print("here");
+  //       // final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  //       // final postProvider = Provider.of<PostProvider>(context, listen: false);
+  //       // final currentUserId = authProvider.user?.id;
+  //       // if (currentUserId != null) {
+  //       //   postProvider.loadPosts(
+  //       //       userId: widget.userId,
+  //       //       bookmark: widget.bookmark,
+  //       //       currentUserId: currentUserId);
+  //       // }
+  //     });
+  //   }
+  // }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> initialData(String? userId, bool? bookmark) async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final postProvider = Provider.of<PostProvider>(context, listen: false);
-      final userId = authProvider.user?.id;
-      if (userId != null) {
+      final currentUserId = authProvider.user?.id;
+      if (currentUserId != null) {
+        postProvider.offset = 0;
+        postProvider.posts = [];
         postProvider.loadPosts(
-            userId: widget.userId,
-            bookmark: widget.bookmark,
-            currentUserId: userId);
+            userId: userId, bookmark: bookmark, currentUserId: currentUserId);
       }
     });
   }
 
   void _showFriendDetail(BuildContext context, int index, postProvider) {
-    print(postProvider.posts?[index]);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -232,189 +288,206 @@ class _PostsState extends State<Posts> {
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
     return Expanded(
-      child: Skeletonizer(
-          enabled: postProvider.loading,
-          enableSwitchAnimation: true,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: postProvider.posts?.length,
-            itemBuilder: (context, index) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                    height: 30,
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
+      child:
+          //  Skeletonizer(
+          //     enabled: postProvider.loadingMore,
+          //     enableSwitchAnimation: true,
+          //     child:
+          ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        itemCount: postProvider.loadingMore
+            ? postProvider.posts!.length + 1
+            : postProvider.posts?.length,
+        itemBuilder: (context, index) {
+          if (index < postProvider.posts!.length) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                  height: 30,
+                ),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (widget.userId == null) {
                           Navigator.pushNamed(
                             context,
                             '/user-profile',
                             arguments: {
                               'userId': postProvider.posts?[index]["author_id"]
                             },
-                          );
-                        },
-                        child: CircleAvatar(
-                          radius: 18,
-                          backgroundImage: NetworkImage(
-                              postProvider.posts?[index]['avatar']),
-                        ),
+                          ).then((value) async {
+                            await initialData(null, null);
+                          });
+                        }
+                      },
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundImage:
+                            NetworkImage(postProvider.posts?[index]['avatar']),
                       ),
-                      SizedBox(width: 5),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                postProvider.posts?[index]['name'] ?? "",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12.80,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                postProvider.posts?[index]['username'] ?? "",
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(0.5),
-                                  fontSize: 12.80,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '${postProvider.posts?[index]['time'] ?? ""} ago',
-                            style: TextStyle(
-                              color: Color(0xFF3C3E42),
-                              fontSize: 12.80,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          _showFriendDetail(context, index, postProvider);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Image.asset(
-                            'assets/images/icons/menu.png',
-                            width: 20.0,
-                            height: 20.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    postProvider.posts?[index]['content'],
-                    style: TextStyle(
-                      color: Color(0xFF272729),
-                      fontSize: 12.80,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
                     ),
+                    SizedBox(width: 5),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              postProvider.posts?[index]['name'] ?? "",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12.80,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              postProvider.posts?[index]['username'] ?? "",
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(0.5),
+                                fontSize: 12.80,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '${postProvider.posts?[index]['time'] ?? ""} ago',
+                          style: TextStyle(
+                            color: Color(0xFF3C3E42),
+                            fontSize: 12.80,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        _showFriendDetail(context, index, postProvider);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Image.asset(
+                          'assets/images/icons/menu.png',
+                          width: 20.0,
+                          height: 20.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Text(
+                  postProvider.posts?[index]['content'],
+                  style: TextStyle(
+                    color: Color(0xFF272729),
+                    fontSize: 12.80,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
                   ),
-                  postProvider.posts?[index]['img_urls'].isEmpty
-                      ? Container()
-                      : SizedBox(
-                          height: 140.0,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount:
-                                postProvider.posts?[index]['img_urls'].length,
-                            itemBuilder: (context, index2) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => FullScreenImage(
-                                          imageUrl: postProvider.posts?[index]
-                                              ['img_urls'][index2]!),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.network(
-                                      postProvider.posts?[index]['img_urls']
-                                          [index2]!,
-                                      fit: BoxFit.cover,
-                                      width: 150.0,
-                                      height: 140.0,
-                                    ),
+                ),
+                postProvider.posts?[index]['img_urls'].isEmpty
+                    ? Container()
+                    : SizedBox(
+                        height: 140.0,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              postProvider.posts?[index]['img_urls'].length,
+                          itemBuilder: (context, index2) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => FullScreenImage(
+                                        imageUrl: postProvider.posts?[index]
+                                            ['img_urls'][index2]!),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Image.network(
+                                    postProvider.posts?[index]['img_urls']
+                                        [index2]!,
+                                    fit: BoxFit.cover,
+                                    width: 150.0,
+                                    height: 140.0,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                  SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ButtonPostAction(
-                        icon: Icons.favorite_border,
-                        count: postProvider.posts![index]['likes'].toString(),
-                        onTap: () async {
-                          final postId = postProvider.posts?[index]['id'];
-                          final authorId =
-                              postProvider.posts?[index]['author_id'];
+                      ),
+                SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ButtonPostAction(
+                      icon: Icons.favorite_border,
+                      count: postProvider.posts![index]['likes'].toString(),
+                      onTap: () async {
+                        final postId = postProvider.posts?[index]['id'];
+                        final authorId =
+                            postProvider.posts?[index]['author_id'];
 
-                          await postProvider.toggleLike(
-                              postId, authorId, index);
-                        },
-                      ),
-                      ButtonPostAction(
-                        icon: Icons.mode_comment_outlined,
-                        count:
-                            postProvider.posts![index]['comments'].toString(),
-                        onTap: () => _showCommentDetail(
-                            context, postProvider.posts?[index]['id']),
-                      ),
-                      ButtonPostAction(
-                        icon: Icons.bookmark_outline,
-                        count:
-                            postProvider.posts![index]['bookmarks'].toString(),
-                        onTap: () async {
-                          final postId = postProvider.posts?[index]['id'];
+                        await postProvider.toggleLike(postId, authorId, index);
+                      },
+                    ),
+                    ButtonPostAction(
+                      icon: Icons.mode_comment_outlined,
+                      count: postProvider.posts![index]['comments'].toString(),
+                      onTap: () => _showCommentDetail(
+                          context, postProvider.posts?[index]['id']),
+                    ),
+                    ButtonPostAction(
+                      icon: Icons.bookmark_outline,
+                      count: postProvider.posts![index]['bookmarks'].toString(),
+                      onTap: () async {
+                        final postId = postProvider.posts?[index]['id'];
 
-                          await postProvider.toggleBookmark(postId, index);
-                        },
-                      ),
-                      ButtonPostAction(
-                        icon: Icons.forward,
-                        count: postProvider.posts![index]['share'].toString(),
-                        onTap: () {
-                          print('share');
-                        },
-                      ),
-                    ],
-                  )
-                ],
-              );
-            },
-          )),
+                        await postProvider.toggleBookmark(postId, index);
+                      },
+                    ),
+                    ButtonPostAction(
+                      icon: Icons.forward,
+                      count: postProvider.posts![index]['share'].toString(),
+                      onTap: () {
+                        print('share');
+                      },
+                    ),
+                  ],
+                )
+              ],
+            );
+          } else {
+            return Container(
+              margin: EdgeInsets.all(4),
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          }
+        },
+      ),
+      // ),
     );
   }
 }

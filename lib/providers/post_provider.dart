@@ -21,13 +21,45 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _loadingMore = false;
+  bool get loadingMore => _loadingMore;
+
+  set loadingMore(bool value) {
+    _loadingMore = value;
+    notifyListeners();
+  }
+
+  int offset = 0;
+  final int _limit = 5;
+
   Future<void> loadPosts(
       {String? userId, bool? bookmark, String? currentUserId}) async {
-    loading = true;
     errorMessage = null;
     try {
-      posts = await postService.getCustomePosts(
-          userId: userId, bookmark: bookmark, currentUserId: currentUserId);
+      List<dynamic> newItem = await postService.getPosts(
+          offset: offset,
+          limit: _limit,
+          userId: userId,
+          bookmark: bookmark,
+          currentUserId: currentUserId);
+
+      for (var element in newItem) {
+        if (posts != null) {
+          posts!.add(element);
+        }
+      }
+      offset = offset + _limit;
+      loading = false;
+      newItem = await postService.getPostsInfo(newItem);
+
+      for (var newPost in newItem) {
+        final existingPostIndex =
+            posts!.indexWhere((post) => post['id'] == newPost['id']);
+        if (existingPostIndex != -1) {
+          posts![existingPostIndex] = newPost;
+        }
+      }
+
       loading = false;
     } catch (e) {
       errorMessage = e.toString();
