@@ -72,8 +72,7 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final userProfileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider = Provider.of<UserProfileProvider>(context);
 
     return Scaffold(
       body: userProfileProvider.loading

@@ -1,3 +1,4 @@
+import 'package:bnn/models/profiles_model.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/profile_service.dart';
 import 'package:bnn/utils/constants.dart';
@@ -23,6 +24,11 @@ class ProfileProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> _following = Constants.fakeFollwers;
   List<Map<String, dynamic>> get following => _following;
+
+  Future<ProfilesModel?> getUserProfileById(String userId) async {
+    ProfilesModel? user = await _profileService.getUserProfileById(userId);
+    return user;
+  }
 
   Future<void> getCountsOfProfileInfo() async {
     final meId = _authService.getCurrentUser()?.id;

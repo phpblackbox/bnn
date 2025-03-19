@@ -1,11 +1,14 @@
+import 'package:bnn/models/profiles_model.dart';
+import 'package:bnn/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
+import 'package:provider/provider.dart';
 
 import '../class/user_ex.dart';
 import '../utils/util.dart';
 
-class UserTile extends StatelessWidget {
+class UserTile extends StatefulWidget {
   final types.User user;
   final ValueChanged<types.User> onTap;
 
@@ -15,10 +18,36 @@ class UserTile extends StatelessWidget {
     required this.onTap,
   });
 
+  @override
+  State<UserTile> createState() => _UserTileState();
+}
+
+class _UserTileState extends State<UserTile> {
+  ProfilesModel? userInfo;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+
+      final result = await profileProvider.getUserProfileById(widget.user.id);
+      if (mounted) {
+        setState(() {
+          userInfo = result;
+        });
+      }
+    });
+  }
+
   Widget _buildAvatar(types.User user) {
     final color = getAvatarColor(user.id);
-    final hasImage = user.imageUrl != null;
-    final name = user.getUserName();
+    // final hasImage = user.imageUrl != null;
+    // final name = user.getUserName();
+    final hasImage = userInfo!.avatar != null;
+    final name =
+        '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'.trim();
     return Container(
       margin: const EdgeInsets.only(right: 16),
       child: UserOnlineStatusWidget(
@@ -28,7 +57,9 @@ class UserTile extends StatelessWidget {
           children: [
             CircleAvatar(
               backgroundColor: hasImage ? Colors.transparent : color,
-              backgroundImage: hasImage ? NetworkImage(user.imageUrl!) : null,
+              // backgroundImage: hasImage ? NetworkImage(user.imageUrl!) : null,
+              backgroundImage:
+                  hasImage ? NetworkImage(userInfo!.avatar!) : null,
               radius: 20,
               child: !hasImage
                   ? Text(
@@ -58,9 +89,15 @@ class UserTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => ListTile(
-        leading: _buildAvatar(user),
-        title: Text(user.getUserName()),
-        onTap: () => onTap(user),
-      );
+  Widget build(BuildContext context) {
+    return userInfo != null
+        ? ListTile(
+            leading: _buildAvatar(widget.user),
+            title: Text(
+                '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
+                    .trim()),
+            onTap: () => widget.onTap(widget.user),
+          )
+        : Text('');
+  }
 }
