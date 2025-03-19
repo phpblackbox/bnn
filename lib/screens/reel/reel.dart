@@ -106,18 +106,17 @@ class _ReelScreenState extends State<ReelScreen>
               },
               child: SlideTransition(
                 position: _slideAnimation,
-                child:
-                    // (reelProvider.isControllerInitialized)
-                    //     ? ReelVideoPlayer(controller: _controller)
-                    //     : const Center(
-                    //         child: CircularProgressIndicator(
-                    //             color: Colors.white),
-                    //       ),
-                    FutureBuilder<void>(
+                child: FutureBuilder<void>(
                   future: reelProvider.initializeVideoPlayerFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      return VideoPlayer(reelProvider.controller!);
+                      return Center(
+                        child: AspectRatio(
+                          aspectRatio:
+                              reelProvider.controller!.value.aspectRatio,
+                          child: VideoPlayer(reelProvider.controller!),
+                        ),
+                      );
                       // return VlcPlayer(
                       //   controller: reelProvider.controller!,
                       //   aspectRatio: 9 / 16,
