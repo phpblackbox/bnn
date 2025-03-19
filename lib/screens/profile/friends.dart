@@ -1,5 +1,6 @@
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/profile/suggested.dart';
+import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/inputs/custom-input-field.dart';
 import 'package:bnn/widgets/toast.dart';
@@ -22,7 +23,8 @@ class _FriendsState extends State<Friends> {
   final TextEditingController searchController = TextEditingController();
 
   List<Map<String, dynamic>>? data = Constants.fakeFollwers;
-
+  String searchQuery = "";
+  List<Map<String, dynamic>> filltered = [];
   bool _loading = true;
 
   @override
@@ -73,48 +75,6 @@ class _FriendsState extends State<Friends> {
 
       Navigator.pushReplacementNamed(context, '/login');
     }
-  }
-
-  Stream<List<Map<String, dynamic>>> getData() {
-    supabase
-        .channel('public:relationships')
-        .onPostgresChanges(
-            event: PostgresChangeEvent.update,
-            schema: 'public',
-            table: 'relationships',
-            callback: (payload) async {
-              if (payload.eventType.toString() ==
-                  "PostgresChangeEvent.update") {
-                print(payload);
-                final userId = supabase.auth.currentUser!.id;
-
-                if ((payload.newRecord["followed_id"] == userId ||
-                        payload.newRecord["follower_id"] == userId) &&
-                    payload.newRecord["status"] == "friend") {
-                  Map<String, dynamic> res = await supabase
-                      .rpc('get_relationship_follower_detail', params: {
-                    'param_r_id': payload.newRecord["id"],
-                  }).single();
-
-                  print(res);
-
-                  if (res.isNotEmpty) {
-                    final mutal = await supabase.rpc('get_count_mutual_friends',
-                        params: {'usera': userId, 'userb': res["id"]});
-
-                    res["mutal"] = '$mutal mutal friend';
-                    res['name'] = '${res["first_name"]} ${res["last_name"]}';
-
-                    setState(() {
-                      data!.add(res);
-                    });
-                  }
-                }
-              }
-            })
-        .subscribe();
-
-    return Stream.fromIterable([data!]);
   }
 
   Future<void> unfollowUser(String rId) async {
@@ -342,7 +302,7 @@ class _FriendsState extends State<Friends> {
                 const SizedBox(width: 8),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
+                    Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => Suggested()));
                   },
                   child: Text(
@@ -384,7 +344,19 @@ class _FriendsState extends State<Friends> {
                 placeholder: "Search for friends",
                 controller: searchController,
                 onChanged: (value) {
-                  setState(() {}); // Update state on input field change
+                  setState(() {
+                    searchQuery = value;
+                  });
+                  if (value.isNotEmpty) {
+                    final temp = data!
+                        .where((item) =>
+                            (item['username'] as String?)
+                                ?.toLowerCase()
+                                .contains(value.toLowerCase()) ??
+                            false)
+                        .toList();
+                    filltered = temp;
+                  }
                 },
                 icon: Icons.search,
               ),
@@ -482,93 +454,82 @@ class _FriendsState extends State<Friends> {
             ),
             SizedBox(height: 10),
             Center(
-              child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream: getData(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    if (snapshot.error.toString().contains("JWT expired")) {
-                      supabase.auth.signOut();
-                      Navigator.pushReplacementNamed(context, '/login');
-                    }
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final data = snapshot.data ?? [];
-                  print("data =  ${data.toString()}");
-
-                  return Skeletonizer(
-                    enabled: _loading,
-                    enableSwitchAnimation: true,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.only(bottom: 12),
-                          // margin: EdgeInsets.all(8),
-                          child: GestureDetector(
-                            onTap: () {
-                              // Navigator.push(context,
-                              //     MaterialPageRoute(builder: (context) => Chat()));
-                            },
-                            child: Row(
-                              children: [
-                                Image.network(
-                                  data[index]['avatar']!,
-                                  fit: BoxFit.fill,
-                                  width: 50,
-                                  height: 50,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        data[index]['username'],
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontSize: 12,
-                                          fontFamily: 'Nunito',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.50,
-                                        ),
-                                      ),
-                                      Text(
-                                        data[index]['mutal'] ?? "",
-                                        style: TextStyle(
-                                          color: Color(0xFF4D4C4A),
-                                          fontFamily: "Poppins",
-                                          fontSize: 9,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _showFriendDetail(context, index);
-                                  },
-                                  child: ImageIcon(
-                                    AssetImage('assets/images/icons/menu.png'),
-                                    color: Color(0xFF4D4C4A),
-                                    size: 16,
-                                  ),
-                                ),
-                              ],
+              child: Skeletonizer(
+                enabled: _loading,
+                enableSwitchAnimation: true,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount:
+                      searchQuery.isEmpty ? data!.length : filltered.length,
+                  itemBuilder: (context, index) {
+                    final item =
+                        searchQuery.isEmpty ? data![index] : filltered[index];
+                    return Container(
+                      padding: EdgeInsets.only(bottom: 12),
+                      // margin: EdgeInsets.all(8),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Navigator.push(context,
+                          //     MaterialPageRoute(builder: (context) => Chat()));
+                        },
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            UserProfile(userId: item['id'])));
+                              },
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundImage: NetworkImage(item['avatar']),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['username'],
+                                    style: TextStyle(
+                                      color: Color(0xFF4D4C4A),
+                                      fontSize: 12,
+                                      fontFamily: 'Nunito',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.50,
+                                    ),
+                                  ),
+                                  Text(
+                                    item['mutal'] ?? "",
+                                    style: TextStyle(
+                                      color: Color(0xFF4D4C4A),
+                                      fontFamily: "Poppins",
+                                      fontSize: 9,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _showFriendDetail(context, index);
+                              },
+                              child: ImageIcon(
+                                AssetImage('assets/images/icons/menu.png'),
+                                color: Color(0xFF4D4C4A),
+                                size: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

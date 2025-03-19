@@ -21,36 +21,15 @@ class _SuggestedState extends State<Suggested> {
   final TextEditingController searchController = TextEditingController();
 
   List<Map<String, dynamic>>? data = Constants.fakeFollwers;
+  String searchQuery = "";
+  List<Map<String, dynamic>> filltered = [];
+
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
     fetchdata();
-  }
-
-  Stream<List<Map<String, dynamic>>> getData() {
-    supabase
-        .channel('public:relationships')
-        .onPostgresChanges(
-            event: PostgresChangeEvent.all,
-            schema: 'public',
-            table: 'relationships',
-            callback: (payload) {
-              if (payload.eventType.toString() ==
-                  "PostgresChangeEvent.insert") {
-                for (int i = 0; i < data!.length; i++) {
-                  if (payload.newRecord["followed_id"] == data![i]["id"]) {
-                    setState(() {
-                      data!.removeAt(i);
-                    });
-                  }
-                }
-              }
-            })
-        .subscribe();
-
-    return Stream.fromIterable([data!]);
   }
 
   Future<void> fetchdata() async {
@@ -92,6 +71,7 @@ class _SuggestedState extends State<Suggested> {
 
   Future<void> followUser(String followedId) async {
     final followerId = supabase.auth.currentUser!.id;
+    removeUser(followedId);
 
     dynamic res = await supabase
         .from('relationships')
@@ -114,7 +94,7 @@ class _SuggestedState extends State<Suggested> {
         .or('status.eq.following, status.eq.friend');
 
     if (res.isNotEmpty) {
-      CustomToast.showToastSuccessTop(context, 'You are friend');
+      CustomToast.showToastSuccessTop(context, 'Success');
 
       await supabase
           .from('relationships')
@@ -213,7 +193,7 @@ class _SuggestedState extends State<Suggested> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
+                    Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => Friends()));
                   },
                   child: Text(
@@ -234,7 +214,19 @@ class _SuggestedState extends State<Suggested> {
                 placeholder: "Search for Suggested",
                 controller: searchController,
                 onChanged: (value) {
-                  setState(() {}); // Update state on input field change
+                  setState(() {
+                    searchQuery = value;
+                  });
+                  if (value.isNotEmpty) {
+                    final temp = data!
+                        .where((item) =>
+                            (item['username'] as String?)
+                                ?.toLowerCase()
+                                .contains(value.toLowerCase()) ??
+                            false)
+                        .toList();
+                    filltered = temp;
+                  }
                 },
                 icon: Icons.search,
               ),
@@ -333,178 +325,152 @@ class _SuggestedState extends State<Suggested> {
             SizedBox(height: 10),
             if (data!.isNotEmpty)
               Expanded(
-                child: StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: getData(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      if (snapshot.error.toString().contains("JWT expired")) {
-                        supabase.auth.signOut();
-                        Navigator.pushReplacementNamed(context, '/login');
-                      }
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-
-                    final data = snapshot.data ?? [];
-                    print("data =  ${data.toString()}");
-
-                    return Skeletonizer(
-                      enabled: _loading,
-                      enableSwitchAnimation: true,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: data.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            padding: EdgeInsets.only(bottom: 12),
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => UserProfile(
-                                                  userId: data[index]['id'])));
-                                    },
-                                    child: CircleAvatar(
-                                      radius: 25,
-                                      backgroundImage:
-                                          NetworkImage(data[index]['avatar']),
+                child: Skeletonizer(
+                  enabled: _loading,
+                  enableSwitchAnimation: true,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount:
+                        searchQuery.isEmpty ? data!.length : filltered.length,
+                    itemBuilder: (context, index) {
+                      final item =
+                          searchQuery.isEmpty ? data![index] : filltered[index];
+                      return Container(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              UserProfile(userId: item['id'])));
+                                },
+                                child: CircleAvatar(
+                                  radius: 25,
+                                  backgroundImage: NetworkImage(item['avatar']),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['username'],
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontSize: 12,
+                                        fontFamily: 'Nunito',
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    Text(
+                                      item['mutal'] ?? "",
+                                      style: TextStyle(
+                                        color: Color(0xFF4D4C4A),
+                                        fontFamily: "Poppins",
+                                        fontSize: 9,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Row(
                                       children: [
-                                        Text(
-                                          data[index]['username'],
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontSize: 12,
-                                            fontFamily: 'Nunito',
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        Text(
-                                          data[index]['mutal'] ?? "",
-                                          style: TextStyle(
-                                            color: Color(0xFF4D4C4A),
-                                            fontFamily: "Poppins",
-                                            fontSize: 9,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () async {
-                                                  followUser(data[index]['id']);
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.only(
-                                                      left: 8,
-                                                      top: 2,
-                                                      right: 8,
-                                                      bottom: 2),
-                                                  decoration: BoxDecoration(
-                                                    gradient: _loading
-                                                        ? null
-                                                        : LinearGradient(
-                                                            colors: [
-                                                              AppColors
-                                                                  .primaryBlack,
-                                                              AppColors
-                                                                  .primaryRed,
-                                                            ],
-                                                            begin: Alignment
-                                                                .topLeft,
-                                                            end: Alignment
-                                                                .bottomRight,
-                                                          ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    'Follow',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontFamily: 'Nunito',
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  ),
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              followUser(item['id']);
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.only(
+                                                  left: 8,
+                                                  top: 2,
+                                                  right: 8,
+                                                  bottom: 2),
+                                              decoration: BoxDecoration(
+                                                gradient: _loading
+                                                    ? null
+                                                    : LinearGradient(
+                                                        colors: [
+                                                          AppColors
+                                                              .primaryBlack,
+                                                          AppColors.primaryRed,
+                                                        ],
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end: Alignment
+                                                            .bottomRight,
+                                                      ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                'Follow',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontFamily: 'Nunito',
+                                                  fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(width: 8),
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  removeUser(data[index]["id"]);
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.only(
-                                                      left: 8,
-                                                      top: 2,
-                                                      right: 8,
-                                                      bottom: 2),
-                                                  decoration: _loading
-                                                      ? null
-                                                      : ShapeDecoration(
-                                                          color:
-                                                              Color(0xFF4D4C4A),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8),
-                                                          ),
-                                                        ),
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    'Remove',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontFamily: 'Nunito',
-                                                      fontWeight:
-                                                          FontWeight.w700,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              removeUser(item["id"]);
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.only(
+                                                  left: 8,
+                                                  top: 2,
+                                                  right: 8,
+                                                  bottom: 2),
+                                              decoration: _loading
+                                                  ? null
+                                                  : ShapeDecoration(
+                                                      color: Color(0xFF4D4C4A),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
                                                     ),
-                                                  ),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                'Remove',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontFamily: 'Nunito',
+                                                  fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                        SizedBox(height: 8),
                                       ],
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(height: 8),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
           ],
