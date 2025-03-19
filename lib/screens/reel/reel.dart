@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bnn/models/reel_model.dart';
 import 'package:bnn/screens/reel/reel_comments.dart';
 import 'package:bnn/screens/reel/reel_video_player.dart';
@@ -65,8 +67,6 @@ class _ReelScreenState extends State<ReelScreen>
 
     _reelProvider?.close();
 
-    print("3");
-
     super.dispose();
   }
 
@@ -106,7 +106,14 @@ class _ReelScreenState extends State<ReelScreen>
               },
               child: SlideTransition(
                 position: _slideAnimation,
-                child: FutureBuilder<void>(
+                child:
+                    // (reelProvider.isControllerInitialized)
+                    //     ? ReelVideoPlayer(controller: _controller)
+                    //     : const Center(
+                    //         child: CircularProgressIndicator(
+                    //             color: Colors.white),
+                    //       ),
+                    FutureBuilder<void>(
                   future: reelProvider.initializeVideoPlayerFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
@@ -129,7 +136,7 @@ class _ReelScreenState extends State<ReelScreen>
               ),
             ),
           Positioned(
-            top: 15,
+            top: Platform.isIOS ? 40 : 12,
             left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, size: 20, color: Colors.white),

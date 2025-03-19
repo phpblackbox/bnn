@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/screens/profile/profile_follower.dart';
@@ -175,12 +177,12 @@ class _UserProfileState extends State<UserProfile> {
                               ),
                             ),
                             Positioned(
-                              top: 32,
+                              top: Platform.isIOS ? 40 : 12,
                               child: IconButton(
                                 icon:
                                     Icon(Icons.close, color: Color(0xFF4D4C4A)),
                                 onPressed: () {
-                                  Navigator.pop(context);
+;                                  Navigator.pop(context);
                                 },
                               ),
                             ),
