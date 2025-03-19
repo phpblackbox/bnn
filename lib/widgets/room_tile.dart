@@ -1,12 +1,15 @@
+import 'package:bnn/models/profiles_model.dart';
+import 'package:bnn/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../class/message_status_ex.dart';
 import '../utils/util.dart';
 
-class RoomTile extends StatelessWidget {
+class RoomTile extends StatefulWidget {
   final types.Room room;
   final ValueChanged<types.Room> onTap;
 
@@ -15,6 +18,123 @@ class RoomTile extends StatelessWidget {
     required this.room,
     required this.onTap,
   });
+
+  @override
+  State<RoomTile> createState() => _RoomTileState();
+}
+
+class _RoomTileState extends State<RoomTile> {
+  ProfilesModel? userInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+
+      final userId = widget.room.users[1].id;
+      final result = await profileProvider.getUserProfileById(userId);
+      if (mounted) {
+        setState(() {
+          userInfo = result;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return userInfo != null
+        ? Container(
+            padding: const EdgeInsets.all(4),
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black,
+                  Color(0xFF800000),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              key: ValueKey(widget.room.id),
+              leading: _buildAvatar(widget.room),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
+                        .trim(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.80,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  if (widget.room.lastMessages?.isNotEmpty == true)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          timeago.format(
+                            DateTime.now().subtract(
+                              Duration(
+                                milliseconds:
+                                    DateTime.now().millisecondsSinceEpoch -
+                                        (widget.room.updatedAt ?? 0),
+                              ),
+                            ),
+                            locale: 'en_short',
+                          ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        if (widget.room.lastMessages!.first.status != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Icon(
+                              size: 20,
+                              widget.room.lastMessages!.first.status!.icon,
+                              color: widget.room.lastMessages!.first.status ==
+                                      types.Status.seen
+                                  ? Color(0XFFF30802)
+                                  : Color(0XFFF30802),
+                            ),
+                          ),
+                      ],
+                    ),
+                ],
+              ),
+              subtitle: widget.room.lastMessages?.isNotEmpty == true &&
+                      widget.room.lastMessages!.first is types.TextMessage
+                  ? Text(
+                      (widget.room.lastMessages!.first as types.TextMessage)
+                          .text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 12.80,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )
+                  : null,
+              onTap: () => widget.onTap(widget.room),
+            ),
+          )
+        : Text('');
+  }
 
   Widget _buildAvatar(types.Room room) {
     final color = getAvatarColor(room.id);
@@ -30,15 +150,16 @@ class RoomTile extends StatelessWidget {
       }
     }
 
-    final hasImage = room.imageUrl != null;
-    final name = room.name ?? '';
+    final hasImage = userInfo!.avatar != null;
+    final name = room.name ?? userInfo!.firstName;
+
     final Widget child = CircleAvatar(
       backgroundColor: hasImage ? Colors.transparent : color,
-      backgroundImage: hasImage ? NetworkImage(room.imageUrl!) : null,
+      backgroundImage: hasImage ? NetworkImage(userInfo!.avatar!) : null,
       radius: 25,
       child: !hasImage
           ? Text(
-              name.isEmpty ? '' : name[0].toUpperCase(),
+              name!.isEmpty ? '' : name[0].toUpperCase(),
               style: const TextStyle(color: Colors.white),
             )
           : null,
@@ -79,90 +200,4 @@ class RoomTile extends StatelessWidget {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: EdgeInsets.all(4),
-        margin: EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.black,
-              Color(0xFF800000),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: ListTile(
-          key: ValueKey(room.id),
-          leading: _buildAvatar(room),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                room.name ?? '',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.80,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              if (room.lastMessages?.isNotEmpty == true)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      timeago.format(
-                        DateTime.now().subtract(
-                          Duration(
-                            milliseconds:
-                                DateTime.now().millisecondsSinceEpoch -
-                                    (room.updatedAt ?? 0),
-                          ),
-                        ),
-                        locale: 'en_short',
-                      ),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    if (room.lastMessages!.first.status != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Icon(
-                          size: 20,
-                          room.lastMessages!.first.status!.icon,
-                          color: room.lastMessages!.first.status ==
-                                  types.Status.seen
-                              ? Color(0XFFF30802)
-                              : Color(0XFFF30802),
-                        ),
-                      ),
-                  ],
-                ),
-            ],
-          ),
-          subtitle: room.lastMessages?.isNotEmpty == true &&
-                  room.lastMessages!.first is types.TextMessage
-              ? Text(
-                  (room.lastMessages!.first as types.TextMessage).text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 12.80,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                  ),
-                )
-              : null,
-          onTap: () => onTap(room),
-        ),
-      );
 }

@@ -124,13 +124,17 @@ class _ChatListState extends State<ChatList> {
                     itemBuilder: (context, room, index) => RoomTile(
                       room: room,
                       onTap: (room) {
-                        Navigator.of(context).push(
+                        Navigator.of(context)
+                            .push(
                           MaterialPageRoute(
                             builder: (context) => RoomPage(
                               room: room,
                             ),
                           ),
-                        );
+                        )
+                            .then((onValue) {
+                          _controller.refresh();
+                        });
                       },
                     ),
                   ),

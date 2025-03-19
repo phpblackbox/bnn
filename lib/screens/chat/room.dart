@@ -1,3 +1,5 @@
+import 'package:bnn/models/profiles_model.dart';
+import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/chat/one_video_call.dart';
 import 'package:bnn/screens/chat/one_voice_call.dart';
 import 'package:bnn/utils/colors.dart';
@@ -11,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class RoomPage extends StatefulWidget {
   const RoomPage({
@@ -27,11 +30,25 @@ class RoomPage extends StatefulWidget {
 class _RoomPageState extends State<RoomPage> {
   bool _isAttachmentUploading = false;
   late SupabaseChatController _chatController;
+  ProfilesModel? userInfo;
 
   @override
   void initState() {
     _chatController = SupabaseChatController(room: widget.room);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+
+      final userId = widget.room.users[1].id;
+      final result = await profileProvider.getUserProfileById(userId);
+      if (mounted) {
+        setState(() {
+          userInfo = result;
+        });
+      }
+    });
   }
 
   @override
@@ -304,7 +321,7 @@ class _RoomPageState extends State<RoomPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(170),
+          preferredSize: Size.fromHeight(200),
           child: Container(
             margin: EdgeInsets.all(16),
             padding: EdgeInsets.only(top: 32),
@@ -375,45 +392,49 @@ class _RoomPageState extends State<RoomPage> {
                     )
                   ],
                 ),
-                Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: widget.room.imageUrl == null
-                              ? null
-                              : NetworkImage(widget.room.imageUrl!),
-                        ),
-                        SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                userInfo != null
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              widget.room.name!,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                              ),
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: userInfo!.avatar == null
+                                  ? null
+                                  : NetworkImage(userInfo!.avatar!),
                             ),
-                            Text(
-                              'Online',
-                              style: TextStyle(
-                                color: Colors.white
-                                    .withOpacity(0.6299999952316284),
-                                fontSize: 10,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
+                                      .trim(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                Text(
+                                  'Online',
+                                  style: TextStyle(
+                                    color: Colors.white
+                                        .withOpacity(0.6299999952316284),
+                                    fontSize: 10,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            )
                           ],
-                        )
-                      ],
-                    ))
+                        ),
+                      )
+                    : Text(''),
               ],
             ),
           ),
