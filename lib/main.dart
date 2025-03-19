@@ -3,9 +3,11 @@ import 'package:bnn/providers/livestream_provider.dart';
 import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/providers/post_comment_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
+import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/providers/reel_provider.dart';
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
+import 'package:bnn/providers/user_profile_provider.dart';
 import 'package:bnn/services/supabase_client.dart';
 import 'package:bnn/widgets/sub/not-found-404.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PostCommentProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => ReelProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
         ChangeNotifierProxyProvider<PostCommentProvider, PostProvider>(
           create: (_) => PostProvider(),
           update: (context, postCommentProvider, postProvider) {

@@ -6,18 +6,21 @@ import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Followers extends StatefulWidget {
-  const Followers({super.key});
+class Following extends StatefulWidget {
+  const Following({super.key});
 
   @override
-  State<Followers> createState() => _FollowersState();
+  State<Following> createState() => _FollowingState();
 }
 
-class _FollowersState extends State<Followers> {
+class _FollowingState extends State<Following> {
+  final supabase = Supabase.instance.client;
+
   final TextEditingController searchController = TextEditingController();
   String searchQuery = "";
-  List<Map<String, dynamic>> fillteredFollowers = [];
+  List<Map<String, dynamic>> fillteredFollowing = [];
 
   @override
   void initState() {
@@ -26,7 +29,7 @@ class _FollowersState extends State<Followers> {
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
       profileProvider.loading = true;
-      await profileProvider.getFollowers();
+      await profileProvider.getFollowing();
     });
   }
 
@@ -37,7 +40,7 @@ class _FollowersState extends State<Followers> {
       appBar: AppBar(
         title: Container(
           child: Text(
-            "Followers",
+            "Following",
             style: TextStyle(
                 fontFamily: "Poppins",
                 fontSize: 16,
@@ -65,14 +68,14 @@ class _FollowersState extends State<Followers> {
                   searchQuery = value;
                 });
                 if (value.isNotEmpty) {
-                  final data = profileProvider.followers
+                  final data = profileProvider.following
                       .where((follower) =>
                           (follower['name'] as String?)
                               ?.toLowerCase()
                               .contains(value.toLowerCase()) ??
                           false)
                       .toList();
-                  fillteredFollowers = data;
+                  fillteredFollowing = data;
                 }
               },
               icon: Icons.search,
@@ -85,12 +88,12 @@ class _FollowersState extends State<Followers> {
                 child: ListView.builder(
                   // shrinkWrap: true,
                   itemCount: searchQuery.isEmpty
-                      ? profileProvider.followers.length
-                      : fillteredFollowers.length,
+                      ? profileProvider.following.length
+                      : fillteredFollowing.length,
                   itemBuilder: (context, index) {
                     final item = searchQuery.isEmpty
-                        ? profileProvider.followers[index]
-                        : fillteredFollowers[index];
+                        ? profileProvider.following[index]
+                        : fillteredFollowing[index];
                     return Container(
                       padding: EdgeInsets.only(bottom: 12),
                       child: GestureDetector(
@@ -129,25 +132,23 @@ class _FollowersState extends State<Followers> {
                               ),
                             ),
                             SizedBox(width: 40),
-                            if (item['status'] == 'following')
-                              Expanded(
-                                child: ButtonGradientMain(
-                                  label: 'Follow',
-                                  onPressed: () async {
-                                    await profileProvider
-                                        .followUser(item['id']);
-                                    CustomToast.showToastSuccessTop(
-                                        context, "Successfully followed!");
-                                  },
-                                  textColor: Colors.white,
-                                  gradientColors: profileProvider.loading
-                                      ? [Colors.transparent, Colors.transparent]
-                                      : [
-                                          AppColors.primaryBlack,
-                                          AppColors.primaryRed
-                                        ],
-                                ),
+                            Expanded(
+                              child: ButtonGradientMain(
+                                label: 'Unfollow',
+                                onPressed: () async {
+                                  await profileProvider.unfollow(item['r_id']);
+                                  CustomToast.showToastSuccessTop(
+                                      context, "Successfully unfollowed!");
+                                },
+                                textColor: Colors.white,
+                                gradientColors: profileProvider.loading
+                                    ? [Colors.transparent, Colors.transparent]
+                                    : [
+                                        AppColors.primaryBlack,
+                                        AppColors.primaryRed
+                                      ],
                               ),
+                            ),
                           ],
                         ),
                       ),

@@ -39,11 +39,8 @@ class _AllPostState extends State<AllPost> {
           .from('post_bookmarks')
           .select('id as bookmark_id, posts.*')
           .eq('post_bookmarks.author_id', userId);
-
-      print(data);
     }
 
-    print("data ===>>> $data");
     if (data.isNotEmpty) {
       setState(() {
         // posts = data;

@@ -1,20 +1,29 @@
-import 'package:bnn/providers/profile_provider.dart';
+import 'package:bnn/providers/user_profile_provider.dart';
 import 'package:bnn/utils/colors.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:bnn/widgets/inputs/custom-input-field.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Followers extends StatefulWidget {
-  const Followers({super.key});
+class UserFollowers extends StatefulWidget {
+  final String userId;
+
+  const UserFollowers({
+    super.key,
+    required this.userId,
+  });
 
   @override
-  State<Followers> createState() => _FollowersState();
+  State<UserFollowers> createState() => _UserFollowersState();
 }
 
-class _FollowersState extends State<Followers> {
+class _UserFollowersState extends State<UserFollowers> {
+  final supabase = Supabase.instance.client;
+
   final TextEditingController searchController = TextEditingController();
   String searchQuery = "";
   List<Map<String, dynamic>> fillteredFollowers = [];
@@ -24,15 +33,15 @@ class _FollowersState extends State<Followers> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final profileProvider =
-          Provider.of<ProfileProvider>(context, listen: false);
+          Provider.of<UserProfileProvider>(context, listen: false);
       profileProvider.loading = true;
-      await profileProvider.getFollowers();
+      await profileProvider.getFollowers(widget.userId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profileProvider = Provider.of<UserProfileProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -48,7 +57,7 @@ class _FollowersState extends State<Followers> {
           icon: Icon(Icons.arrow_back, size: 20.0),
           onPressed: () {
             Navigator.pop(context);
-            profileProvider.getCountsOfProfileInfo();
+            profileProvider.getCountsOfProfileInfo(widget.userId);
           },
         ),
         backgroundColor: Colors.transparent,
@@ -77,7 +86,7 @@ class _FollowersState extends State<Followers> {
               },
               icon: Icons.search,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Expanded(
               child: Skeletonizer(
                 enabled: profileProvider.loading,
@@ -128,26 +137,25 @@ class _FollowersState extends State<Followers> {
                                 ],
                               ),
                             ),
-                            SizedBox(width: 40),
-                            if (item['status'] == 'following')
-                              Expanded(
-                                child: ButtonGradientMain(
-                                  label: 'Follow',
-                                  onPressed: () async {
-                                    await profileProvider
-                                        .followUser(item['id']);
-                                    CustomToast.showToastSuccessTop(
-                                        context, "Successfully followed!");
-                                  },
-                                  textColor: Colors.white,
-                                  gradientColors: profileProvider.loading
-                                      ? [Colors.transparent, Colors.transparent]
-                                      : [
-                                          AppColors.primaryBlack,
-                                          AppColors.primaryRed
-                                        ],
-                                ),
-                              ),
+                            // SizedBox(width: 40),
+                            // if (item['status'] == 'following')
+                            //   Expanded(
+                            //     child: ButtonGradientMain(
+                            //       label: 'Follow',
+                            //       onPressed: () async {
+                            //         await profileProvider.followUser(item['id']);
+                            //         CustomToast.showToastSuccessTop(
+                            //             context, "Successfully followed!");
+                            //       },
+                            //       textColor: Colors.white,
+                            //       gradientColors: profileProvider.loading
+                            //           ? [Colors.transparent, Colors.transparent]
+                            //           : [
+                            //               AppColors.primaryBlack,
+                            //               AppColors.primaryRed
+                            //             ],
+                            //     ),
+                            //   ),
                           ],
                         ),
                       ),

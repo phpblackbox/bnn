@@ -15,6 +15,13 @@ class Constants {
   // static const String addphoto = 'assets/images/addphoto.png';
   // static const String logo = 'assets/images/bnn_logo.png';
 
+  String formatWithCommas(int number) {
+    return number.toString().replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
+  }
+
   String generateRandomNumberString(int length) {
     final Random random = Random();
     String randomString = '';
@@ -179,6 +186,20 @@ class Constants {
       }
     },
   ];
+
+  static const dynamic fakeUserInfo = {
+    "username": "John\nSmith",
+    "posts": 35,
+    "followers": 6552,
+    "views": 128,
+    "about":
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
+    "year": "20yrs",
+    "marital": "Married",
+    "nationality": "African-American",
+    "location": "United States, California",
+    "content": "Content Creator",
+  };
 
   static const List<Map<String, dynamic>> fakeFollwers = [
     {

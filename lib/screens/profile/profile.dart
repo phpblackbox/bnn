@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/profile_provider.dart';
+import 'package:bnn/screens/profile/following.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:bnn/screens/home/posts.dart';
 import 'package:bnn/screens/profile/all.dart';
@@ -24,49 +26,16 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   final supabase = Supabase.instance.client;
 
-  int _followers = 0;
-  int _posts = 0;
-  int _views = 124;
-  bool _loading = true;
   int _allorbookmark = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchdata();
-  }
-
-  void fetchdata() async {
-    final AuthProvider authProvider =
-        Provider.of<AuthProvider>(context, listen: false);
-    final meId = authProvider.profile!.id;
-
-    int data = await supabase.rpc('get_count_follower', params: {
-          'param_followed_id': meId,
-        }) ??
-        0;
-    setState(() {
-      _followers = data;
-    });
-
-    final temp = await supabase
-        .from('profiles')
-        .select('views')
-        .eq('id', meId.toString())
-        .single();
-
-    setState(() {
-      _views = temp['views'];
-    });
-
-    data = await supabase.rpc('get_count_posts', params: {
-          'param_user_id': meId,
-        }) ??
-        0;
-
-    setState(() {
-      _posts = data;
-      _loading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      profileProvider.loading = true;
+      await profileProvider.getCountsOfProfileInfo();
     });
   }
 
@@ -80,6 +49,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     final meProfile = authProvider.profile!;
+    final profileProvider = Provider.of<ProfileProvider>(context);
 
     var currentTime;
     return WillPopScope(
@@ -97,8 +67,7 @@ class _ProfileState extends State<Profile> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Container(
-            child: Column(
+        body: Column(
           children: [
             Container(
               height: 330,
@@ -194,33 +163,41 @@ class _ProfileState extends State<Profile> {
                   ),
                   SizedBox(height: 10),
                   Skeletonizer(
-                    enabled: _loading,
+                    enabled: profileProvider.loading,
                     enableSwitchAnimation: true,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            Text(
-                              'Posts',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Following()));
+                          },
+                          child: Column(
+                            children: [
+                              Text(
+                                'Following',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 12),
-                            Text(
-                              _posts.toString(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w700,
+                              SizedBox(height: 12),
+                              Text(
+                                profileProvider.countFollowing.toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         SizedBox(width: 8),
                         Container(
@@ -252,7 +229,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               SizedBox(height: 12),
                               Text(
-                                _followers.toString(),
+                                profileProvider.countFollowers.toString(),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -286,7 +263,7 @@ class _ProfileState extends State<Profile> {
                             ),
                             SizedBox(height: 12),
                             Text(
-                              _views.toString(),
+                              profileProvider.countViews.toString(),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -341,7 +318,7 @@ class _ProfileState extends State<Profile> {
                     child: Posts(bookmark: true)),
               ),
           ],
-        )),
+        ),
         bottomNavigationBar: BottomNavigation(currentIndex: 4),
       ),
     );

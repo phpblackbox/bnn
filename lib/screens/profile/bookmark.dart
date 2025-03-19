@@ -30,9 +30,6 @@ class _PostBookmarksState extends State<PostBookmarks> {
         .select('post_bookmarks.id, post_bookmarks.author_id')
         .eq('post_bookmarks.author_id', userId);
 
-    print(data);
-
-    print("data ===>>> $data");
     if (data.isNotEmpty) {
       setState(() {
         // posts = data;
