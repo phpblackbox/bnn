@@ -1,5 +1,6 @@
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/screens/signup/interests.dart';
+import 'package:bnn/screens/signup/termsofservice.dart';
 import 'package:bnn/utils/colors.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:bnn/widgets/toast.dart';
@@ -38,7 +39,7 @@ class _AgeState extends State<Age> with SingleTickerProviderStateMixin {
         await authProvider.setProfile(profile);
 
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Interests()));
+            context, MaterialPageRoute(builder: (context) => TermsOfService()));
       } catch (error) {
         CustomToast.showToastWarningBottom(
             context, 'Error updating profile: $error');
