@@ -157,43 +157,43 @@ class _ReelCommandsState extends State<ReelCommands> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-    SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom, 
-        ),
-        child:Container(
-      padding: EdgeInsets.all(16.0),
-      height: MediaQuery.of(context).size.height * 0.5,
-      child: Column(
-        children: [
-          Text(
-            'Comments',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF151923),
-              fontSize: 13.20,
-              fontFamily: 'Nunito',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(
-            child: Skeletonizer(
-              enabled: _loading,
-              enableSwitchAnimation: true,
-              child: ListView.builder(
-                itemCount: _parentComments.length,
-                itemBuilder: (context, index) {
-                  final comment = _parentComments[index];
-                  return buildCommentItem(comment);
-                },
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Column(
+          children: [
+            Text(
+              'Comments',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF151923),
+                fontSize: 13.20,
+                fontFamily: 'Nunito',
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          buildCommentInput(),
-        ],
+            Expanded(
+              child: Skeletonizer(
+                enabled: _loading,
+                enableSwitchAnimation: true,
+                child: ListView.builder(
+                  itemCount: _parentComments.length,
+                  itemBuilder: (context, index) {
+                    final comment = _parentComments[index];
+                    return buildCommentItem(comment);
+                  },
+                ),
+              ),
+            ),
+            buildCommentInput(),
+          ],
+        ),
       ),
-    ),);
+    );
   }
 
   Widget buildCommentItem(dynamic comment) {
@@ -240,10 +240,20 @@ class _ReelCommandsState extends State<ReelCommands> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: NetworkImage(comment["profiles"]['avatar']),
-                backgroundColor: Colors.transparent,
+              GestureDetector(
+                onTap: () async {
+                  print(comment['author_id']);
+                  Navigator.pushNamed(
+                    context,
+                    '/user-profile',
+                    arguments: {'userId': comment["author_id"]},
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundImage: NetworkImage(comment["profiles"]['avatar']),
+                  backgroundColor: Colors.transparent,
+                ),
               ),
               SizedBox(width: 6),
               Expanded(

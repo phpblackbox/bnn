@@ -37,44 +37,43 @@ class _CommentsModalState extends State<CommentsModal> {
   Widget build(BuildContext context) {
     final PostCommentProvider postCommentProvider =
         Provider.of<PostCommentProvider>(context);
-    return 
-    
-     SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom, 
-        ),
-        child:Container(
-      padding: EdgeInsets.all(16.0),
-      height: MediaQuery.of(context).size.height * 0.5,
-      child: Column(
-        children: [
-          Text(
-            'Comments',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF151923),
-              fontSize: 13.20,
-              fontFamily: 'Nunito',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(
-            child: Skeletonizer(
-              enabled: postCommentProvider.loading,
-              enableSwitchAnimation: true,
-              child: ListView.builder(
-                itemCount: postCommentProvider.parentComments.length,
-                itemBuilder: (context, index) {
-                  final comment = postCommentProvider.parentComments[index];
-                  return buildCommentItem(comment, postCommentProvider);
-                },
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Column(
+          children: [
+            Text(
+              'Comments',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF151923),
+                fontSize: 13.20,
+                fontFamily: 'Nunito',
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          buildCommentInput(postCommentProvider),
-        ],
+            Expanded(
+              child: Skeletonizer(
+                enabled: postCommentProvider.loading,
+                enableSwitchAnimation: true,
+                child: ListView.builder(
+                  itemCount: postCommentProvider.parentComments.length,
+                  itemBuilder: (context, index) {
+                    final comment = postCommentProvider.parentComments[index];
+                    return buildCommentItem(comment, postCommentProvider);
+                  },
+                ),
+              ),
+            ),
+            buildCommentInput(postCommentProvider),
+          ],
+        ),
       ),
-    ),);
+    );
   }
 
   Widget buildCommentItem(
@@ -126,10 +125,20 @@ class _CommentsModalState extends State<CommentsModal> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: NetworkImage(comment["profiles"]['avatar']),
-                backgroundColor: Colors.transparent,
+              GestureDetector(
+                onTap: () async {
+                  print(comment['author_id']);
+                  Navigator.pushNamed(
+                    context,
+                    '/user-profile',
+                    arguments: {'userId': comment["author_id"]},
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundImage: NetworkImage(comment["profiles"]['avatar']),
+                  backgroundColor: Colors.transparent,
+                ),
               ),
               SizedBox(width: 6),
               Expanded(
@@ -250,43 +259,42 @@ class _CommentsModalState extends State<CommentsModal> {
           SizedBox(width: 10),
           Expanded(
             child: Focus(
-            child: TextField(
-              focusNode: commentFocusNode,
-              controller: _commentController,
-              onSubmitted: (value) async {
-                if (value.isEmpty) {
-                  CustomToast.showToastWarningTop(context, 'Add a comment');
-                  return;
-                }
+              child: TextField(
+                focusNode: commentFocusNode,
+                controller: _commentController,
+                onSubmitted: (value) async {
+                  if (value.isEmpty) {
+                    CustomToast.showToastWarningTop(context, 'Add a comment');
+                    return;
+                  }
 
-                _commentController.clear();
-                postCommentProvider.sendPostComment(widget.postId, value, me);
-              },
-              style: TextStyle(
-                fontSize: 10.0,
-                color: Colors.black,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Add a comment...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  _commentController.clear();
+                  postCommentProvider.sendPostComment(widget.postId, value, me);
+                },
+                style: TextStyle(
+                  fontSize: 10.0,
+                  color: Colors.black,
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide(color: Colors.transparent),
+                decoration: InputDecoration(
+                  hintText: 'Add a comment...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  filled: true,
+                  fillColor: Color(0xFFE9E9E9),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide(color: Colors.transparent),
-                ),
-                filled: true,
-                fillColor: Color(0xFFE9E9E9),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
               ),
             ),
-            ),
-          
           ),
         ],
       ),
