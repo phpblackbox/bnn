@@ -7,7 +7,7 @@ class NotificationService {
   Future<List<dynamic>> getNotificationsByUserId(String userId) async {
     final data = await _supabase
         .from('notifications')
-        .select('*, profiles(username, avatar, first_name, last_name)')
+        .select('*, profiles(id, username, avatar, first_name, last_name)')
         .eq('is_read', false)
         .eq('user_id', userId)
         .order('created_at', ascending: false);

@@ -10,6 +10,7 @@ import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});
@@ -19,6 +20,8 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
+  final supabase = Supabase.instance.client;
+
   @override
   void initState() {
     super.initState();
@@ -70,10 +73,49 @@ class _NotificationsState extends State<Notifications> {
                       padding: EdgeInsets.all(4),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            backgroundImage: NetworkImage(notificationProvider
-                                .data[index]['profiles']['avatar']!),
-                            radius: 25,
+                          GestureDetector(
+                            onTap: () async {
+                              final meId = supabase.auth.currentUser!.id;
+                              final userInfo =
+                                  notificationProvider.data[index]['profiles'];
+                              print(userInfo);
+                              if (userInfo['id'] == meId) {
+                                CustomToast.showToastWarningTop(
+                                    context, "You can't send message to you");
+
+                                return;
+                              }
+                              types.User otherUser = types.User(
+                                id: userInfo['id'],
+                                firstName: userInfo['first_name'],
+                                lastName: userInfo['last_name'],
+                                imageUrl: userInfo['avatar'],
+                              );
+
+                              final navigator = Navigator.of(context);
+
+                              final temp = await SupabaseChatCore.instance
+                                  .createRoom(otherUser);
+
+                              var room = temp.copyWith(
+                                  imageUrl: userInfo['avatar'],
+                                  name:
+                                      "${userInfo['first_name']} ${userInfo['last_name']}");
+
+                              // navigator.pop();
+                              await navigator.push(
+                                MaterialPageRoute(
+                                  builder: (context) => RoomPage(
+                                    room: room,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(notificationProvider
+                                  .data[index]['profiles']['avatar']!),
+                              radius: 25,
+                            ),
                           ),
                           SizedBox(width: 6),
                           Column(
