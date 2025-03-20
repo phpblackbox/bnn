@@ -37,7 +37,13 @@ class _CommentsModalState extends State<CommentsModal> {
   Widget build(BuildContext context) {
     final PostCommentProvider postCommentProvider =
         Provider.of<PostCommentProvider>(context);
-    return Container(
+    return 
+    
+     SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom, 
+        ),
+        child:Container(
       padding: EdgeInsets.all(16.0),
       height: MediaQuery.of(context).size.height * 0.5,
       child: Column(
@@ -68,7 +74,7 @@ class _CommentsModalState extends State<CommentsModal> {
           buildCommentInput(postCommentProvider),
         ],
       ),
-    );
+    ),);
   }
 
   Widget buildCommentItem(
@@ -243,6 +249,7 @@ class _CommentsModalState extends State<CommentsModal> {
           ),
           SizedBox(width: 10),
           Expanded(
+            child: Focus(
             child: TextField(
               focusNode: commentFocusNode,
               controller: _commentController,
@@ -278,6 +285,8 @@ class _CommentsModalState extends State<CommentsModal> {
                     EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
               ),
             ),
+            ),
+          
           ),
         ],
       ),

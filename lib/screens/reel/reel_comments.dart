@@ -157,7 +157,12 @@ class _ReelCommandsState extends State<ReelCommands> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return 
+    SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom, 
+        ),
+        child:Container(
       padding: EdgeInsets.all(16.0),
       height: MediaQuery.of(context).size.height * 0.5,
       child: Column(
@@ -188,7 +193,7 @@ class _ReelCommandsState extends State<ReelCommands> {
           buildCommentInput(),
         ],
       ),
-    );
+    ),);
   }
 
   Widget buildCommentItem(dynamic comment) {
