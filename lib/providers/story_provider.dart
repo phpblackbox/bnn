@@ -22,6 +22,11 @@ class StoryProvider with ChangeNotifier {
   bool get loading => _loading;
   List<XFile> get selectedImages => _selectedImages;
 
+  set loading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
+
   Future<void> getStories() async {
     _loading = true;
     notifyListeners();
@@ -35,11 +40,6 @@ class StoryProvider with ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
-  }
-
-  set loading(bool value) {
-    _loading = value;
-    notifyListeners();
   }
 
   Future<void> createStoryContent(int storyId, String content) async {

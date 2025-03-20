@@ -85,7 +85,7 @@ class _StorySliderState extends State<StorySlider> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => StoryView(
-                                id: storyProvider.stories[index]["user_id"]),
+                                id: storyProvider.stories[index]["id"]),
                           ),
                         );
                       },

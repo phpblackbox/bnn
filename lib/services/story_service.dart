@@ -23,8 +23,12 @@ class StoryService {
 
   Future<Map<String, dynamic>> getStoryById(int storyId) async {
     try {
-      final data =
-          await _supabase.from('stories').select().eq('id', storyId).single();
+      final data = await _supabase
+          .from('stories')
+          .select('*, profiles(id, avatar, username, first_name, last_name)')
+          .eq('id', storyId)
+          .eq('is_published', true)
+          .single();
       return data;
     } catch (e) {
       print('Caught error: $e');
@@ -40,7 +44,7 @@ class StoryService {
     try {
       final response = await _supabase
           .from('stories')
-          .select('*, profiles(avatar, username, first_name, last_name)')
+          .select('*, profiles(id, avatar, username, first_name, last_name)')
           .eq('author_id', userId)
           .eq('is_published', true)
           .order('id', ascending: false);
@@ -98,5 +102,10 @@ class StoryService {
         );
 
     return _supabase.storage.from('story').getPublicUrl(filename);
+  }
+
+  Future<int> getRandomStoryId() async {
+    final storyId = await _supabase.rpc('get_random_story_id') ?? 0;
+    return storyId;
   }
 }

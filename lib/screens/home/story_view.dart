@@ -1,3 +1,4 @@
+import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/widgets/toast.dart';
@@ -10,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StoryView extends StatefulWidget {
-  final String id;
+  final int id;
 
   const StoryView({super.key, required this.id});
 
@@ -48,23 +49,23 @@ class _StoryViewState extends State<StoryView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final storyViewProvider =
           Provider.of<StoryViewProvider>(context, listen: false);
-      await storyViewProvider.getStoriesByUserId(widget.id);
+      await storyViewProvider.initialize(widget.id);
       _startAutoSlide(storyViewProvider);
     });
   }
 
   void _startAutoSlide(StoryViewProvider storyViewProvider) {
-    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
-      if (storyViewProvider.currentStoryIndex <
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (storyViewProvider.currentImageIndex <
           storyViewProvider.story["img_urls"].length - 1) {
-        storyViewProvider.currentStoryIndex++;
+        storyViewProvider.currentImageIndex++;
       } else {
-        storyViewProvider.currentStoryIndex = 0;
+        storyViewProvider.currentImageIndex = 0;
       }
 
       _pageController.animateToPage(
-        storyViewProvider.currentStoryIndex,
-        duration: Duration(milliseconds: 300),
+        storyViewProvider.currentImageIndex,
+        duration: Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
     });
@@ -96,11 +97,10 @@ class _StoryViewState extends State<StoryView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: 10), // Add some spacing
+                SizedBox(height: 10),
                 GridView.builder(
-                  physics: NeverScrollableScrollPhysics(), // Disable scrolling
-                  shrinkWrap:
-                      true, // Allow the grid to take only the needed space
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 6,
                     childAspectRatio: 1,
@@ -141,30 +141,51 @@ class _StoryViewState extends State<StoryView> {
           storyViewProvider.loading
               ? Center(child: CircularProgressIndicator())
               : GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    if (details.velocity.pixelsPerSecond.dx > 0) {
-                      storyViewProvider.previousStory();
-                      _pageController.jumpToPage(0);
-                    } else if (details.velocity.pixelsPerSecond.dx < 0) {
-                      storyViewProvider.nextStory();
-                      _pageController.jumpToPage(0);
+                  onTapDown: (details) {
+                    double dx = details.globalPosition.dx;
+                    double screenWidth = MediaQuery.of(context).size.width;
+                    if (dx < screenWidth / 8) {
+                      print("prev");
+                      storyViewProvider.prevImage();
+                      _pageController.animateToPage(
+                        storyViewProvider.currentImageIndex,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+
+                    if (dx > 7 * screenWidth / 8) {
+                      print("next");
+                      storyViewProvider.nextImage();
+                      _pageController.animateToPage(
+                        storyViewProvider.currentImageIndex,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
                     }
                   },
                   child: Column(
                     children: [
                       Expanded(
                         child: CubePageView.builder(
-                          itemCount: storyViewProvider.data.length,
-                          onPageChanged: (i) {
-                            storyViewProvider.currentStoryIndex = i;
-                            storyViewProvider.story = storyViewProvider
-                                .data[storyViewProvider.currentStoryIndex];
-                            storyViewProvider.currentStoryIndex = 0;
+                          itemCount: storyViewProvider.stories.length,
+                          onPageChanged: (i) async {
+                            print(i);
+                            if (i == storyViewProvider.stories.length - 1) {
+                              print("next");
+                              await storyViewProvider.nextStory();
+                              print(storyViewProvider.stories.length);
+                              storyViewProvider.loadStory(i);
+                            } else {
+                              print("prev");
+                              storyViewProvider.loadStory(i);
+                            }
+                            storyViewProvider.currentImageIndex = 0;
                             _stopAutoSlide();
                             _startAutoSlide(storyViewProvider);
                           },
                           itemBuilder: (context, index, notifier) {
-                            final tempStory = storyViewProvider.data[index];
+                            final tempStory = storyViewProvider.stories[index];
                             return CubeWidget(
                               index: index,
                               pageNotifier: notifier,
@@ -173,7 +194,7 @@ class _StoryViewState extends State<StoryView> {
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount: tempStory["img_urls"].length,
                                 onPageChanged: (i) {
-                                  storyViewProvider.currentStoryIndex = i;
+                                  storyViewProvider.currentImageIndex = i;
                                 },
                                 itemBuilder: (context, index) {
                                   return Image.network(
@@ -209,11 +230,10 @@ class _StoryViewState extends State<StoryView> {
                               margin: EdgeInsets.symmetric(horizontal: 1.5),
                               decoration: BoxDecoration(
                                 color:
-                                    index == storyViewProvider.currentStoryIndex
+                                    index == storyViewProvider.currentImageIndex
                                         ? Colors.white
                                         : Colors.white.withOpacity(0.36),
-                                borderRadius: BorderRadius.circular(
-                                    3.0), // Set border radius here
+                                borderRadius: BorderRadius.circular(3.0),
                               ),
                             ),
                           );
@@ -235,7 +255,6 @@ class _StoryViewState extends State<StoryView> {
                             borderRadius: BorderRadius.circular(21),
                           ),
                           child: ClipOval(
-                            // This will ensure the image is circular
                             child: Image.network(
                               storyViewProvider.story["profiles"]["avatar"],
                               fit: BoxFit.fill,
@@ -329,7 +348,6 @@ class _StoryViewState extends State<StoryView> {
                                 context, "You can't send message yourself");
                             return;
                           }
-
                           types.User otherUser = types.User(
                             id: storyViewProvider.story['author_id'],
                             firstName: storyViewProvider.story['profiles']
@@ -339,36 +357,29 @@ class _StoryViewState extends State<StoryView> {
                             imageUrl: storyViewProvider.story['profiles']
                                 ['avatar'],
                           );
-
                           final navigator = Navigator.of(context);
                           final temp = await SupabaseChatCore.instance
                               .createRoom(otherUser);
-
                           var room = temp.copyWith(
                               imageUrl: storyViewProvider.story['profiles']
                                   ['avatar'],
                               name:
                                   "${storyViewProvider.story['profiles']['first_name']} ${storyViewProvider.story['profiles']['last_name']}");
-
                           final message = types.PartialText(
                               text: _msgController.text,
                               metadata: {
                                 'image_url': storyViewProvider.story["img_urls"]
-                                    [storyViewProvider.currentStoryIndex]
+                                    [storyViewProvider.currentImageIndex]
                               });
-
                           await SupabaseChatCore.instance
                               .sendMessage(message, room.id);
-
                           _msgController.clear();
-
                           await supabase.from('notifications').insert({
                             'actor_id': meId,
                             'user_id': storyViewProvider.story['author_id'],
                             'action_type': 'comment story',
                             'content': _msgController.text,
                           });
-
                           await navigator.push(
                             MaterialPageRoute(
                               builder: (context) => RoomPage(room: room),
