@@ -1,4 +1,6 @@
 // lib/screens/home/bottom_navigation.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class BottomNavigation extends StatelessWidget {
@@ -53,7 +55,7 @@ class BottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 67.0,
+      height: Platform.isIOS ? 80 : 67.0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
@@ -87,8 +89,8 @@ class BottomNavigation extends StatelessWidget {
       onTap: () => onTabSelected(context, index),
       child: Image.asset(
         assetPath,
-        width: isMainAction ? 80 : 20,
-        height: isMainAction ? 80 : 20,
+        width: Platform.isIOS ? (isMainAction ? 90 : 24) : (isMainAction ? 80 : 20),
+        height: Platform.isIOS ? (isMainAction ? 90 : 24) : (isMainAction ? 80 : 20),
         fit: isMainAction ? BoxFit.cover : null,
       ),
     );
