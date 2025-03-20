@@ -42,8 +42,6 @@ class _PostsState extends State<Posts> {
               _scrollController.position.maxScrollExtent * 1 &&
           !_scrollController.position.outOfRange &&
           !postProvider.loadingMore) {
-        print("loading more data...");
-
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
@@ -61,25 +59,6 @@ class _PostsState extends State<Posts> {
       }
     }
   }
-
-  // void _onScroll() {
-  //   print("123");
-  //   if (_scrollController.position.pixels ==
-  //       _scrollController.position.maxScrollExtent) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) {
-  //       print("here");
-  //       // final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  //       // final postProvider = Provider.of<PostProvider>(context, listen: false);
-  //       // final currentUserId = authProvider.user?.id;
-  //       // if (currentUserId != null) {
-  //       //   postProvider.loadPosts(
-  //       //       userId: widget.userId,
-  //       //       bookmark: widget.bookmark,
-  //       //       currentUserId: currentUserId);
-  //       // }
-  //     });
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -170,8 +149,6 @@ class _PostsState extends State<Posts> {
                       imageUrl: postProvider.posts?[index]['avatar'],
                       name:
                           "${postProvider.posts?[index]['first_name']} ${postProvider.posts?[index]['last_name']}");
-
-                  print(room);
 
                   navigator.pop();
                   await navigator.push(
@@ -311,84 +288,122 @@ class _PostsState extends State<Posts> {
                   thickness: 1,
                   height: 30,
                 ),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (widget.userId == null) {
-                          Navigator.pushNamed(
-                            context,
-                            '/user-profile',
-                            arguments: {
-                              'userId': postProvider.posts?[index]["author_id"]
+                GestureDetector(
+                  onLongPress: () {
+                    final me = Provider.of<AuthProvider>(context, listen: false)
+                        .profile!;
+                    me.id == postProvider.posts![index]['author_id']
+                        ? showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content: const Text(
+                                    'Are you sure you want to remove this post?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Close'),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      await postProvider.deletePost(
+                                          postProvider.posts![index]["id"]);
+
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Remove'),
+                                  ),
+                                ],
+                              );
                             },
-                          ).then((value) async {
-                            await initialData(null, null);
-                          });
-                        }
-                      },
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundImage:
-                            NetworkImage(postProvider.posts?[index]['avatar']),
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              postProvider.posts?[index]['name'] ?? "",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12.80,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              postProvider.posts?[index]['username'] ?? "",
-                              style: TextStyle(
-                                color: Colors.black.withOpacity(0.5),
-                                fontSize: 12.80,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
+                          )
+                        : null;
+                  },
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (widget.userId == null) {
+                            Navigator.pushNamed(
+                              context,
+                              '/user-profile',
+                              arguments: {
+                                'userId': postProvider.posts?[index]
+                                    ["author_id"]
+                              },
+                            ).then((value) async {
+                              await initialData(null, null);
+                            });
+                          }
+                        },
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundImage: NetworkImage(
+                              postProvider.posts?[index]['avatar']),
                         ),
-                        Text(
-                          '${postProvider.posts?[index]['time'] ?? ""} ago',
-                          style: TextStyle(
-                            color: Color(0xFF3C3E42),
-                            fontSize: 12.80,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w400,
+                      ),
+                      SizedBox(width: 5),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                postProvider.posts?[index]['name'] ?? "",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 12.80,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                postProvider.posts?[index]['username'] ?? "",
+                                style: TextStyle(
+                                  color: Colors.black.withOpacity(0.5),
+                                  fontSize: 12.80,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '${postProvider.posts?[index]['time'] ?? ""} ago',
+                            style: TextStyle(
+                              color: Color(0xFF3C3E42),
+                              fontSize: 12.80,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          _showFriendDetail(context, index, postProvider);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Image.asset(
+                            'assets/images/icons/menu.png',
+                            width: 20.0,
+                            height: 20.0,
                           ),
                         ),
-                      ],
-                    ),
-                    Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        _showFriendDetail(context, index, postProvider);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Image.asset(
-                          'assets/images/icons/menu.png',
-                          width: 20.0,
-                          height: 20.0,
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(height: 5),
                 Text(
@@ -469,9 +484,7 @@ class _PostsState extends State<Posts> {
                     ButtonPostAction(
                       icon: Icons.forward,
                       count: postProvider.posts![index]['share'].toString(),
-                      onTap: () {
-                        print('share');
-                      },
+                      onTap: () {},
                     ),
                   ],
                 )

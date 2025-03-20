@@ -314,4 +314,12 @@ class PostService {
       print('Error deleting comment: $e');
     }
   }
+
+  Future<void> deletePost(int postId) async {
+    try {
+      await _supabase.from('posts').delete().eq('id', postId);
+    } catch (e) {
+      print('Error deleting post: $e');
+    }
+  }
 }

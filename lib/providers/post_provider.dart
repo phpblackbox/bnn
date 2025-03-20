@@ -125,4 +125,11 @@ class PostProvider extends ChangeNotifier {
     }
     loading = false;
   }
+
+  Future<void> deletePost(int postId) async {
+    print(postId);
+    await postService.deletePost(postId);
+    posts!.removeWhere((post) => post["id"] == postId);
+    notifyListeners();
+  }
 }
