@@ -151,12 +151,12 @@ class _UserProfileState extends State<UserProfile> {
                                       ),
                                     ),
                                     SizedBox(width: 5, height: 15),
-                                    ImageIcon(
-                                      AssetImage(
-                                          'assets/images/icons/verified.png'),
-                                      color: Colors.red,
-                                      size: 16.0,
-                                    ),
+                                    // ImageIcon(
+                                    //   AssetImage(
+                                    //       'assets/images/icons/verified.png'),
+                                    //   color: Colors.red,
+                                    //   size: 16.0,
+                                    // ),
                                     SizedBox(width: 35),
                                     Row(children: [
                                       GestureDetector(

@@ -88,7 +88,6 @@ class _ProfileState extends State<Profile> {
                         Spacer(),
                         GestureDetector(
                           onTap: () {
-                            print("hello");
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -143,12 +142,12 @@ class _ProfileState extends State<Profile> {
                         ),
                       ),
                       SizedBox(width: 8),
-                      ImageIcon(
-                        AssetImage(
-                            'assets/images/icons/verified.png'), // Replace with your image path
-                        size: 16, // Set the size of the icon
-                        color: Colors.white, // Set the color of the icon
-                      ),
+                      // ImageIcon(
+                      //   AssetImage(
+                      //       'assets/images/icons/verified.png'),
+                      //   size: 16,
+                      //   color: Colors.white,
+                      // ),
                     ],
                   ),
                   SizedBox(height: 4),
