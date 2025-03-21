@@ -54,18 +54,14 @@ class _HomeState extends State<Home> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(90),
-          child: Container(
-            margin: EdgeInsets.only(top: 30),
-            child: Header(),
-          ),
-        ),
         body: Padding(
           padding: EdgeInsets.only(left: 16, top: 0, right: 16),
           child: Column(
             children: [
+              Padding(
+                padding: EdgeInsets.only(top: 32, bottom: 0),
+                child: Header(),
+              ),
               FeedOrReel(index: _feedorReels, onPressed: _onFeedOrReel),
               StorySlider(),
               if (_feedorReels == 0) Posts(),

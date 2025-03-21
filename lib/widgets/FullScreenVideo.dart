@@ -29,6 +29,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
 
   @override
   void dispose() {
+    _controller.pause();
     _controller.dispose();
     super.dispose();
   }
