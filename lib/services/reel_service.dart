@@ -19,9 +19,10 @@ class ReelService {
   }
 
   Future<void> createReel(String userId, String videoUrl) async {
-    await _supabase.from('reels').upsert({
+    await _supabase.from('stories').upsert({
       'author_id': userId,
       'video_url': videoUrl,
+      'type': 'video',
     });
   }
 
@@ -31,8 +32,12 @@ class ReelService {
   }
 
   Future<ReelModel?> getReelById(int reelId) async {
-    final reelRecord =
-        await _supabase.from('reels').select().eq("id", reelId).single();
+    final reelRecord = await _supabase
+        .from('stories')
+        .select()
+        .eq("id", reelId)
+        .eq('type', 'video')
+        .single();
 
     if (reelRecord.isNotEmpty) {
       final reel = ReelModel.fromJson(reelRecord);
@@ -75,8 +80,9 @@ class ReelService {
     return count;
   }
 
-  Future<bool> toggleLikeReel(int reelId, ReelModel reelData) async {
+  Future<bool> toggleLikeReel(ReelModel reelData) async {
     final meId = _supabase.auth.currentUser!.id;
+    final reelId = reelData.id;
     final response = await _supabase
         .from('reel_likes')
         .select()
@@ -123,8 +129,9 @@ class ReelService {
     return currentLikeStatus;
   }
 
-  Future<bool> toggleBookmarkReel(int reelId, ReelModel reelData) async {
+  Future<bool> toggleBookmarkReel(ReelModel reelData) async {
     final meId = _supabase.auth.currentUser!.id;
+    final reelId = reelData.id;
     final response = await _supabase
         .from('reel_bookmarks')
         .select()

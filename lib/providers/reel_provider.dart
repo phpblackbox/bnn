@@ -10,51 +10,36 @@ class ReelProvider extends ChangeNotifier {
   // late VlcPlayerController controller;
   // VlcPlayerController? controller;
 
-  bool loading = false;
+  bool _loading = true;
+  bool get loading => _loading;
+  set loading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
 
   ReelModel? currentReel;
-  ReelModel? nextReel;
-  int currentReelId = 0;
-  int nextReelId = 0;
+
+  List<ReelModel> reels = [];
 
   Future<void>? initializeVideoPlayerFuture;
 
-  ReelProvider({int? initialReelId}) {
-    print("init");
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initialize(initialReelId);
-    });
-  }
-
-  Future<void> initialize(int? initialReelId) async {
+  Future<void> initialize() async {
+    reels = [];
+    currentReel = null;
     loading = true;
-    notifyListeners();
 
-    int randomReelId1;
-    if (initialReelId != null) {
-      randomReelId1 = initialReelId;
-    } else {
-      randomReelId1 = await reelService.getRandomReelId();
-    }
-
-    final reel = await reelService.getReelById(randomReelId1);
+    int randomReelId;
+    randomReelId = await reelService.getRandomReelId();
+    final reel = await reelService.getReelById(randomReelId);
     if (reel != null) {
-      currentReelId = randomReelId1;
       currentReel = reel;
+      reels.add(reel);
     }
     notifyListeners();
-
     await loadVideo(currentReel!);
 
-    int randomReelId2 = await reelService.getRandomReelId();
-    final temp2 = await reelService.getReelById(randomReelId2);
-    if (temp2 != null) {
-      nextReel = temp2;
-      nextReelId = randomReelId2;
-    }
-
+    await nextStep();
     loading = false;
-    notifyListeners();
   }
 
   Future<void> increaseCountComment() async {
@@ -68,22 +53,19 @@ class ReelProvider extends ChangeNotifier {
   }
 
   Future<void> nextStep() async {
-    currentReelId = nextReelId;
-    currentReel = nextReel;
+    currentReel = reels.last;
+    notifyListeners();
     await loadVideo(currentReel!);
 
     int randomReelId;
     do {
       randomReelId = await reelService.getRandomReelId();
-    } while (randomReelId == currentReelId);
-
+    } while (reels.any((reel) => reel.id == randomReelId));
     print(randomReelId);
-    print(currentReelId);
 
-    final temp = await reelService.getReelById(randomReelId);
-    if (temp != null) {
-      nextReel = temp;
-      nextReelId = randomReelId;
+    final reel = await reelService.getReelById(randomReelId);
+    if (reel != null) {
+      reels.add(reel);
     }
     notifyListeners();
   }
@@ -94,17 +76,14 @@ class ReelProvider extends ChangeNotifier {
     }
     controller = null;
     initializeVideoPlayerFuture = null;
-    // notifyListeners();
   }
 
   Future<void> loadVideo(ReelModel currentReel) async {
-    print("load video");
     if (controller != null) {
       await controller?.dispose();
     }
 
     if (currentReel.videoUrl.isNotEmpty) {
-      // if (controller != null) {
       controller = VideoPlayerController.networkUrl(
         Uri.parse(currentReel.videoUrl),
       );
@@ -123,15 +102,14 @@ class ReelProvider extends ChangeNotifier {
 
   Future<void> toggleLikeReel() async {
     if (currentReel == null) return;
-    bool status = await reelService.toggleLikeReel(currentReelId, currentReel!);
+    bool status = await reelService.toggleLikeReel(currentReel!);
     currentReel!.likes += status ? 1 : -1;
     notifyListeners();
   }
 
   Future<void> toggleBookmarkReel() async {
     if (currentReel == null) return;
-    bool status =
-        await reelService.toggleBookmarkReel(currentReelId, currentReel!);
+    bool status = await reelService.toggleBookmarkReel(currentReel!);
     currentReel!.bookmarks += status ? 1 : -1;
     notifyListeners();
   }

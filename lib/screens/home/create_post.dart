@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:get_thumbnail_video/index.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:get_thumbnail_video/video_thumbnail.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -21,7 +24,8 @@ class _CreatePostState extends State<CreatePost> {
   final TextEditingController _postController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  final List<XFile> _selectedImages = [];
+  final List<XFile> _selected = [];
+  List<XFile> _selectedVideos = [];
 
   @override
   void initState() {
@@ -30,10 +34,10 @@ class _CreatePostState extends State<CreatePost> {
 
   Future<void> pickImages() async {
     try {
-      final List<XFile> pickedFiles = await _picker.pickMultiImage();
+      final List<XFile> pickedFiles = await _picker.pickMultipleMedia();
       if (pickedFiles.isNotEmpty) {
         setState(() {
-          _selectedImages.addAll(pickedFiles);
+          _selected.addAll(pickedFiles);
         });
       }
     } catch (e) {
@@ -48,7 +52,7 @@ class _CreatePostState extends State<CreatePost> {
 
       if (image != null) {
         setState(() {
-          _selectedImages.add(image);
+          _selected.add(image);
         });
       }
     } catch (e) {
@@ -65,8 +69,7 @@ class _CreatePostState extends State<CreatePost> {
       return;
     }
     try {
-      await postProvider.newPost(
-          context, _selectedImages, _postController.text);
+      await postProvider.newPost(context, _selected, _postController.text);
       CustomToast.showToastSuccessTop(context, "You've posted successfully!");
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
@@ -210,11 +213,30 @@ class _CreatePostState extends State<CreatePost> {
                         height: 80,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: _selectedImages.length,
+                          itemCount: _selected.length,
                           itemBuilder: (context, index) {
+                            final fileType =
+                                postProvider.getFileType(_selected[index].path);
                             return Row(children: [
-                              Image.file(File(_selectedImages[index].path),
-                                  fit: BoxFit.fill, height: 64),
+                              fileType == "image"
+                                  ? Image.file(File(_selected[index].path),
+                                      fit: BoxFit.fill, height: 64)
+                                  : FutureBuilder<Uint8List?>(
+                                      future: postProvider.generateThumbnail(
+                                          _selected[index].path),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return CircularProgressIndicator();
+                                        } else if (snapshot.hasData &&
+                                            snapshot.data != null) {
+                                          return Image.memory(snapshot.data!);
+                                        } else {
+                                          return Text(
+                                              'Failed to load thumbnail');
+                                        }
+                                      },
+                                    ),
                               SizedBox(width: 8),
                             ]);
                           },
@@ -243,9 +265,7 @@ class _CreatePostState extends State<CreatePost> {
                             width: 16,
                             height: 16,
                           ),
-                          onPressed: () {
-                            print('Image Icon Button Pressed');
-                          },
+                          onPressed: () {},
                         ),
                         IconButton(
                           icon: Image.asset(

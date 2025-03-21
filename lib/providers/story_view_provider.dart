@@ -1,12 +1,14 @@
 import 'package:bnn/services/story_service.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 class StoryViewProvider extends ChangeNotifier {
   final StoryService _storyService = StoryService();
 
   dynamic story = {
     "img_urls": [],
+    "video_url": "",
     "id": 0,
     "username": "",
     "avatar": "",
@@ -17,6 +19,9 @@ class StoryViewProvider extends ChangeNotifier {
   };
 
   List<dynamic> stories = [];
+
+  Future<void>? initializeVideoPlayerFuture;
+  VideoPlayerController? controller;
 
   int _currentImageIndex = 0;
   int get currentImageIndex => _currentImageIndex;
@@ -35,8 +40,9 @@ class StoryViewProvider extends ChangeNotifier {
   Future<void> initialize(int storyId) async {
     loading = true;
     stories = [];
-    story = await getStoryById(storyId);
-    stories.add(story);
+    final temp = await getStoryById(storyId);
+    stories.add(temp);
+    loadStory(0);
     await nextStory();
     loading = false;
   }
@@ -87,11 +93,13 @@ class StoryViewProvider extends ChangeNotifier {
   }
 
   void loadStory(int index) {
-    if (stories.length >= 2) {
-      story = stories[index];
-      currentImageIndex = 0;
-      notifyListeners();
+    story = stories[index];
+    print(story);
+    currentImageIndex = 0;
+    if (story['type'] == "video") {
+      loadVideo();
     }
+    notifyListeners();
   }
 
   void nextImage() {
@@ -113,6 +121,36 @@ class StoryViewProvider extends ChangeNotifier {
         currentImageIndex = currentImageIndex - 1;
       }
       notifyListeners();
+    }
+  }
+
+  Future<void> close() async {
+    if (controller != null && controller!.value.isInitialized) {
+      await controller?.dispose();
+    }
+    controller = null;
+    initializeVideoPlayerFuture = null;
+  }
+
+  Future<void> loadVideo() async {
+    if (controller != null) {
+      await controller?.dispose();
+    }
+
+    if (story['video_url'].isNotEmpty) {
+      controller = VideoPlayerController.networkUrl(
+        Uri.parse(story['video_url']),
+      );
+
+      initializeVideoPlayerFuture = controller!.initialize().then((_) {
+        controller!.setLooping(true);
+        controller!.play();
+        notifyListeners();
+      }).catchError((error) {
+        print("Error initializing video: $error");
+      });
+    } else {
+      print("Video URL is not available");
     }
   }
 }

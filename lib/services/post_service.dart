@@ -300,6 +300,15 @@ class PostService {
     });
   }
 
+  Future<String> uploadVideo(String filePath) async {
+    final bytes = await File(filePath).readAsBytes();
+    String filename = '${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+    await _supabase.storage.from('posts').uploadBinary(filename, bytes);
+
+    return _supabase.storage.from('posts').getPublicUrl(filename);
+  }
+
   Future<void> deleteComment(int commentId) async {
     try {
       final response =

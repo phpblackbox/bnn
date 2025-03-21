@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/comments.dart';
+import 'package:bnn/widgets/FullScreenVideo.dart';
 import 'package:bnn/widgets/buttons/button-post-action.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:bnn/widgets/FullScreenImage.dart';
@@ -424,29 +427,64 @@ class _PostsState extends State<Posts> {
                           itemCount:
                               postProvider.posts?[index]['img_urls'].length,
                           itemBuilder: (context, index2) {
+                            final fileType = postProvider.getFileType(
+                                postProvider.posts?[index]['img_urls'][index2]);
                             return GestureDetector(
                               onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => FullScreenImage(
-                                        imageUrl: postProvider.posts?[index]
-                                            ['img_urls'][index2]!),
-                                  ),
-                                );
+                                if (fileType == "image") {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => FullScreenImage(
+                                          imageUrl: postProvider.posts?[index]
+                                              ['img_urls'][index2]!),
+                                    ),
+                                  );
+                                } else if (fileType == "video") {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => FullScreenVideo(
+                                          videoUrl: postProvider.posts?[index]
+                                              ['img_urls'][index2]!),
+                                    ),
+                                  );
+                                }
                               },
                               child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  child: Image.network(
-                                    postProvider.posts?[index]['img_urls']
-                                        [index2]!,
-                                    fit: BoxFit.cover,
-                                    width: 150.0,
-                                    height: 140.0,
-                                  ),
-                                ),
-                              ),
+                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                  child: fileType == "video"
+                                      ? FutureBuilder<Uint8List?>(
+                                          future:
+                                              postProvider.generateThumbnail(
+                                                  postProvider.posts?[index]
+                                                      ['img_urls'][index2]),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 2));
+                                            } else if (snapshot.hasData &&
+                                                snapshot.data != null) {
+                                              return Image.memory(
+                                                  snapshot.data!);
+                                            } else {
+                                              return Text(
+                                                  'Failed to load thumbnail');
+                                            }
+                                          },
+                                        )
+                                      : ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            postProvider.posts?[index]
+                                                ['img_urls'][index2]!,
+                                            fit: BoxFit.cover,
+                                            width: 150.0,
+                                            height: 140.0,
+                                          ),
+                                        )),
                             );
                           },
                         ),

@@ -35,10 +35,7 @@ class _ReelScreenState extends State<ReelScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final reelProvider = Provider.of<ReelProvider>(context, listen: false);
-
-      if (reelProvider.currentReel != null) {
-        reelProvider.loadVideo(reelProvider.currentReel!);
-      }
+      await reelProvider.initialize();
     });
 
     _animationController = AnimationController(
@@ -156,8 +153,8 @@ class _ReelScreenState extends State<ReelScreen>
                       .toggleLikeReel();
                 },
                 onComment: () {
-                  if (!reelProvider.currentReelId.isNaN) {
-                    _showCommentDetail(context, reelProvider.currentReelId);
+                  if (!reelProvider.currentReel!.id.isNaN) {
+                    _showCommentDetail(context, reelProvider.currentReel!.id);
                   }
                 },
                 onBookmark: () {

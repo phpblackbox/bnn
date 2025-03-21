@@ -1,6 +1,7 @@
 // lib/services/story_service.dart
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -75,10 +76,8 @@ class StoryService {
 
   Future<Map<String, dynamic>> createStoryImage(
       String userId, List<String> imgUrls) async {
-    final newStory = await _supabase.from('stories').upsert({
-      'author_id': userId,
-      'img_urls': imgUrls,
-    }).select();
+    final newStory = await _supabase.from('stories').upsert(
+        {'author_id': userId, 'img_urls': imgUrls, 'type': 'image'}).select();
 
     return newStory[0];
   }

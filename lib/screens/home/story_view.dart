@@ -1,14 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:cube_transition_plus/cube_transition_plus.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:video_player/video_player.dart';
 
 class StoryView extends StatefulWidget {
   final int id;
@@ -39,10 +45,23 @@ class _StoryViewState extends State<StoryView> {
     '😱'
   ];
 
+  StoryViewProvider? _storyViewProvider;
+  late FocusNode _focusNode;
+
+  final GlobalKey _videoKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     initialData();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() async {
+      if (_focusNode.hasFocus) {
+        await _storyViewProvider!.controller!.pause();
+      } else {
+        print("TextField lost focus");
+      }
+    });
   }
 
   Future<void> initialData() async {
@@ -77,10 +96,44 @@ class _StoryViewState extends State<StoryView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _storyViewProvider = Provider.of<StoryViewProvider>(context, listen: false);
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _pageController.dispose();
+    _storyViewProvider?.close();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  Future<String> capturePausedFrame() async {
+    if (_storyViewProvider!.controller!.value.isPlaying) {
+      await _storyViewProvider!.controller!.pause();
+    }
+
+    RenderRepaintBoundary boundary =
+        _videoKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData != null) {
+      String randomNumStr = Constants().generateRandomNumberString(8);
+      final filename = '$randomNumStr.png';
+      List<int> bytes = byteData.buffer.asUint8List();
+      Uint8List uint8ByteData = Uint8List.fromList(bytes);
+      await supabase.storage.from('story').uploadBinary(
+            filename,
+            uint8ByteData,
+          );
+
+      return supabase.storage.from('story').getPublicUrl(filename);
+    }
+
+    return "";
   }
 
   void _showEmojiModal(BuildContext context) {
@@ -143,25 +196,42 @@ class _StoryViewState extends State<StoryView> {
               : GestureDetector(
                   onTapDown: (details) {
                     double dx = details.globalPosition.dx;
+                    double dy = details.globalPosition.dy;
                     double screenWidth = MediaQuery.of(context).size.width;
-                    if (dx < screenWidth / 8) {
-                      print("prev");
-                      storyViewProvider.prevImage();
-                      _pageController.animateToPage(
-                        storyViewProvider.currentImageIndex,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                      );
+                    double screenHieght = MediaQuery.of(context).size.height;
+                    if (storyViewProvider.story['type'] == 'image') {
+                      if (dx < screenWidth / 8) {
+                        FocusScope.of(context).unfocus();
+                        storyViewProvider.prevImage();
+                        _pageController.animateToPage(
+                          storyViewProvider.currentImageIndex,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+
+                      if (dx > 7 * screenWidth / 8) {
+                        FocusScope.of(context).unfocus();
+                        storyViewProvider.nextImage();
+                        _pageController.animateToPage(
+                          storyViewProvider.currentImageIndex,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
                     }
 
-                    if (dx > 7 * screenWidth / 8) {
-                      print("next");
-                      storyViewProvider.nextImage();
-                      _pageController.animateToPage(
-                        storyViewProvider.currentImageIndex,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                      );
+                    if (storyViewProvider.story['type'] == 'video' &&
+                        dx > screenWidth / 4 &&
+                        dx < 3 * screenWidth / 4 &&
+                        dy > screenHieght / 4 &&
+                        dy < 3 * screenHieght / 4) {
+                      print("click event");
+                      if (storyViewProvider.controller!.value.isPlaying) {
+                        storyViewProvider.controller!.pause();
+                      } else {
+                        storyViewProvider.controller!.play();
+                      }
                     }
                   },
                   child: Column(
@@ -170,14 +240,15 @@ class _StoryViewState extends State<StoryView> {
                         child: CubePageView.builder(
                           itemCount: storyViewProvider.stories.length,
                           onPageChanged: (i) async {
-                            print(i);
                             if (i == storyViewProvider.stories.length - 1) {
-                              print("next");
+                              FocusScope.of(context).unfocus();
+                              await storyViewProvider.controller!.pause();
                               await storyViewProvider.nextStory();
                               print(storyViewProvider.stories.length);
                               storyViewProvider.loadStory(i);
                             } else {
-                              print("prev");
+                              FocusScope.of(context).unfocus();
+                              await storyViewProvider.controller!.pause();
                               storyViewProvider.loadStory(i);
                             }
                             storyViewProvider.currentImageIndex = 0;
@@ -189,22 +260,50 @@ class _StoryViewState extends State<StoryView> {
                             return CubeWidget(
                               index: index,
                               pageNotifier: notifier,
-                              child: PageView.builder(
-                                controller: _pageController,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: tempStory["img_urls"].length,
-                                onPageChanged: (i) {
-                                  storyViewProvider.currentImageIndex = i;
-                                },
-                                itemBuilder: (context, index) {
-                                  return Image.network(
-                                    tempStory["img_urls"][index],
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  );
-                                },
-                              ),
+                              child: tempStory["type"] == "image"
+                                  ? PageView.builder(
+                                      controller: _pageController,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: tempStory["img_urls"].length,
+                                      onPageChanged: (i) {
+                                        storyViewProvider.currentImageIndex = i;
+                                      },
+                                      itemBuilder: (context, index) {
+                                        return Image.network(
+                                          tempStory["img_urls"][index],
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                        );
+                                      },
+                                    )
+                                  : FutureBuilder<void>(
+                                      future: storyViewProvider
+                                          .initializeVideoPlayerFuture,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.done) {
+                                          return Center(
+                                            child: RepaintBoundary(
+                                              key: _videoKey,
+                                              child: AspectRatio(
+                                                aspectRatio: storyViewProvider
+                                                    .controller!
+                                                    .value
+                                                    .aspectRatio,
+                                                child: VideoPlayer(
+                                                    storyViewProvider
+                                                        .controller!),
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          return Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
+                                      },
+                                    ),
                             );
                           },
                         ),
@@ -310,6 +409,7 @@ class _StoryViewState extends State<StoryView> {
                     children: [
                       Expanded(
                         child: TextField(
+                          focusNode: _focusNode,
                           controller: _msgController,
                           style: TextStyle(
                             fontSize: 10.0,
@@ -365,12 +465,18 @@ class _StoryViewState extends State<StoryView> {
                                   ['avatar'],
                               name:
                                   "${storyViewProvider.story['profiles']['first_name']} ${storyViewProvider.story['profiles']['last_name']}");
+                          final imageUrl =
+                              storyViewProvider.story['type'] == "image"
+                                  ? storyViewProvider.story["img_urls"]
+                                      [storyViewProvider.currentImageIndex]
+                                  : await capturePausedFrame();
+                          print(imageUrl);
                           final message = types.PartialText(
                               text: _msgController.text,
                               metadata: {
-                                'image_url': storyViewProvider.story["img_urls"]
-                                    [storyViewProvider.currentImageIndex]
+                                'image_url': imageUrl,
                               });
+
                           await SupabaseChatCore.instance
                               .sendMessage(message, room.id);
                           _msgController.clear();

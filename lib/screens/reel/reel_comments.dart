@@ -464,9 +464,10 @@ class _ReelCommandsState extends State<ReelCommands> {
                 }
 
                 final reel_author_userInfo = await supabase
-                    .from('reels')
+                    .from('stories')
                     .select()
                     .eq('id', widget.reelId)
+                    .eq('type', 'video')
                     .single();
 
                 if (reel_author_userInfo.isNotEmpty) {
