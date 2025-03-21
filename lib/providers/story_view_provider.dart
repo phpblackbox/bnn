@@ -19,6 +19,12 @@ class StoryViewProvider extends ChangeNotifier {
   };
 
   List<dynamic> stories = [];
+  int _currentStoryIndex = 0;
+  int get currentStoryIndex => _currentStoryIndex;
+  set currentStoryIndex(int value) {
+    _currentStoryIndex = value;
+    notifyListeners();
+  }
 
   Future<void>? initializeVideoPlayerFuture;
   VideoPlayerController? controller;
@@ -40,10 +46,14 @@ class StoryViewProvider extends ChangeNotifier {
   Future<void> initialize(int storyId) async {
     loading = true;
     stories = [];
-    final temp = await getStoryById(storyId);
-    stories.add(temp);
+
+    // Load initial story
+    final initialStory = await getStoryById(storyId);
+    stories.add(initialStory);
+    await preloadNextStory();
+    await preloadPreviousStory();
+
     loadStory(0);
-    await nextStory();
     loading = false;
   }
 
@@ -57,44 +67,53 @@ class StoryViewProvider extends ChangeNotifier {
     return tempStory;
   }
 
-  // Future<void> getStoriesByUserId(String userId) async {
-  //   try {
-  //     currentStoryIndex = 0;
-  //     story = {};
-  //     loading = true;
-  //     _data = await _storyService.getStoriesByUserId(userId);
-  //     if (_data.isNotEmpty) {
-  //       for (int i = 0; i < _data.length; i++) {
-  //         final nowString = await _storyService.getServerTime();
-  //         DateTime now = DateTime.parse(nowString);
-  //         DateTime createdAt = DateTime.parse(_data[i]["created_at"]);
-  //         Duration difference = now.difference(createdAt);
-  //         _data[i]['timeDiff'] = Constants().formatDuration(difference);
-  //       }
-  //       story = _data[currentStoryIndex];
-  //     }
-  //     loading = false;
-  //   } catch (e) {
-  //     loading = false;
-  //     rethrow;
-  //   } finally {
-  //     loading = false;
-  //   }
-  // }
-
-  Future<void> nextStory() async {
+  Future<void> preloadNextStory() async {
     int randomId;
     do {
       randomId = await _storyService.getRandomStoryId();
     } while (stories.any((story) => story['id'] == randomId));
-    final temp = await getStoryById(randomId);
-    stories.add(temp);
+
+    final nextStory = await getStoryById(randomId);
+    stories.add(nextStory);
     notifyListeners();
+  }
+
+  Future<void> preloadPreviousStory() async {
+    int randomId;
+    do {
+      randomId = await _storyService.getRandomStoryId();
+    } while (stories.any((story) => story['id'] == randomId));
+
+    final prevStory = await getStoryById(randomId);
+    stories.insert(0, prevStory);
+    currentStoryIndex++; // Adjust current index since we inserted at beginning
+    notifyListeners();
+  }
+
+  Future<void> nextStory() async {
+    if (currentStoryIndex < stories.length - 1) {
+      currentStoryIndex++;
+      loadStory(currentStoryIndex);
+      // Preload next story if we're near the end
+      if (currentStoryIndex >= stories.length - 2) {
+        await preloadNextStory();
+      }
+    }
+  }
+
+  Future<void> previousStory() async {
+    if (currentStoryIndex > 0) {
+      currentStoryIndex--;
+      loadStory(currentStoryIndex);
+      // Preload previous story if we're near the beginning
+      if (currentStoryIndex <= 1) {
+        await preloadPreviousStory();
+      }
+    }
   }
 
   void loadStory(int index) {
     story = stories[index];
-
     currentImageIndex = 0;
     if (story['type'] == "video") {
       loadVideo();

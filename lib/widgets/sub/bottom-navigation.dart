@@ -54,7 +54,7 @@ class BottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: Platform.isIOS ? 80 : 67.0,
+      height: Platform.isIOS ? 90 : 67.0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
@@ -89,10 +89,10 @@ class BottomNavigation extends StatelessWidget {
       child: Image.asset(
         assetPath,
         width: Platform.isIOS
-            ? (isMainAction ? 90 : 24)
+            ? (isMainAction ? 100 : 26)
             : (isMainAction ? 80 : 20),
         height: Platform.isIOS
-            ? (isMainAction ? 90 : 24)
+            ? (isMainAction ? 100 : 26)
             : (isMainAction ? 80 : 20),
         fit: isMainAction ? BoxFit.cover : null,
       ),

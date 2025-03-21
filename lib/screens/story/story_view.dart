@@ -109,32 +109,6 @@ class _StoryViewState extends State<StoryView> {
     super.dispose();
   }
 
-  Future<String> capturePausedFrame() async {
-    if (_storyViewProvider!.controller!.value.isPlaying) {
-      await _storyViewProvider!.controller!.pause();
-    }
-
-    RenderRepaintBoundary boundary =
-        _videoKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-
-    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData != null) {
-      String randomNumStr = Constants().generateRandomNumberString(8);
-      final filename = '$randomNumStr.png';
-      List<int> bytes = byteData.buffer.asUint8List();
-      Uint8List uint8ByteData = Uint8List.fromList(bytes);
-      await supabase.storage.from('story').uploadBinary(
-            filename,
-            uint8ByteData,
-          );
-
-      return supabase.storage.from('story').getPublicUrl(filename);
-    }
-
-    return "";
-  }
-
   void _showEmojiModal(BuildContext context) {
     showDialog(
       context: context,
@@ -184,10 +158,37 @@ class _StoryViewState extends State<StoryView> {
     Navigator.pop(context);
   }
 
+  Future<String> capturePausedFrame() async {
+    if (_storyViewProvider!.controller!.value.isPlaying) {
+      await _storyViewProvider!.controller!.pause();
+    }
+
+    RenderRepaintBoundary boundary =
+        _videoKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData != null) {
+      String randomNumStr = Constants().generateRandomNumberString(8);
+      final filename = '$randomNumStr.png';
+      List<int> bytes = byteData.buffer.asUint8List();
+      Uint8List uint8ByteData = Uint8List.fromList(bytes);
+      await supabase.storage.from('story').uploadBinary(
+            filename,
+            uint8ByteData,
+          );
+
+      return supabase.storage.from('story').getPublicUrl(filename);
+    }
+
+    return "";
+  }
+
   @override
   Widget build(BuildContext context) {
     final storyViewProvider = Provider.of<StoryViewProvider>(context);
     return Scaffold(
+      // backgroundColor: Colors.black,
       body: Stack(
         children: [
           storyViewProvider.loading
@@ -198,31 +199,32 @@ class _StoryViewState extends State<StoryView> {
                     double dy = details.globalPosition.dy;
                     double screenWidth = MediaQuery.of(context).size.width;
                     double screenHieght = MediaQuery.of(context).size.height;
-                    if (storyViewProvider.story['type'] == 'image') {
-                      if (dx < screenWidth / 8) {
-                        FocusScope.of(context).unfocus();
+
+                    if (dx < screenWidth / 4) {
+                      FocusScope.of(context).unfocus();
+                      if (storyViewProvider.story['type'] == 'image') {
                         storyViewProvider.prevImage();
                         _pageController.animateToPage(
                           storyViewProvider.currentImageIndex,
                           duration: Duration(milliseconds: 500),
                           curve: Curves.easeInOut,
                         );
+                      } else {
+                        storyViewProvider.previousStory();
                       }
-
-                      if (dx > 7 * screenWidth / 8) {
-                        FocusScope.of(context).unfocus();
+                    } else if (dx > 3 * screenWidth / 4) {
+                      FocusScope.of(context).unfocus();
+                      if (storyViewProvider.story['type'] == 'image') {
                         storyViewProvider.nextImage();
                         _pageController.animateToPage(
                           storyViewProvider.currentImageIndex,
                           duration: Duration(milliseconds: 500),
                           curve: Curves.easeInOut,
                         );
+                      } else {
+                        storyViewProvider.nextStory();
                       }
-                    }
-
-                    if (storyViewProvider.story['type'] == 'video' &&
-                        dx > screenWidth / 4 &&
-                        dx < 3 * screenWidth / 4 &&
+                    } else if (storyViewProvider.story['type'] == 'video' &&
                         dy > screenHieght / 4 &&
                         dy < 3 * screenHieght / 4) {
                       if (storyViewProvider.controller!.value.isPlaying) {
@@ -238,15 +240,15 @@ class _StoryViewState extends State<StoryView> {
                         child: CubePageView.builder(
                           itemCount: storyViewProvider.stories.length,
                           onPageChanged: (i) async {
-                            if (i == storyViewProvider.stories.length - 1) {
+                            if (i > storyViewProvider.currentStoryIndex) {
                               FocusScope.of(context).unfocus();
                               await storyViewProvider.controller!.pause();
                               await storyViewProvider.nextStory();
-                              storyViewProvider.loadStory(i);
-                            } else {
+                            } else if (i <
+                                storyViewProvider.currentStoryIndex) {
                               FocusScope.of(context).unfocus();
                               await storyViewProvider.controller!.pause();
-                              storyViewProvider.loadStory(i);
+                              await storyViewProvider.previousStory();
                             }
                             storyViewProvider.currentImageIndex = 0;
                             _stopAutoSlide();
@@ -314,87 +316,31 @@ class _StoryViewState extends State<StoryView> {
                   top: 40.0,
                   left: 10,
                   right: 10,
-                  child: Column(children: [
-                    SizedBox(
-                      height: 5.0,
-                      child: Row(
-                        children: List.generate(
-                            storyViewProvider.story["img_urls"].length,
-                            (index) {
-                          return Expanded(
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 1.5),
-                              decoration: BoxDecoration(
-                                color:
-                                    index == storyViewProvider.currentImageIndex
-                                        ? Colors.white
-                                        : Colors.white.withOpacity(0.36),
-                                borderRadius: BorderRadius.circular(3.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 5.0,
+                        child: Row(
+                          children: List.generate(
+                              storyViewProvider.story["img_urls"].length,
+                              (index) {
+                            return Expanded(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 1.5),
+                                decoration: BoxDecoration(
+                                  color: index ==
+                                          storyViewProvider.currentImageIndex
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.36),
+                                  borderRadius: BorderRadius.circular(3.0),
+                                ),
                               ),
-                            ),
-                          );
-                        }),
+                            );
+                          }),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(21),
-                          ),
-                          child: ClipOval(
-                            child: Image.network(
-                              storyViewProvider.story["profiles"]["avatar"],
-                              fit: BoxFit.fill,
-                              width: 42,
-                              height: 42,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          storyViewProvider.story["profiles"]["username"],
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'Nunito',
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.33,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          storyViewProvider.story["timeDiff"],
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8199999928474426),
-                            fontSize: 12,
-                            fontFamily: 'Nunito',
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -0.07,
-                          ),
-                        ),
-                        Spacer(),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: ImageIcon(
-                            AssetImage('assets/images/icons/close.png'),
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ]),
+                    ],
+                  ),
                 ),
           storyViewProvider.loading
               ? Container()

@@ -1,6 +1,6 @@
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/screens/home/create_story_gallery.dart';
-import 'package:bnn/screens/home/story_view.dart';
+import 'package:bnn/screens/story/story_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
