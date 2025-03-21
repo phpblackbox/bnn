@@ -7,8 +7,11 @@ import 'package:video_player/video_player.dart';
 class ReelProvider extends ChangeNotifier {
   final ReelService reelService = ReelService();
   VideoPlayerController? controller;
-  // late VlcPlayerController controller;
-  // VlcPlayerController? controller;
+  VideoPlayerController? _nextController;
+  ReelModel? _nextReel;
+  bool _isPreloadingNext = false;
+  static const int _maxPreloadAttempts = 3;
+  int _preloadNextAttempts = 0;
 
   bool _loading = true;
   bool get loading => _loading;
@@ -18,28 +21,150 @@ class ReelProvider extends ChangeNotifier {
   }
 
   ReelModel? currentReel;
-
+  int currentIndex = 0;
   List<ReelModel> reels = [];
-
   Future<void>? initializeVideoPlayerFuture;
 
   Future<void> initialize() async {
     reels = [];
     currentReel = null;
+    currentIndex = 0;
     loading = true;
 
-    int randomReelId;
-    randomReelId = await reelService.getRandomReelId();
-    final reel = await reelService.getReelById(randomReelId);
-    if (reel != null) {
-      currentReel = reel;
-      reels.add(reel);
+    try {
+      int randomReelId = await reelService.getRandomReelId();
+      final reel = await reelService.getReelById(randomReelId);
+      if (reel != null) {
+        currentReel = reel;
+        reels.add(reel);
+        await loadVideo(currentReel!);
+        await _preloadNextVideo();
+      }
+    } catch (e) {
+      print("Error initializing reel: $e");
+    } finally {
+      loading = false;
+      notifyListeners();
     }
-    notifyListeners();
-    await loadVideo(currentReel!);
+  }
 
-    await nextStep();
-    loading = false;
+  Future<void> _preloadNextVideo() async {
+    if (_nextReel != null ||
+        _isPreloadingNext ||
+        _preloadNextAttempts >= _maxPreloadAttempts) return;
+
+    _isPreloadingNext = true;
+    _preloadNextAttempts++;
+
+    try {
+      int randomReelId;
+      do {
+        randomReelId = await reelService.getRandomReelId();
+      } while (reels.any((reel) => reel.id == randomReelId));
+
+      _nextReel = await reelService.getReelById(randomReelId);
+
+      if (_nextReel != null && _nextReel!.videoUrl.isNotEmpty) {
+        _nextController = VideoPlayerController.networkUrl(
+          Uri.parse(_nextReel!.videoUrl),
+        );
+        await _nextController?.initialize();
+        _preloadNextAttempts = 0; // Reset attempts on success
+      }
+    } catch (e) {
+      print("Error preloading next video: $e");
+      _nextReel = null;
+      _nextController = null;
+    } finally {
+      _isPreloadingNext = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> nextStep() async {
+    if (_nextReel == null || _nextController == null) {
+      await _preloadNextVideo();
+      return;
+    }
+
+    try {
+      // Store current controller before disposing
+      final oldController = controller;
+
+      // Switch to preloaded content first
+      controller = _nextController;
+      currentReel = _nextReel;
+      reels.add(_nextReel!);
+      currentIndex++;
+
+      // Start preloading next video
+      _nextReel = null;
+      _nextController = null;
+      _preloadNextVideo();
+
+      // Play current video
+      controller?.setLooping(true);
+      controller?.play();
+
+      // Dispose old controller after switching
+      if (oldController != null && oldController.value.isInitialized) {
+        await oldController.dispose();
+      }
+    } catch (e) {
+      print("Error in nextStep: $e");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> close() async {
+    try {
+      if (controller != null && controller!.value.isInitialized) {
+        await controller?.dispose();
+      }
+      if (_nextController != null && _nextController!.value.isInitialized) {
+        await _nextController?.dispose();
+      }
+    } catch (e) {
+      print("Error disposing controllers: $e");
+    } finally {
+      controller = null;
+      _nextController = null;
+      _nextReel = null;
+      _isPreloadingNext = false;
+      _preloadNextAttempts = 0;
+      initializeVideoPlayerFuture = null;
+    }
+  }
+
+  Future<void> loadVideo(ReelModel currentReel) async {
+    try {
+      // Store old controller
+      final oldController = controller;
+
+      if (currentReel.videoUrl.isNotEmpty) {
+        controller = VideoPlayerController.networkUrl(
+          Uri.parse(currentReel.videoUrl),
+        );
+
+        initializeVideoPlayerFuture = controller!.initialize().then((_) {
+          controller!.setLooping(true);
+          controller!.play();
+          notifyListeners();
+        }).catchError((error) {
+          print("Error initializing video: $error");
+        });
+
+        // Dispose old controller after new one is initialized
+        if (oldController != null && oldController.value.isInitialized) {
+          oldController.dispose();
+        }
+      } else {
+        print("Video URL is not available");
+      }
+    } catch (e) {
+      print("Error creating video controller: $e");
+    }
   }
 
   Future<void> increaseCountComment() async {
@@ -50,53 +175,6 @@ class ReelProvider extends ChangeNotifier {
   Future<void> decreaseCountComment() async {
     currentReel!.comments -= 1;
     notifyListeners();
-  }
-
-  Future<void> nextStep() async {
-    currentReel = reels.last;
-    notifyListeners();
-    await loadVideo(currentReel!);
-
-    int randomReelId;
-    do {
-      randomReelId = await reelService.getRandomReelId();
-    } while (reels.any((reel) => reel.id == randomReelId));
-
-    final reel = await reelService.getReelById(randomReelId);
-    if (reel != null) {
-      reels.add(reel);
-    }
-    notifyListeners();
-  }
-
-  Future<void> close() async {
-    if (controller != null && controller!.value.isInitialized) {
-      await controller?.dispose();
-    }
-    controller = null;
-    initializeVideoPlayerFuture = null;
-  }
-
-  Future<void> loadVideo(ReelModel currentReel) async {
-    if (controller != null) {
-      await controller?.dispose();
-    }
-
-    if (currentReel.videoUrl.isNotEmpty) {
-      controller = VideoPlayerController.networkUrl(
-        Uri.parse(currentReel.videoUrl),
-      );
-
-      initializeVideoPlayerFuture = controller!.initialize().then((_) {
-        controller!.setLooping(true);
-        controller!.play();
-        notifyListeners();
-      }).catchError((error) {
-        print("Error initializing video: $error");
-      });
-    } else {
-      print("Video URL is not available");
-    }
   }
 
   Future<void> toggleLikeReel() async {
