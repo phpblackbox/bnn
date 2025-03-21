@@ -69,7 +69,12 @@ class _RoomTileState extends State<RoomTile> {
                 children: [
                   Text(
                     '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
-                        .trim(),
+                                .trim()
+                                .length >
+                            16
+                        ? '${('${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}').trim().substring(0, 16)}...'
+                        : '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
+                            .trim(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12.80,

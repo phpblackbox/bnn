@@ -97,7 +97,7 @@ class _UserProfileState extends State<UserProfile> {
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   image: DecorationImage(
-                                    fit: BoxFit.fitHeight,
+                                    fit: BoxFit.cover,
                                     image: NetworkImage(
                                         userProfileProvider.userInfo!.avatar!),
                                   ),
@@ -125,7 +125,6 @@ class _UserProfileState extends State<UserProfile> {
                                   icon: Icon(Icons.close,
                                       color: Color(0xFF4D4C4A)),
                                   onPressed: () {
-                                    ;
                                     Navigator.pop(context);
                                   },
                                 ),
@@ -144,7 +143,7 @@ class _UserProfileState extends State<UserProfile> {
                                         '${userProfileProvider.userInfo!.firstName!}\n${userProfileProvider.userInfo!.lastName!}',
                                         style: TextStyle(
                                           color: Color(0xFF4D4C4A),
-                                          fontSize: 26,
+                                          fontSize: 20,
                                           fontFamily: 'Roboto',
                                           fontWeight: FontWeight.w400,
                                           height: 1.06,
@@ -179,7 +178,7 @@ class _UserProfileState extends State<UserProfile> {
                                                 'Following',
                                                 style: TextStyle(
                                                   color: Color(0xFF4D4C4A),
-                                                  fontSize: 14,
+                                                  fontSize: 12,
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w400,
                                                 ),
@@ -191,7 +190,7 @@ class _UserProfileState extends State<UserProfile> {
                                                         .countFollowing),
                                                 style: TextStyle(
                                                   color: Color(0xFF4D4C4A),
-                                                  fontSize: 20,
+                                                  fontSize: 16,
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -219,7 +218,7 @@ class _UserProfileState extends State<UserProfile> {
                                                 'Followers',
                                                 style: TextStyle(
                                                   color: Color(0xFF4D4C4A),
-                                                  fontSize: 14,
+                                                  fontSize: 12,
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w400,
                                                 ),
@@ -231,7 +230,7 @@ class _UserProfileState extends State<UserProfile> {
                                                         .countFollowers),
                                                 style: TextStyle(
                                                   color: Color(0xFF4D4C4A),
-                                                  fontSize: 20,
+                                                  fontSize: 16,
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -246,7 +245,7 @@ class _UserProfileState extends State<UserProfile> {
                                               'Views',
                                               style: TextStyle(
                                                 color: Color(0xFF4D4C4A),
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 fontFamily: 'Poppins',
                                                 fontWeight: FontWeight.w400,
                                               ),
@@ -258,7 +257,7 @@ class _UserProfileState extends State<UserProfile> {
                                                       .countViews),
                                               style: TextStyle(
                                                 color: Color(0xFF4D4C4A),
-                                                fontSize: 20,
+                                                fontSize: 16,
                                                 fontFamily: 'Poppins',
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -322,7 +321,7 @@ class _UserProfileState extends State<UserProfile> {
                                               fontWeight: FontWeight.w400,
                                               height: 1.50,
                                             ),
-                                            maxLines: 5,
+                                            maxLines: 15,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),

@@ -2,6 +2,7 @@ import 'package:bnn/models/profiles_model.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/chat/one_video_call.dart';
 import 'package:bnn/screens/chat/one_voice_call.dart';
+import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/utils/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
@@ -72,10 +73,21 @@ class _RoomPageState extends State<RoomPage> {
             Row(children: [
               Icon(Icons.person, color: Color(0xFF4D4C4A)),
               SizedBox(width: 10),
-              Text(
-                'View Profile',
-                style: TextStyle(color: Color(0xFF4D4C4A)),
-              )
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserProfile(
+                                userId: widget.room.users[1].id,
+                              )));
+                },
+                child: Text(
+                  'View Profile',
+                  style: TextStyle(color: Color(0xFF4D4C4A)),
+                ),
+              ),
             ]),
             Divider()
           ]),

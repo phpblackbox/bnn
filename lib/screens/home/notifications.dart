@@ -3,6 +3,7 @@ import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/one_post.dart';
 import 'package:bnn/screens/profile/followers.dart';
+import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/screens/reel/reel.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -158,91 +159,119 @@ class _NotificationsState extends State<Notifications> {
                               await notificationProvider.readNotificaiton(
                                   notificationProvider.data[index]['id']!);
 
-                              switch (notificationProvider.data[index]
-                                  ['action_type']) {
-                                case "follow":
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              Followers())).then((value) {
-                                    notificationProvider.getMyNotifications();
-                                  });
-                                  break;
+                              // goto room page
+                              final meId = supabase.auth.currentUser!.id;
+                              final userInfo =
+                                  notificationProvider.data[index]['profiles'];
+                              if (userInfo['id'] == meId) {
+                                CustomToast.showToastWarningTop(
+                                    context, "You can't send message to you");
 
-                                case "like post":
-                                case "comment post":
-                                  Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => OnePost(
-                                                  postId: notificationProvider
-                                                          .data[index]
-                                                      ['target_id'])))
-                                      .then((value) {
-                                    notificationProvider.getMyNotifications();
-                                  });
-                                  break;
-
-                                case "like reel":
-                                case "comment reel":
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ReelScreen(
-                                                reelId: notificationProvider
-                                                    .data[index]['target_id'],
-                                              ))).then((value) {
-                                    notificationProvider.getMyNotifications();
-                                  });
-                                  break;
-
-                                case "like story":
-                                case "comment story":
-                                  final meId = Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false)
-                                      .user
-                                      ?.id;
-                                  if (notificationProvider.data[index]
-                                          ['actor_id'] ==
-                                      meId) {
-                                    CustomToast.showToastWarningTop(context,
-                                        "You can't send message to you");
-                                    return;
-                                  }
-
-                                  types.User otherUser = types.User(
-                                    id: notificationProvider.data[index]
-                                        ['actor_id'],
-                                    firstName: notificationProvider.data[index]
-                                        ['profiles']['avatar'],
-                                    lastName: notificationProvider.data[index]
-                                        ['profiles']['last_name'],
-                                    imageUrl: notificationProvider.data[index]
-                                        ['profiles']['avatar'],
-                                  );
-
-                                  final navigator = Navigator.of(context);
-                                  final temp = await SupabaseChatCore.instance
-                                      .createRoom(otherUser);
-
-                                  var room = temp.copyWith(
-                                      imageUrl: notificationProvider.data[index]
-                                          ['profiles']['avatar'],
-                                      name:
-                                          "${notificationProvider.data[index]['profiles']['first_name']} ${notificationProvider.data[index]['profiles']['last_name']}");
-
-                                  navigator.pop();
-
-                                  await navigator.push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          RoomPage(room: room),
-                                    ),
-                                  );
-                                  break;
+                                return;
                               }
+                              types.User otherUser = types.User(
+                                id: userInfo['id'],
+                                firstName: userInfo['first_name'],
+                                lastName: userInfo['last_name'],
+                                imageUrl: userInfo['avatar'],
+                              );
+
+                              final navigator = Navigator.of(context);
+
+                              final temp = await SupabaseChatCore.instance
+                                  .createRoom(otherUser);
+
+                              var room = temp.copyWith(
+                                  imageUrl: userInfo['avatar'],
+                                  name:
+                                      "${userInfo['first_name']} ${userInfo['last_name']}");
+
+                              // navigator.pop();
+                              await navigator.push(
+                                MaterialPageRoute(
+                                  builder: (context) => RoomPage(
+                                    room: room,
+                                  ),
+                                ),
+                              );
+
+                              // switch (notificationProvider.data[index]
+                              //     ['action_type']) {
+                              //   case "follow":
+                              //     Navigator.push(
+                              //         context,
+                              //         MaterialPageRoute(
+                              //             builder: (context) =>
+                              //                 Followers())).then((value) {
+                              //       notificationProvider.getMyNotifications();
+                              //     });
+                              //     break;
+                              //   case "like post":
+                              //   case "comment post":
+                              //     Navigator.push(
+                              //             context,
+                              //             MaterialPageRoute(
+                              //                 builder: (context) => OnePost(
+                              //                     postId: notificationProvider
+                              //                             .data[index]
+                              //                         ['target_id'])))
+                              //         .then((value) {
+                              //       notificationProvider.getMyNotifications();
+                              //     });
+                              //     break;
+                              //   case "like reel":
+                              //   case "comment reel":
+                              //     Navigator.push(
+                              //         context,
+                              //         MaterialPageRoute(
+                              //             builder: (context) => ReelScreen(
+                              //                   reelId: notificationProvider
+                              //                       .data[index]['target_id'],
+                              //                 ))).then((value) {
+                              //       notificationProvider.getMyNotifications();
+                              //     });
+                              //     break;
+                              //   case "like story":
+                              //   case "comment story":
+                              //     final meId = Provider.of<AuthProvider>(
+                              //             context,
+                              //             listen: false)
+                              //         .user
+                              //         ?.id;
+                              //     if (notificationProvider.data[index]
+                              //             ['actor_id'] ==
+                              //         meId) {
+                              //       CustomToast.showToastWarningTop(context,
+                              //           "You can't send message to you");
+                              //       return;
+                              //     }
+                              //     types.User otherUser = types.User(
+                              //       id: notificationProvider.data[index]
+                              //           ['actor_id'],
+                              //       firstName: notificationProvider.data[index]
+                              //           ['profiles']['avatar'],
+                              //       lastName: notificationProvider.data[index]
+                              //           ['profiles']['last_name'],
+                              //       imageUrl: notificationProvider.data[index]
+                              //           ['profiles']['avatar'],
+                              //     );
+                              //     final navigator = Navigator.of(context);
+                              //     final temp = await SupabaseChatCore.instance
+                              //         .createRoom(otherUser);
+                              //     var room = temp.copyWith(
+                              //         imageUrl: notificationProvider.data[index]
+                              //             ['profiles']['avatar'],
+                              //         name:
+                              //             "${notificationProvider.data[index]['profiles']['first_name']} ${notificationProvider.data[index]['profiles']['last_name']}");
+                              //     navigator.pop();
+                              //     await navigator.push(
+                              //       MaterialPageRoute(
+                              //         builder: (context) =>
+                              //             RoomPage(room: room),
+                              //       ),
+                              //     );
+                              //     break;
+                              // }
                             },
                             child: Icon(
                               Icons.arrow_forward_ios,
