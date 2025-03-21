@@ -78,7 +78,6 @@ class _NotificationsState extends State<Notifications> {
                               final meId = supabase.auth.currentUser!.id;
                               final userInfo =
                                   notificationProvider.data[index]['profiles'];
-                              print(userInfo);
                               if (userInfo['id'] == meId) {
                                 CustomToast.showToastWarningTop(
                                     context, "You can't send message to you");

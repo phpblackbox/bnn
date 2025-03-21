@@ -102,10 +102,7 @@ class _GroupState extends State<Group> {
         ),
       ],
     ).then((value) {
-      if (value != null) {
-        // Handle the selected option here
-        print('Selected option: $value');
-      }
+      if (value != null) {}
     });
   }
 
@@ -122,9 +119,9 @@ class _GroupState extends State<Group> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white, // Customize according to your theme
+        backgroundColor: Colors.white,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(180), // Set your desired height here
+          preferredSize: Size.fromHeight(180),
           child: Container(
             margin: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -200,10 +197,9 @@ class _GroupState extends State<Group> {
                   Image.asset(
                     "assets/images/avatar/message_man.png",
                     fit: BoxFit.fill,
-                    height: 100, // This is the height of the image
+                    height: 100,
                   ),
                   Column(
-                    // mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -280,7 +276,7 @@ class _GroupState extends State<Group> {
                             message.text,
                             style: TextStyle(color: Colors.black, fontSize: 10),
                           ),
-                          SizedBox(height: 5), // Space between text and time
+                          SizedBox(height: 5),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -317,7 +313,7 @@ class _GroupState extends State<Group> {
                 controller: _controller,
                 obscureText: false,
                 onChanged: (value) {
-                  setState(() {}); // Update state on email field change
+                  setState(() {});
                 },
                 decoration: InputDecoration(
                   hintText: "Write a message...",
@@ -331,7 +327,6 @@ class _GroupState extends State<Group> {
                         color: Colors.black.withOpacity(0.7),
                         iconSize: 40.0,
                         onPressed: () {
-                          // Action when button is pressed
                           print("Volume Up Pressed");
                         },
                       ),

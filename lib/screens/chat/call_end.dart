@@ -23,25 +23,22 @@ class _callEndState extends State<callEnd> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Call Ended', // Replace with dynamic name
+                'Call Ended',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
-                '14:23 minutes ', // Replace with dynamic duration
+                '14:23 minutes ',
                 style: TextStyle(fontSize: 15, color: Color(0xFFF30802)),
               ),
             ],
           ),
           SizedBox(height: 20),
-          // Avatar Image (Center of display)
           CircleAvatar(
             radius: 60,
-            backgroundImage: AssetImage(
-                'assets/images/avatar/p2.png'), // Replace with your image asset
+            backgroundImage: AssetImage('assets/images/avatar/p2.png'),
           ),
           Spacer(),
-          // Bottom Bar
           ButtonGradientMain(
               label: 'Back to home',
               onPressed: () {
@@ -49,12 +46,7 @@ class _callEndState extends State<callEnd> {
                     MaterialPageRoute(builder: (context) => ChatView()));
               },
               textColor: Colors.white,
-              gradientColors: [
-                AppColors.primaryBlack,
-                AppColors.primaryRed
-              ] // Active gradient
-
-              ),
+              gradientColors: [AppColors.primaryBlack, AppColors.primaryRed]),
           SizedBox(height: 50),
         ],
       ),

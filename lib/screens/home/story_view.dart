@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/utils/constants.dart';
@@ -226,7 +225,6 @@ class _StoryViewState extends State<StoryView> {
                         dx < 3 * screenWidth / 4 &&
                         dy > screenHieght / 4 &&
                         dy < 3 * screenHieght / 4) {
-                      print("click event");
                       if (storyViewProvider.controller!.value.isPlaying) {
                         storyViewProvider.controller!.pause();
                       } else {
@@ -244,7 +242,6 @@ class _StoryViewState extends State<StoryView> {
                               FocusScope.of(context).unfocus();
                               await storyViewProvider.controller!.pause();
                               await storyViewProvider.nextStory();
-                              print(storyViewProvider.stories.length);
                               storyViewProvider.loadStory(i);
                             } else {
                               FocusScope.of(context).unfocus();
@@ -470,7 +467,6 @@ class _StoryViewState extends State<StoryView> {
                                   ? storyViewProvider.story["img_urls"]
                                       [storyViewProvider.currentImageIndex]
                                   : await capturePausedFrame();
-                          print(imageUrl);
                           final message = types.PartialText(
                               text: _msgController.text,
                               metadata: {

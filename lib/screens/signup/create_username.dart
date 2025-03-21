@@ -80,7 +80,6 @@ class _CreateUserNameState extends State<CreateUserName> {
                       );
                     }
                   } catch (error) {
-                    print(error);
                     CustomToast.showToastWarningBottom(
                         context, error.toString());
                   }

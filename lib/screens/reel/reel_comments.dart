@@ -18,7 +18,6 @@ class ReelCommands extends StatefulWidget {
 
 class _ReelCommandsState extends State<ReelCommands> {
   final supabase = Supabase.instance.client;
-  // late List<dynamic> _parentComments = [];
   final Map<String, List<dynamic>> _childCommentsMap = {};
 
   late List<dynamic> _parentComments = Constants.fakeParentComments;
@@ -242,7 +241,6 @@ class _ReelCommandsState extends State<ReelCommands> {
             children: [
               GestureDetector(
                 onTap: () async {
-                  print(comment['author_id']);
                   Navigator.pushNamed(
                     context,
                     '/user-profile',
@@ -454,7 +452,6 @@ class _ReelCommandsState extends State<ReelCommands> {
                     _parentComments.insert(0, temp);
                   });
                 } else {
-                  print(_expandedComments);
                   final childComments =
                       await fetchChildComments(parentId.toString());
                   setState(() {
@@ -485,7 +482,7 @@ class _ReelCommandsState extends State<ReelCommands> {
                 Provider.of<ReelProvider>(context, listen: false)
                     .increaseCountComment();
 
-                _commentController.clear(); // Clear the input field
+                _commentController.clear();
                 setState(() {
                   parentId = 0;
                 });

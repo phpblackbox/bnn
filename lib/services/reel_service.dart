@@ -1,5 +1,3 @@
-// lib/services/story_service.dart
-
 import 'dart:io';
 import 'package:bnn/models/reel_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,7 +43,7 @@ class ReelService {
       reel.likes = await getReelLikesCount(reelId);
       reel.bookmarks = await getReelBookmarksCount(reelId);
       reel.comments = await getReelCommentsCount(reelId);
-      reel.share = 2; // default value
+      reel.share = 2;
 
       final meId = _supabase.auth.currentUser?.id;
       if (meId == reel.authorId) {

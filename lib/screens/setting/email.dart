@@ -38,7 +38,6 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
       curve: Curves.easeIn,
     ));
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -48,8 +47,6 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -101,19 +98,17 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: Color(0xFFE9E9E9), // Background color
-                            borderRadius:
-                                BorderRadius.circular(20.0), // Border radius
+                            color: Color(0xFFE9E9E9),
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: TextField(
                             style: TextStyle(
                                 fontSize: 12.0, fontFamily: "Poppins"),
                             controller: emailController,
                             onChanged: (value) {
-                              setState(
-                                  () {}); // Update state on input field change
+                              setState(() {});
                             },
-                            enabled: false, // Disable input if needed
+                            enabled: false,
                             decoration: InputDecoration(
                               hintText: "johnsmith@gmail.com",
                               suffixIcon: IconButton(
@@ -122,18 +117,11 @@ class _Email extends State<Email> with SingleTickerProviderStateMixin {
                                   color: Color(0xFFF30802),
                                   size: 18,
                                 ),
-                                onPressed: () {
-                                  // Handle check button pressed
-                                  print(
-                                      "Checked Email: ${emailController.text}");
-                                },
+                                onPressed: () {},
                               ),
-                              border:
-                                  InputBorder.none, // Remove the outline border
-                              enabledBorder:
-                                  InputBorder.none, // Remove the enabled border
-                              focusedBorder:
-                                  InputBorder.none, // Remove the focused border
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 10.0),
                             ),

@@ -15,7 +15,7 @@ class StoryViewProvider extends ChangeNotifier {
     "authour_id": "",
     "created_at": '',
     "comments": "",
-    "timeDiff": "1",
+    "timeDiff": "0",
   };
 
   List<dynamic> stories = [];
@@ -94,7 +94,7 @@ class StoryViewProvider extends ChangeNotifier {
 
   void loadStory(int index) {
     story = stories[index];
-    print(story);
+
     currentImageIndex = 0;
     if (story['type'] == "video") {
       loadVideo();

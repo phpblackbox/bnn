@@ -37,15 +37,14 @@ class _SignUpDashState extends State<SignUpDash>
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Log IN button
             Align(
               alignment: Alignment.centerRight,
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF101013), // First color
-                      Color(0xFF8D0000), // Second color
+                      Color(0xFF101013),
+                      Color(0xFF8D0000),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -53,14 +52,12 @@ class _SignUpDashState extends State<SignUpDash>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: SizedBox(
-                  width: 80, // Set the width of the button
-                  height: 30, // Set the height of the button
+                  width: 80,
+                  height: 30,
                   child: TextButton(
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets
-                          .zero, // Remove padding as size is controlled
-                      backgroundColor:
-                          Colors.transparent, // Background transparent
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
                     ),
                     onPressed: () {
                       Navigator.push(context,
@@ -77,9 +74,7 @@ class _SignUpDashState extends State<SignUpDash>
                 ),
               ),
             ),
-
             SplashLogo(),
-
             Consumer<AuthProvider>(
               builder: (context, authProvider, _) {
                 return Column(
@@ -107,7 +102,7 @@ class _SignUpDashState extends State<SignUpDash>
                           MaterialPageRoute(
                               builder: (context) => EmailSignUp()),
                         );
-                      }, // Handle email signup
+                      },
                     ),
                     ButtonPrimary(
                       icon: Icons.phone,
@@ -159,7 +154,6 @@ class _SignUpDashState extends State<SignUpDash>
                 );
               },
             ),
-
             FooterTOS(),
           ],
         ),

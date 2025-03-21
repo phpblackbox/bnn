@@ -26,12 +26,11 @@ class ButtonGradientPrimary extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: gradientColors, // Set the gradient colors
+              colors: gradientColors,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius:
-                BorderRadius.circular(30), // Match button's border radius
+            borderRadius: BorderRadius.circular(30),
           ),
           child: Container(
             width: double.infinity,

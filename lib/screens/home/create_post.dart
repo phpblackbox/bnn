@@ -48,8 +48,6 @@ class _CreatePostState extends State<CreatePost> {
   Future<void> cameraImage() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-      print(image);
-
       if (image != null) {
         setState(() {
           _selected.add(image);
@@ -138,8 +136,7 @@ class _CreatePostState extends State<CreatePost> {
                         borderRadius: BorderRadius.circular(17),
                       ),
                     ),
-                    padding: EdgeInsets.symmetric(
-                        vertical: 6, horizontal: 16), // Optional padding
+                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                     child: Text(
                       'Post',
                       style: TextStyle(
@@ -273,9 +270,7 @@ class _CreatePostState extends State<CreatePost> {
                             width: 16,
                             height: 16,
                           ),
-                          onPressed: () {
-                            print('Image Icon Button Pressed');
-                          },
+                          onPressed: () {},
                         ),
                         IconButton(
                           icon: Image.asset(
@@ -283,9 +278,7 @@ class _CreatePostState extends State<CreatePost> {
                             width: 16,
                             height: 16,
                           ),
-                          onPressed: () {
-                            print('Image Icon Button Pressed');
-                          },
+                          onPressed: () {},
                         ),
                       ],
                     ),
@@ -297,9 +290,7 @@ class _CreatePostState extends State<CreatePost> {
                             width: 16,
                             height: 16,
                           ),
-                          onPressed: () {
-                            print('Image Icon Button Pressed');
-                          },
+                          onPressed: () {},
                         ),
                         IconButton(
                           icon: Image.asset(
@@ -307,9 +298,7 @@ class _CreatePostState extends State<CreatePost> {
                             width: 16,
                             height: 16,
                           ),
-                          onPressed: () {
-                            print('Image Icon Button Pressed');
-                          },
+                          onPressed: () {},
                         ),
                       ],
                     )

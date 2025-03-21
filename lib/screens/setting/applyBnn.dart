@@ -55,16 +55,16 @@ class _ApplyBNNState extends State<ApplyBNN> {
             SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Background color
-                borderRadius: BorderRadius.circular(20.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(20.0),
               ),
               child: TextField(
                 style: TextStyle(fontSize: 12.0, fontFamily: "Poppins"),
                 controller: emailController,
                 onChanged: (value) {
-                  setState(() {}); // Update state on input field change
+                  setState(() {});
                 },
-                enabled: false, // Disable input if needed
+                enabled: false,
                 decoration: InputDecoration(
                   hintText: "johndoe.com",
                   suffixIcon: IconButton(
@@ -73,14 +73,11 @@ class _ApplyBNNState extends State<ApplyBNN> {
                       color: Color(0xF4327AFF),
                       size: 18,
                     ),
-                    onPressed: () {
-                      // Handle check button pressed
-                      print("Checked Email: ${emailController.text}");
-                    },
+                    onPressed: () {},
                   ),
-                  border: InputBorder.none, // Remove the outline border
-                  enabledBorder: InputBorder.none, // Remove the enabled border
-                  focusedBorder: InputBorder.none, // Remove the focused border
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                 ),
@@ -139,8 +136,7 @@ class _ApplyBNNState extends State<ApplyBNN> {
                               height: 200,
                               width: double.maxFinite,
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment
-                                    .center, // Center content vertically
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   ImageIcon(
                                     AssetImage(

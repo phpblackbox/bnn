@@ -4,7 +4,7 @@ class ReelModel {
   final int id;
   final String videoUrl;
   final String authorId;
-  ProfilesModel? userInfo; // Use the UserInfo model later
+  ProfilesModel? userInfo;
   int likes;
   int bookmarks;
   int comments;
@@ -23,13 +23,11 @@ class ReelModel {
     this.isFriend = false,
   });
 
-  // Add a factory method to create a ReelModel from a Supabase record
   factory ReelModel.fromJson(Map<String, dynamic> json) {
     return ReelModel(
       id: json['id'],
       videoUrl: json['video_url'],
       authorId: json['author_id'],
-      // Initialize other fields as needed
     );
   }
 }

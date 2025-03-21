@@ -13,9 +13,6 @@ class _PhoneNumber extends State<PhoneNumber>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // final bool _isMessage = false;
-  // final bool _isPromotions = false;
-
   final TextEditingController phonenumberController = TextEditingController();
 
   @override
@@ -39,7 +36,6 @@ class _PhoneNumber extends State<PhoneNumber>
       curve: Curves.easeIn,
     ));
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -49,8 +45,6 @@ class _PhoneNumber extends State<PhoneNumber>
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -103,19 +97,17 @@ class _PhoneNumber extends State<PhoneNumber>
                         SizedBox(height: 6),
                         Container(
                           decoration: BoxDecoration(
-                            color: Color(0xFFE9E9E9), // Background color
-                            borderRadius:
-                                BorderRadius.circular(20.0), // Border radius
+                            color: Color(0xFFE9E9E9),
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: TextField(
                             style: TextStyle(
                                 fontSize: 12.0, fontFamily: "Poppins"),
                             controller: phonenumberController,
                             onChanged: (value) {
-                              setState(
-                                  () {}); // Update state on input field change
+                              setState(() {});
                             },
-                            enabled: false, // Disable input if needed
+                            enabled: false,
                             decoration: InputDecoration(
                               hintText: "12345678901",
                               suffixIcon: IconButton(
@@ -124,18 +116,11 @@ class _PhoneNumber extends State<PhoneNumber>
                                   color: Color(0xFFF30802),
                                   size: 18,
                                 ),
-                                onPressed: () {
-                                  // Handle check button pressed
-                                  print(
-                                      "Checked PhoneNumber: ${phonenumberController.text}");
-                                },
+                                onPressed: () {},
                               ),
-                              border:
-                                  InputBorder.none, // Remove the outline border
-                              enabledBorder:
-                                  InputBorder.none, // Remove the enabled border
-                              focusedBorder:
-                                  InputBorder.none, // Remove the focused border
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 10.0),
                             ),

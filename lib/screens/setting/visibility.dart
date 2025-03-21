@@ -44,8 +44,8 @@ class _MyVisibilityState extends State<MyVisibility> {
               padding: const EdgeInsets.only(
                   left: 16, top: 12, right: 16, bottom: 12),
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Grey background color
-                borderRadius: BorderRadius.circular(8.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               child: GestureDetector(
                 onTap: () {},

@@ -46,7 +46,7 @@ class _AddParticipantsState extends State<AddParticipants> {
                 placeholder: "Search for friends",
                 controller: searchController,
                 onChanged: (value) {
-                  setState(() {}); // Update state on input field change
+                  setState(() {});
                 },
                 icon: Icons.search,
               ),
@@ -150,12 +150,8 @@ class _AddParticipantsState extends State<AddParticipants> {
                 itemBuilder: (context, index) {
                   return Container(
                     padding: EdgeInsets.only(bottom: 12),
-                    // margin: EdgeInsets.all(8),
                     child: GestureDetector(
-                      onTap: () {
-                        // Navigator.push(context,
-                        //     MaterialPageRoute(builder: (context) => Chat()));
-                      },
+                      onTap: () {},
                       child: Row(
                         children: [
                           Image.asset(

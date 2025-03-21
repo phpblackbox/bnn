@@ -120,7 +120,6 @@ class _EditProfileState extends State<EditProfile> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image(image: NetworkImage(meProfile.avatar)),
               SizedBox(
                 width: double.infinity,
                 height: 270,
@@ -173,8 +172,8 @@ class _EditProfileState extends State<EditProfile> {
                 padding: const EdgeInsets.only(
                     left: 16, top: 12, right: 16, bottom: 12),
                 decoration: BoxDecoration(
-                  color: Color(0xFFE9E9E9), // Grey background color
-                  borderRadius: BorderRadius.circular(15.0), // Border radius
+                  color: Color(0xFFE9E9E9),
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
                 child: Column(children: [
                   Column(children: [
@@ -288,7 +287,6 @@ class _EditProfileState extends State<EditProfile> {
                   decoration: InputDecoration(
                     hintText: meProfile.bio,
                     contentPadding: EdgeInsets.all(12),
-                    // border: InputBorder.none,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -328,8 +326,8 @@ class _EditProfileState extends State<EditProfile> {
                 padding: const EdgeInsets.only(
                     left: 16, top: 12, right: 16, bottom: 12),
                 decoration: BoxDecoration(
-                  color: Color(0xFFE9E9E9), // Grey background color
-                  borderRadius: BorderRadius.circular(15.0), // Border radius
+                  color: Color(0xFFE9E9E9),
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
                 child: Column(children: [
                   Column(children: [

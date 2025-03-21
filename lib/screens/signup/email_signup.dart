@@ -20,8 +20,6 @@ class EmailSignUp extends StatefulWidget {
 class _EmailSignUpState extends State<EmailSignUp>
     with SingleTickerProviderStateMixin {
   final supabase = Supabase.instance.client;
-
-  // for data
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
@@ -62,8 +60,6 @@ class _EmailSignUpState extends State<EmailSignUp>
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return SafeArea(
       child: Scaffold(
         body: Container(
@@ -73,15 +69,14 @@ class _EmailSignUpState extends State<EmailSignUp>
             key: _formKey,
             child: Column(
               children: [
-                // Log IN button
                 Align(
                   alignment: Alignment.centerRight,
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFF101013), // First color
-                          Color(0xFF8D0000), // Second color
+                          Color(0xFF101013),
+                          Color(0xFF8D0000),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -89,14 +84,12 @@ class _EmailSignUpState extends State<EmailSignUp>
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: SizedBox(
-                      width: 80, // Set the width of the button
-                      height: 30, // Set the height of the button
+                      width: 80,
+                      height: 30,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          padding: EdgeInsets
-                              .zero, // Remove padding as size is controlled
-                          backgroundColor:
-                              Colors.transparent, // Background transparent
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
                         ),
                         onPressed: () {
                           Navigator.push(
@@ -115,15 +108,10 @@ class _EmailSignUpState extends State<EmailSignUp>
                     ),
                   ),
                 ),
-
-                // Logo image
                 SplashLogo(),
-
                 Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Email Sign Up
                     Text(
                       'Email Sign Up',
                       style: TextStyle(
@@ -167,7 +155,6 @@ class _EmailSignUpState extends State<EmailSignUp>
                   ],
                 ),
                 FooterTOS(),
-
                 ButtonGradientMain(
                   label: 'Create account',
                   onPressed: () {
@@ -183,7 +170,6 @@ class _EmailSignUpState extends State<EmailSignUp>
                           AppColors.primaryBlack.withOpacity(0.5)
                         ],
                 ),
-
                 BottomSignUp(),
               ],
             ),

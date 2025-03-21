@@ -43,31 +43,23 @@ class _AllPostState extends State<AllPost> {
 
     if (data.isNotEmpty) {
       setState(() {
-        // posts = data;
         _loading = true;
       });
 
       for (int i = 0; i < data.length; i++) {
-        print("views ===>>> ${data[i]['views']}");
-
         dynamic res =
             await supabase.rpc('get_count_post_likes_by_postid', params: {
                   'param_post_id': data[i]["id"],
                 }) ??
                 0;
-
         data[i]["likes"] = res;
-
         res = await supabase.rpc('get_count_post_bookmarks_by_postid', params: {
           'param_post_id': data[i]["id"],
         });
-
         data[i]["bookmarks"] = res;
-
         res = await supabase.rpc('get_count_post_comments_by_postid', params: {
           'param_post_id': data[i]["id"],
         });
-
         data[i]["comments"] = res;
         data[i]["share"] = 2;
         data[i]['name'] = '${data[i]["first_name"]} ${data[i]["last_name"]}';
@@ -103,7 +95,7 @@ class _AllPostState extends State<AllPost> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Color(0x7CA6A8AB), width: 1),
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   padding: EdgeInsets.all(4),
                   margin: EdgeInsets.all(4),
@@ -194,8 +186,7 @@ class _AllPostState extends State<AllPost> {
                             },
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 5.0,
-                                  horizontal: 16.0), // Add padding
+                                  vertical: 5.0, horizontal: 16.0),
                               decoration: ShapeDecoration(
                                 color: Colors.black.withOpacity(0.4),
                                 shape: RoundedRectangleBorder(
@@ -245,9 +236,8 @@ class _AllPostState extends State<AllPost> {
                                   Text(
                                     posts![index]['bookmarks'].toString(),
                                     style: TextStyle(
-                                      color: Colors
-                                          .white, // Set text color to contrast with the background
-                                      fontSize: 12.0, // Set font size
+                                      color: Colors.white,
+                                      fontSize: 12.0,
                                     ),
                                   ),
                                 ],

@@ -61,7 +61,6 @@ class ReelProvider extends ChangeNotifier {
     do {
       randomReelId = await reelService.getRandomReelId();
     } while (reels.any((reel) => reel.id == randomReelId));
-    print(randomReelId);
 
     final reel = await reelService.getReelById(randomReelId);
     if (reel != null) {

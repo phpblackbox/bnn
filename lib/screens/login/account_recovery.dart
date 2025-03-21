@@ -43,7 +43,6 @@ class _AccountRecoveryState extends State<AccountRecovery>
           child: Column(
             children: [
               Column(
-                // mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Column(
@@ -52,7 +51,7 @@ class _AccountRecoveryState extends State<AccountRecovery>
                         placeholder: 'Your email address',
                         controller: addressController,
                         onChanged: (value) {
-                          setState(() {}); // Update state on email field change
+                          setState(() {});
                         },
                       ),
                     ],
@@ -75,10 +74,7 @@ class _AccountRecoveryState extends State<AccountRecovery>
                 },
                 textColor: Colors.white,
                 gradientColors: isButtonEnabled
-                    ? [
-                        AppColors.primaryBlack,
-                        AppColors.primaryRed
-                      ] // Active gradient
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
                     : [
                         AppColors.primaryRed.withOpacity(0.5),
                         AppColors.primaryBlack.withOpacity(0.5)

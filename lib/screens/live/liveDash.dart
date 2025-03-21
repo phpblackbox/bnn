@@ -46,8 +46,7 @@ class _LiveDashState extends State<LiveDash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Customize according to your theme
-
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Container(
@@ -133,8 +132,8 @@ class _LiveDashState extends State<LiveDash> {
             ),
           ),
           Positioned(
-            top: 20, // Adjust this value to change vertical position
-            right: 10, // Adjust this value to change horizontal position
+            top: 20,
+            right: 10,
             child: GestureDetector(
               onTap: () {
                 // Navigator.pop(context);
@@ -265,17 +264,16 @@ class _LiveDashState extends State<LiveDash> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(16.0), // Adjust padding as needed
+                padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
                     Expanded(
-                      child: InputWithEmoji(), // Your input widget
+                      child: InputWithEmoji(),
                     ),
                     SizedBox(width: 10),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(
-                            context); // Action when the button is tapped
+                        Navigator.pop(context);
                       },
                       child: Image(
                         image: AssetImage("assets/images/live/like_btn.png"),

@@ -1,5 +1,3 @@
-// lib/providers/story_provider.dart
-
 import 'package:bnn/screens/home/create_story.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/reel_service.dart';
@@ -34,7 +32,6 @@ class StoryProvider with ChangeNotifier {
     try {
       stories = await _storyService.getStories();
     } catch (e) {
-      // Handle any errors as needed
       print('Error fetching stories: $e');
     } finally {
       _loading = false;
@@ -132,8 +129,6 @@ class StoryProvider with ChangeNotifier {
       loading = false;
 
       Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      print('No video selected');
     }
   }
 }

@@ -29,7 +29,7 @@ class BottomLogin extends StatelessWidget {
               ),
             ],
           ),
-          textAlign: TextAlign.center, // Use textAlign if you need
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 5),
         Text(

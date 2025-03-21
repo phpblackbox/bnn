@@ -86,8 +86,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(30),
-            top: Radius.circular(30)), // Set the radius
+            bottom: Radius.circular(30), top: Radius.circular(30)),
       ),
       builder: (BuildContext context) {
         return Container(
@@ -110,11 +109,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
                 icon: Icons.photo_camera,
                 label: 'Camera',
                 textColor: Colors.white,
-                gradientColors: [
-                  // Gradient colors
-                  AppColors.primaryBlack,
-                  Color(0xFF6A0200)
-                ],
+                gradientColors: [AppColors.primaryBlack, Color(0xFF6A0200)],
                 onPressed: () {},
               ),
               ButtonPrimary(
@@ -163,10 +158,8 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
               Padding(
                 padding: const EdgeInsets.all(22.0),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // Centering horizontally
-                  mainAxisSize: MainAxisSize
-                      .min, // To prevent Column from taking up more space than necessary
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
                       height: 200,
@@ -179,7 +172,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
                       ),
                     ),
                     Text("Add your photo",
-                        textAlign: TextAlign.center, // Centering text
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                             fontFamily: "Archivo",
                             fontWeight: FontWeight.bold,
@@ -187,7 +180,7 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
                     SizedBox(height: 10),
                     Text(
                       "Add your photo to be easily recognized via your profile",
-                      textAlign: TextAlign.center, // Centering text
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 12),
                     ),
                   ],

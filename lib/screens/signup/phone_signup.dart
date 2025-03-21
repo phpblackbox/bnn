@@ -45,7 +45,6 @@ class _PhoneSignUp extends State<PhoneSignUp>
       curve: Curves.easeIn,
     ));
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -58,20 +57,16 @@ class _PhoneSignUp extends State<PhoneSignUp>
     }
   }
 
-  // This variable keeps track of the currently selected PhoneSignUp
   String selectedPhoneSignUp = '';
 
-  // Method to select PhoneSignUp and update the UI
   void selectPhoneSignUp(String PhoneSignUp) {
     setState(() {
-      selectedPhoneSignUp = PhoneSignUp; // Update the selected PhoneSignUp
+      selectedPhoneSignUp = PhoneSignUp;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -80,9 +75,9 @@ class _PhoneSignUp extends State<PhoneSignUp>
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back), // Back arrow icon
+            icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context); // Go back to the previous screen
+              Navigator.pop(context);
             },
           ),
         ),
@@ -96,17 +91,13 @@ class _PhoneSignUp extends State<PhoneSignUp>
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // You can adjust alignment as needed
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          minimumSize:
-                              Size(100, 40), // Set a minimum width and height
+                          minimumSize: Size(100, 40),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical:
-                                  8.0), // Adjust horizontal and vertical padding
+                              horizontal: 16.0, vertical: 8.0),
                         ),
                         onPressed: () {
                           showCountryPicker(
@@ -115,11 +106,8 @@ class _PhoneSignUp extends State<PhoneSignUp>
                             showPhoneCode: true,
                             onSelect: (Country country) {
                               setState(() {
-                                _selectedCountryCode = country
-                                    .countryCode; // Store the selected country code
+                                _selectedCountryCode = country.countryCode;
                               });
-                              print(
-                                  'Selected country: ${country.displayName} ___ ${country.countryCode}');
                             },
                             moveAlongWithKeyboard: false,
                             countryListTheme: CountryListThemeData(
@@ -150,26 +138,23 @@ class _PhoneSignUp extends State<PhoneSignUp>
                           children: [
                             if (_selectedCountryCode != null)
                               SizedBox(
-                                width: 24.0, // Set your desired width
-                                height: 24.0, // Set your desired height
+                                width: 24.0,
+                                height: 24.0,
                                 child: CountryFlag.fromCountryCode(
                                     _selectedCountryCode!),
                               ),
-                            // Optionally, add some text to the button
-                            SizedBox(width: 8.0), // Spacer betwon text
+                            SizedBox(width: 8.0),
                           ],
                         ),
                       ),
                       SizedBox(width: 8.0),
                       Expanded(
-                        // Use Expanded to allow the input field to take up remaining space
                         child: CustomInputField(
                           icon: Icons.phone,
                           placeholder: 'Phone Number',
                           controller: _phoneController,
                           onChanged: (value) {
-                            setState(
-                                () {}); // Update state on phone field change
+                            setState(() {});
                           },
                         ),
                       ),
@@ -190,11 +175,9 @@ class _PhoneSignUp extends State<PhoneSignUp>
                         // );
                         // final Session? session = res.session;
                         // final User? user = res.user;
-                        // print(user);
                         await supabase.auth.signInWithOtp(
                           phone: '+12149374719',
                         );
-                        // print(res);
                         // Navigator.push(context,
                         //     MaterialPageRoute(builder: (context) => OTP()));
                       }

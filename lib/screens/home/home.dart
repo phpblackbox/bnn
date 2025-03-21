@@ -51,7 +51,6 @@ class _HomeState extends State<Home> {
         } else {
           SystemNavigator.pop();
           exit(0);
-          // Future.value(false);
         }
       },
       child: Scaffold(

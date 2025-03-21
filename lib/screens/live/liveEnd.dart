@@ -15,21 +15,17 @@ class _liveEndState extends State<liveEnd> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/call4.png'), // Replace with your background image asset
+                image: AssetImage('assets/images/call4.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Black Opacity Layer
           Container(
-            color: Colors.black.withOpacity(0.5), // Adjust opacity as needed
+            color: Colors.black.withOpacity(0.5),
           ),
-          // Main Content
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -60,7 +56,6 @@ class _liveEndState extends State<liveEnd> {
                   ],
                 ),
                 SizedBox(height: 10),
-                // Avatar Image (Center of display)
                 SizedBox(
                   width: 90,
                   height: 90,
@@ -70,7 +65,6 @@ class _liveEndState extends State<liveEnd> {
                   ),
                 ),
                 SizedBox(height: 10),
-
                 Text(
                   'You Ended The On Air session',
                   style: TextStyle(
@@ -81,7 +75,6 @@ class _liveEndState extends State<liveEnd> {
                   ),
                 ),
                 Spacer(),
-
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -112,7 +105,6 @@ class _liveEndState extends State<liveEnd> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 100),
               ],
             ),

@@ -12,11 +12,11 @@ class FullScreenImage extends StatelessWidget {
       body: Center(
         child: GestureDetector(
           onTap: () {
-            Navigator.of(context).pop(); // Close the full-screen view on tap
+            Navigator.of(context).pop();
           },
           child: Image.network(
             imageUrl,
-            fit: BoxFit.contain, // Adjusts the image to fit within the screen
+            fit: BoxFit.contain,
             width: double.infinity,
             height: double.infinity,
           ),

@@ -1,5 +1,3 @@
-// lib/screens/home/story_slider.dart
-
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/screens/home/create_story_gallery.dart';
 import 'package:bnn/screens/home/story_view.dart';
@@ -36,7 +34,6 @@ class _StorySliderState extends State<StorySlider> {
           enableSwitchAnimation: true,
           child: Row(
             children: [
-              // Create Story Button
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -73,7 +70,6 @@ class _StorySliderState extends State<StorySlider> {
                   ),
                 ),
               ),
-              // Story ListView
               Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,

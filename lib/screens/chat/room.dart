@@ -137,9 +137,7 @@ class _RoomPageState extends State<RoomPage> {
         ),
       ],
     ).then((value) {
-      if (value != null) {
-        print('Selected option: $value');
-      }
+      if (value != null) {}
     });
   }
 
@@ -293,27 +291,22 @@ class _RoomPageState extends State<RoomPage> {
     DateTime messageDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
     DateTime now = DateTime.now();
 
-    // Check if the message is from today
     bool isToday = now.year == messageDate.year &&
         now.month == messageDate.month &&
         now.day == messageDate.day;
 
-    // Check if the message is from yesterday
     bool isYesterday = now.year == messageDate.year &&
         now.month == messageDate.month &&
         now.day == messageDate.day - 1;
 
-    // Format based on whether it's today, yesterday, or earlier
     if (isToday) {
-      var timeFormat = DateFormat('hh:mm a'); // Format for time
+      var timeFormat = DateFormat('hh:mm a');
       return timeFormat.format(messageDate);
     } else if (isYesterday) {
-      var yesterdayFormat =
-          DateFormat('Yesterday, hh:mm a'); // Format for yesterday
+      var yesterdayFormat = DateFormat('Yesterday, hh:mm a');
       return yesterdayFormat.format(messageDate);
     } else {
-      var dateFormat =
-          DateFormat('MMM dd, hh:mm a'); // Format for full date and time
+      var dateFormat = DateFormat('MMM dd, hh:mm a');
       return dateFormat.format(messageDate);
     }
   }
@@ -462,8 +455,8 @@ class _RoomPageState extends State<RoomPage> {
                 inputTextDecoration: InputDecoration(
                   hintText: "Write a message...",
                   hintStyle: TextStyle(color: Color(0x99898989)),
-                  border: InputBorder.none, // Remove the border
-                  enabledBorder: InputBorder.none, // Remove the enabled border
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   filled: true,
                   fillColor: Color(0xFFEAEAEA),
@@ -483,8 +476,6 @@ class _RoomPageState extends State<RoomPage> {
                 sendButtonMargin: EdgeInsets.all(0),
                 attachmentButtonMargin: EdgeInsets.all(0),
                 inputPadding: EdgeInsets.only(top: 0, bottom: 0),
-                // inputMargin:
-                //     EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 12),
                 inputBackgroundColor: Color(0xFFE9E9E9),
                 inputBorderRadius: BorderRadius.circular(40.0),
                 messageMaxWidth: 550,

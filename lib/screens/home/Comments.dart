@@ -127,7 +127,6 @@ class _CommentsModalState extends State<CommentsModal> {
             children: [
               GestureDetector(
                 onTap: () async {
-                  print(comment['author_id']);
                   Navigator.pushNamed(
                     context,
                     '/user-profile',

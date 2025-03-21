@@ -25,7 +25,7 @@ class _GenderSelectionModalState extends State<GenderSelectionModal> {
   @override
   void initState() {
     super.initState();
-    // Initialize selected option with the initial value passed
+
     selectedOption = widget.initialSelectedOption;
   }
 
@@ -33,7 +33,7 @@ class _GenderSelectionModalState extends State<GenderSelectionModal> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.0),
-      height: 230.0, // Adjust height as needed
+      height: 230.0,
       width: double.infinity,
       child: Column(
         children: [

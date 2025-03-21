@@ -25,8 +25,8 @@ class _GroupVideoCallState extends State<GroupVideoCall> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.black, // Border color
-                            width: 1, // Border width
+                            color: Colors.black,
+                            width: 1,
                           ),
                         ),
                         child: Container(
@@ -43,8 +43,8 @@ class _GroupVideoCallState extends State<GroupVideoCall> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.black, // Border color
-                            width: 1, // Border width
+                            color: Colors.black,
+                            width: 1,
                           ),
                         ),
                         child: Container(
@@ -68,8 +68,8 @@ class _GroupVideoCallState extends State<GroupVideoCall> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.black, // Border color
-                            width: 1, // Border width
+                            color: Colors.black,
+                            width: 1,
                           ),
                         ),
                         child: Container(
@@ -86,8 +86,8 @@ class _GroupVideoCallState extends State<GroupVideoCall> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.black, // Border color
-                            width: 1, // Border width
+                            color: Colors.black,
+                            width: 1,
                           ),
                         ),
                         child: Container(

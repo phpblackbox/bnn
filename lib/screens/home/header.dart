@@ -68,10 +68,10 @@ class _HeaderState extends State<Header> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Image.asset(
-                    'assets/images/icons/notification_plus.png', // Path to your image
+                    'assets/images/icons/notification_plus.png',
                     width: 20.0,
                     height: 20.0,
                   ),

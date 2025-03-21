@@ -28,7 +28,6 @@ class _LiveState extends State<Live> {
         } else {
           SystemNavigator.pop();
           exit(0);
-          // Future.value(false);
         }
       },
       child: Scaffold(
@@ -163,7 +162,6 @@ class _LiveState extends State<Live> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    // width: 220,
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(10),
@@ -212,7 +210,6 @@ class _LiveState extends State<Live> {
                   ),
                   SizedBox(height: 10),
                   Container(
-                    // width: 220,
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(10),

@@ -55,7 +55,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
                 placeholder: "Search for friends",
                 controller: searchController,
                 onChanged: (value) {
-                  setState(() {}); // Update state on input field change
+                  setState(() {});
                 },
                 icon: Icons.search,
               ),

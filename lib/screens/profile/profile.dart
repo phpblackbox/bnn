@@ -41,7 +41,7 @@ class _ProfileState extends State<Profile> {
 
   void _onAllOrSave(int index) {
     setState(() {
-      _allorbookmark = index; // Update the selected index
+      _allorbookmark = index;
     });
   }
 

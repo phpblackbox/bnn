@@ -68,7 +68,6 @@ class _InterestsState extends State<Interests>
       vsync: this,
     );
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -80,7 +79,6 @@ class _InterestsState extends State<Interests>
         selectedInterests.remove(interest);
       }
     });
-    print("Selected Interests: $selectedInterests");
   }
 
   bool get isButtonEnabled {
@@ -119,7 +117,7 @@ class _InterestsState extends State<Interests>
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0), // Adjust padding values here
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               Text(
@@ -127,8 +125,8 @@ class _InterestsState extends State<Interests>
               ),
               SizedBox(height: 10),
               Wrap(
-                spacing: 8.0, // Space between items
-                runSpacing: 8.0, // Space between lines when they wrap
+                spacing: 8.0,
+                runSpacing: 8.0,
                 children: interests.map((interest) {
                   return InterestItem(
                     interest: interest,

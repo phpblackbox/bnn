@@ -32,17 +32,12 @@ class _InterestItemState extends State<InterestItem> {
               ? LinearGradient(
                   colors: [AppColors.primaryBlack, Color(0xFF5A0000)])
               : null,
-          color: isSelected
-              ? null // No solid color when selected
-              : Color(0xFFEAEAEA),
+          color: isSelected ? null : Color(0xFFEAEAEA),
           borderRadius: BorderRadius.circular(50),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(
-              left: 16,
-              top: 4,
-              right: 16,
-              bottom: 4), // Adjust padding values here
+          padding:
+              const EdgeInsets.only(left: 16, top: 4, right: 16, bottom: 4),
           child: Text(
             widget.interest,
             style: TextStyle(

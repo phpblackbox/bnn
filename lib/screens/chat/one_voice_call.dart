@@ -19,30 +19,26 @@ class _OneVoiceCallState extends State<OneVoiceCall> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Name (Top Center)
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'John Doe', // Replace with dynamic name
+                'John Doe',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
-                'Duration: 12:34', // Replace with dynamic duration
+                'Duration: 12:34',
                 style: TextStyle(fontSize: 20, color: Colors.grey),
               ),
             ],
           ),
           SizedBox(height: 50),
-          // Avatar Image (Center of display)
           CircleAvatar(
             radius: 70,
-            backgroundImage: AssetImage(
-                'assets/images/avatar/p2.png'), // Replace with your image asset
+            backgroundImage: AssetImage('assets/images/avatar/p2.png'),
           ),
           Spacer(),
-          // Bottom Bar
           CallBottom(),
         ],
       ),

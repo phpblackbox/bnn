@@ -48,7 +48,6 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
               SplashLogo(),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     'I am a ',
@@ -63,7 +62,7 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTap: () => selectGender('man'), // Select Man
+                        onTap: () => selectGender('man'),
                         child: Image.asset(
                           selectedGender == 'man'
                               ? 'assets/images/gender_man_select.png'
@@ -74,7 +73,7 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
                       ),
                       SizedBox(height: 20),
                       GestureDetector(
-                        onTap: () => selectGender('woman'), // Select Woman
+                        onTap: () => selectGender('woman'),
                         child: Image.asset(
                           selectedGender == 'woman'
                               ? 'assets/images/gender_woman_select.png'
@@ -116,7 +115,6 @@ class _Gender extends State<Gender> with SingleTickerProviderStateMixin {
                       );
                     }
                   } catch (error) {
-                    print(error);
                     CustomToast.showToastWarningBottom(
                         context, error.toString());
                   }

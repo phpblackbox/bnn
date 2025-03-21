@@ -47,7 +47,6 @@ class _EmailLogin extends State<EmailLogin>
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Log IN button
               Align(
                 alignment: Alignment.centerRight,
                 child: Container(
@@ -84,10 +83,7 @@ class _EmailLogin extends State<EmailLogin>
                   ),
                 ),
               ),
-
-              // Logo image
               SplashLogo(),
-
               Consumer<AuthProvider>(
                 builder: (context, authProvider, _) {
                   return Column(
@@ -125,7 +121,6 @@ class _EmailLogin extends State<EmailLogin>
                                 setState(() {});
                               }),
                           SizedBox(height: 16),
-                          
                           ButtonGradientMain(
                             label: 'Log in',
                             onPressed: () async {
@@ -160,19 +155,15 @@ class _EmailLogin extends State<EmailLogin>
                                   ],
                           ),
                           SizedBox(height: 10),
-                          
                           if (authProvider.isLoading)
                             const Center(child: CircularProgressIndicator()),
-
                           SizedBox(height: 10),
-
                         ],
                       ),
                     ],
                   );
                 },
               ),
-
               BottomLogin(),
             ],
           ),

@@ -40,7 +40,6 @@ class _SetupPassowrd extends State<SetupPassowrd>
       curve: Curves.easeIn,
     ));
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -50,8 +49,6 @@ class _SetupPassowrd extends State<SetupPassowrd>
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -60,9 +57,9 @@ class _SetupPassowrd extends State<SetupPassowrd>
             style: TextStyle(fontFamily: "Archivo"),
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back), // Back arrow icon
+            icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context); // Go back to the previous screen
+              Navigator.pop(context);
             },
           ),
         ),
@@ -86,8 +83,7 @@ class _SetupPassowrd extends State<SetupPassowrd>
                             controller: passwordController,
                             isPassword: true,
                             onChanged: (value) {
-                              setState(
-                                  () {}); // Update state on email field change
+                              setState(() {});
                             },
                           ),
                         ],
@@ -107,10 +103,7 @@ class _SetupPassowrd extends State<SetupPassowrd>
                 },
                 textColor: Colors.white,
                 gradientColors: isButtonEnabled
-                    ? [
-                        AppColors.primaryBlack,
-                        AppColors.primaryRed
-                      ] // Active gradient
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
                     : [
                         AppColors.primaryRed.withOpacity(0.5),
                         AppColors.primaryBlack.withOpacity(0.5)

@@ -23,8 +23,8 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.black, // Border color
-                          width: 1, // Border width
+                          color: Colors.black,
+                          width: 1,
                         ),
                       ),
                       child: Column(
@@ -34,24 +34,23 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'John Doe', // Replace with dynamic name
+                                'John Doe',
                                 style: TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Duration: 12:34', // Replace with dynamic duration
+                                'Duration: 12:34',
                                 style:
                                     TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
                           ),
                           SizedBox(height: 10),
-                          // Avatar Image (Center of display)
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: AssetImage(
-                                'assets/images/avatar/p2.png'), // Replace with your image asset
+                            backgroundImage:
+                                AssetImage('assets/images/avatar/p2.png'),
                           ),
                         ],
                       ),
@@ -61,8 +60,8 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.black, // Border color
-                          width: 1, // Border width
+                          color: Colors.black,
+                          width: 1,
                         ),
                       ),
                       child: Column(
@@ -72,24 +71,23 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'John Doe', // Replace with dynamic name
+                                'John Doe',
                                 style: TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Duration: 12:34', // Replace with dynamic duration
+                                'Duration: 12:34',
                                 style:
                                     TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
                           ),
                           SizedBox(height: 10),
-                          // Avatar Image (Center of display)
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: AssetImage(
-                                'assets/images/avatar/p2.png'), // Replace with your image asset
+                            backgroundImage:
+                                AssetImage('assets/images/avatar/p2.png'),
                           ),
                         ],
                       ),
@@ -106,8 +104,8 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.black, // Border color
-                          width: 1, // Border width
+                          color: Colors.black,
+                          width: 1,
                         ),
                       ),
                       child: Column(
@@ -117,24 +115,23 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'John Doe', // Replace with dynamic name
+                                'John Doe',
                                 style: TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Duration: 12:34', // Replace with dynamic duration
+                                'Duration: 12:34',
                                 style:
                                     TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
                           ),
                           SizedBox(height: 10),
-                          // Avatar Image (Center of display)
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: AssetImage(
-                                'assets/images/avatar/p2.png'), // Replace with your image asset
+                            backgroundImage:
+                                AssetImage('assets/images/avatar/p2.png'),
                           ),
                         ],
                       ),
@@ -144,8 +141,8 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.black, // Border color
-                          width: 1, // Border width
+                          color: Colors.black,
+                          width: 1,
                         ),
                       ),
                       child: Column(
@@ -155,24 +152,23 @@ class _GroupVoiceCallState extends State<GroupVoiceCall> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'John Doe', // Replace with dynamic name
+                                'John Doe',
                                 style: TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Duration: 12:34', // Replace with dynamic duration
+                                'Duration: 12:34',
                                 style:
                                     TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
                           ),
                           SizedBox(height: 10),
-                          // Avatar Image (Center of display)
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: AssetImage(
-                                'assets/images/avatar/p2.png'), // Replace with your image asset
+                            backgroundImage:
+                                AssetImage('assets/images/avatar/p2.png'),
                           ),
                         ],
                       ),

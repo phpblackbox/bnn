@@ -124,10 +124,10 @@ class AuthService {
 
       final publicUrl =
           _supabase.storage.from('avatars').getPublicUrl(filename);
-      return publicUrl; // Return the public URL
+      return publicUrl;
     } catch (e) {
       print('Error uploading avatar to Supabase: $e');
-      rethrow; // Re-throw the error to be handled by the provider
+      rethrow;
     }
   }
 }

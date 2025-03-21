@@ -96,11 +96,11 @@ class _FriendsState extends State<Friends> {
   void _showFriendDetail(BuildContext context, int index) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allow full-height modal
+      isScrollControlled: true,
       builder: (BuildContext context) {
         return Container(
           padding: EdgeInsets.all(20.0),
-          height: 300.0, // Set the height of the modal
+          height: 300.0,
           child: Column(
             children: [
               Row(
@@ -151,8 +151,6 @@ class _FriendsState extends State<Friends> {
                     imageUrl: data![index]['avatar'],
                   );
 
-                  print(otherUser);
-
                   final navigator = Navigator.of(context);
 
                   final temp =
@@ -182,8 +180,8 @@ class _FriendsState extends State<Friends> {
                     padding: EdgeInsets.all(13),
                     child: Icon(
                       Icons.mode_comment_outlined,
-                      color: Colors.white, // Icon color
-                      size: 17, // Icon size
+                      color: Colors.white,
+                      size: 17,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -214,8 +212,8 @@ class _FriendsState extends State<Friends> {
                     padding: EdgeInsets.all(13),
                     child: Icon(
                       Icons.person_off_outlined,
-                      color: Colors.white, // Icon color
-                      size: 17, // Icon size
+                      color: Colors.white,
+                      size: 17,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -246,8 +244,8 @@ class _FriendsState extends State<Friends> {
                     padding: EdgeInsets.all(13),
                     child: Icon(
                       Icons.block_flipped,
-                      color: Colors.white, // Icon color
-                      size: 17, // Icon size
+                      color: Colors.white,
+                      size: 17,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -466,7 +464,6 @@ class _FriendsState extends State<Friends> {
                         searchQuery.isEmpty ? data![index] : filltered[index];
                     return Container(
                       padding: EdgeInsets.only(bottom: 12),
-                      // margin: EdgeInsets.all(8),
                       child: GestureDetector(
                         onTap: () {
                           // Navigator.push(context,

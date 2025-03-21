@@ -21,13 +21,9 @@ class _SettingsState extends State<Settings> {
   final supabase = Supabase.instance.client;
   Future<void> signOutUser(BuildContext context) async {
     try {
-      // Sign out from Supabase
       await supabase.auth.signOut();
-
-      // Optionally, navigate to the login page or show a success message
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
-      // Handle any errors during sign-out
       print('Error signing out: $e');
     }
   }
@@ -61,8 +57,8 @@ class _SettingsState extends State<Settings> {
               padding: const EdgeInsets.only(
                   left: 16, top: 12, right: 16, bottom: 12),
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Grey background color
-                borderRadius: BorderRadius.circular(8.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               child: GestureDetector(
                 onTap: () {
@@ -94,8 +90,8 @@ class _SettingsState extends State<Settings> {
               padding: const EdgeInsets.only(
                   left: 16, top: 12, right: 16, bottom: 12),
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Grey background color
-                borderRadius: BorderRadius.circular(15.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(15.0),
               ),
               child: Column(children: [
                 Column(children: [

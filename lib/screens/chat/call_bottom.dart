@@ -14,16 +14,13 @@ class _CallBottomState extends State<CallBottom> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.black,
-            Color(0xFF800000)
-          ], // Set your gradient colors here
+          colors: [Colors.black, Color(0xFF800000)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20), // Set top-left radius
-          topRight: Radius.circular(20), // Set top-right radius
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
       child: BottomAppBar(
@@ -36,19 +33,15 @@ class _CallBottomState extends State<CallBottom> {
                 Icons.change_circle_outlined,
                 color: Colors.white,
               ),
-              onPressed: () {
-                // Re-dial action
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: Icon(Icons.video_camera_back_rounded, color: Colors.white),
-              onPressed: () {
-                // Video call action
-              },
+              onPressed: () {},
             ),
             Container(
               decoration: BoxDecoration(
-                color: Color(0xFFFF2121), // Background color
+                color: Color(0xFFFF2121),
                 borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
               child: IconButton(
@@ -61,15 +54,11 @@ class _CallBottomState extends State<CallBottom> {
             ),
             IconButton(
               icon: Icon(Icons.mic, color: Colors.white),
-              onPressed: () {
-                // Voice action
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: Icon(Icons.add_reaction_outlined, color: Colors.white),
-              onPressed: () {
-                // Emoji action
-              },
+              onPressed: () {},
             ),
           ],
         ),

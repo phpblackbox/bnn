@@ -17,7 +17,7 @@ class FeedOrReel extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFFF30802), // Change color as desired
+              color: Color(0xFFF30802),
             ),
           ),
         const SizedBox(width: 8),
@@ -42,7 +42,7 @@ class FeedOrReel extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFFF30802), // Change color as desired
+              color: Color(0xFFF30802),
             ),
           ),
         const SizedBox(width: 8),

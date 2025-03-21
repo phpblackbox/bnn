@@ -24,7 +24,6 @@ class _CreateStoryState extends State<CreateStory> {
   void initState() {
     super.initState();
 
-    print(widget.storyId);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<StoryProvider>(context, listen: false)
           .getStoryById(widget.storyId);

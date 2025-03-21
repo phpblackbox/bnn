@@ -70,7 +70,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           child: Column(
             children: [
               Column(
-                // mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
@@ -83,7 +82,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         placeholder: 'First name',
                         controller: firstnameController,
                         onChanged: (value) {
-                          setState(() {}); // Update state on email field change
+                          setState(() {});
                         },
                       ),
                       SizedBox(height: 10),
@@ -91,7 +90,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         placeholder: 'Last name',
                         controller: lastnameController,
                         onChanged: (value) {
-                          setState(() {}); // Update state on email field change
+                          setState(() {});
                         },
                       ),
                     ],
@@ -133,10 +132,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 onPressed: _update,
                 textColor: Colors.white,
                 gradientColors: isButtonEnabled
-                    ? [
-                        AppColors.primaryBlack,
-                        AppColors.primaryRed
-                      ] // Active gradient
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
                     : [
                         AppColors.primaryRed.withOpacity(0.5),
                         AppColors.primaryBlack.withOpacity(0.5)

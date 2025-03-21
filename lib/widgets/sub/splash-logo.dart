@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SplashLogo extends StatelessWidget {
-  final double height; // Optional: Allow customization of the logo height
+  final double height;
 
-  const SplashLogo({Key? key, this.height = 200})
-      : super(key: key); // Default height
+  const SplashLogo({Key? key, this.height = 200}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

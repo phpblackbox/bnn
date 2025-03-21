@@ -65,10 +65,7 @@ class _LoginDashState extends State<LoginDash>
                 ),
               ),
             ),
-
-            // Logo image
             SplashLogo(),
-
             Consumer<AuthProvider>(
               builder: (context, authProvider, _) {
                 return Column(
@@ -158,7 +155,6 @@ class _LoginDashState extends State<LoginDash>
                 );
               },
             ),
-
             FooterTOS(),
           ],
         ),

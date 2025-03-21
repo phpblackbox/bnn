@@ -70,11 +70,11 @@ class BnnProState extends State<BnnPro> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 7, // Set the width of the circle
-                  height: 7, // Set the height of the circle
+                  width: 7,
+                  height: 7,
                   decoration: BoxDecoration(
-                    color: Color(0xFF800000), // Set the color of the circle
-                    shape: BoxShape.circle, // Make it circular
+                    color: Color(0xFF800000),
+                    shape: BoxShape.circle,
                   ),
                 ),
                 SizedBox(width: 4),
@@ -162,8 +162,7 @@ class BnnProState extends State<BnnPro> {
                         height: 200,
                         width: double.maxFinite,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center, // Center content vertically
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ImageIcon(
                               AssetImage('assets/images/icons/verified.png'),
@@ -304,12 +303,9 @@ class BnnProState extends State<BnnPro> {
                 padding: EdgeInsets.all(4),
                 decoration: ShapeDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.black,
-                      Color(0xFF800000)
-                    ], // Define the gradient colors
-                    begin: Alignment.topLeft, // Starting point of the gradient
-                    end: Alignment.bottomRight, // Ending point of the gradient
+                    colors: [Colors.black, Color(0xFF800000)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(21),

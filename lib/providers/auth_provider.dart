@@ -26,7 +26,6 @@ class AuthProvider with ChangeNotifier {
     final isUser = await _authService.isLoggedIn();
 
     if (isUser) {
-      // initial
       _user = UserModel(
           email: _authService.getCurrentUser()?.email,
           id: _authService.getCurrentUser()?.id);

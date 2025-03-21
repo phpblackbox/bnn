@@ -101,7 +101,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(30), // Rounded corners
+                  borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -118,19 +118,18 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                           fontFamily: 'Archivo',
                           color: Colors.white,
                         ),
-                        textAlign: TextAlign.center, // Center align text
+                        textAlign: TextAlign.center,
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.only(
-                        top: 16.0, // Padding for the top
-                        left: 10.0, // Padding for the left
-                        right: 10.0, // Padding for the right
-                        bottom: 8.0, // Padding for the bottom
+                        top: 16.0,
+                        left: 10.0,
+                        right: 10.0,
+                        bottom: 8.0,
                       ),
                       child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center icon and text
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(width: 20),
                           AnimatedSwitcher(
@@ -147,7 +146,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                               child: Text(
                                 texts[currentIndex],
                                 key: ValueKey<int>(currentIndex),
-                                textAlign: TextAlign.left, // Center align text
+                                textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,

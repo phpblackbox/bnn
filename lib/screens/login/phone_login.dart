@@ -32,20 +32,16 @@ class _PhoneLogin extends State<PhoneLogin>
     }
   }
 
-  // This variable keeps track of the currently selected PhoneLogin
   String selectedPhoneLogin = '';
 
-  // Method to select PhoneLogin and update the UI
   void selectPhoneLogin(String PhoneLogin) {
     setState(() {
-      selectedPhoneLogin = PhoneLogin; // Update the selected PhoneLogin
+      selectedPhoneLogin = PhoneLogin;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Start a timer to navigate to the next page after 3 seconds
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -54,9 +50,9 @@ class _PhoneLogin extends State<PhoneLogin>
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back), // Back arrow icon
+            icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context); // Go back to the previous screen
+              Navigator.pop(context);
             },
           ),
         ),
@@ -66,17 +62,13 @@ class _PhoneLogin extends State<PhoneLogin>
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .spaceBetween, // You can adjust alignment as needed
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      minimumSize:
-                          Size(100, 40), // Set a minimum width and height
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical:
-                              8.0), // Adjust horizontal and vertical padding
+                      minimumSize: Size(100, 40),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     ),
                     onPressed: () {
                       showCountryPicker(
@@ -85,11 +77,8 @@ class _PhoneLogin extends State<PhoneLogin>
                         showPhoneCode: true,
                         onSelect: (Country country) {
                           setState(() {
-                            _selectedCountryCode = country
-                                .countryCode; // Store the selected country code
+                            _selectedCountryCode = country.countryCode;
                           });
-                          print(
-                              'Selected country: ${country.displayName} ___ ${country.countryCode}');
                         },
                         moveAlongWithKeyboard: false,
                         countryListTheme: CountryListThemeData(
@@ -119,25 +108,23 @@ class _PhoneLogin extends State<PhoneLogin>
                       children: [
                         if (_selectedCountryCode != null)
                           SizedBox(
-                            width: 24.0, // Set your desired width
-                            height: 24.0, // Set your desired height
+                            width: 24.0,
+                            height: 24.0,
                             child: CountryFlag.fromCountryCode(
                                 _selectedCountryCode!),
                           ),
-                        // Optionally, add some text to the button
-                        SizedBox(width: 8.0), // Spacer betwon text
+                        SizedBox(width: 8.0),
                       ],
                     ),
                   ),
                   SizedBox(width: 8.0),
                   Expanded(
-                    // Use Expanded to allow the input field to take up remaining space
                     child: CustomInputField(
                       icon: Icons.phone,
                       placeholder: 'Phone Number',
                       controller: _phoneController,
                       onChanged: (value) {
-                        setState(() {}); // Update state on phone field change
+                        setState(() {});
                       },
                     ),
                   ),
@@ -157,16 +144,12 @@ class _PhoneLogin extends State<PhoneLogin>
                 },
                 textColor: Colors.white,
                 gradientColors: isButtonEnabled
-                    ? [
-                        AppColors.primaryBlack,
-                        AppColors.primaryRed
-                      ] // Active gradient
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
                     : [
                         AppColors.primaryRed.withOpacity(0.5),
                         AppColors.primaryBlack.withOpacity(0.5)
                       ],
               ),
-              // Submit Button
             ],
           ),
         ),

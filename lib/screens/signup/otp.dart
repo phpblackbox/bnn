@@ -42,7 +42,6 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
       curve: Curves.easeIn,
     ));
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -67,14 +66,14 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
 
   void _sendAgain() {
     setState(() {
-      _start = 59; // Reset timer
-      startTimer(); // Restart timer
+      _start = 59;
+      startTimer();
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel timer on dispose
+    _timer?.cancel();
     _otpController.dispose();
     super.dispose();
   }
@@ -107,46 +106,37 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
                     padding: const EdgeInsets.all(0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      // crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
                           '00:${_start < 10 ? '0$_start' : _start}',
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         ),
-
                         SizedBox(height: 10),
-
-                        // Instruction Text
                         Text(
                           "Type the verification code \n we’ve sent you",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16),
                         ),
-
                         SizedBox(height: 10),
-
                         SizedBox(
-                          width: 150, // Set a smaller width
+                          width: 150,
                           child: TextField(
                             controller: _otpController,
                             maxLength: 4,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16), // Smaller font size
+                            style: TextStyle(fontSize: 16),
                             decoration: InputDecoration(
                               counterText: '',
                               border: OutlineInputBorder(),
                               hintText: 'Enter OTP',
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 8.0), // Adjust padding
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 8.0),
                             ),
                           ),
                         ),
-
                         SizedBox(height: 10),
-
-                        // Dial Pad
                         GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
@@ -162,10 +152,7 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
                             return _buildDialButton(index);
                           },
                         ),
-
                         SizedBox(height: 20),
-
-                        // Send Again Text
                         GestureDetector(
                           onTap: _sendAgain,
                           child: Text(
@@ -177,7 +164,6 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
                                 fontFamily: "Poppins"),
                           ),
                         ),
-
                         SizedBox(height: 20),
                       ],
                     ),
@@ -195,10 +181,7 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
                 },
                 textColor: Colors.white,
                 gradientColors: isButtonEnabled
-                    ? [
-                        AppColors.primaryBlack,
-                        AppColors.primaryRed
-                      ] // Active gradient
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
                     : [
                         AppColors.primaryRed.withOpacity(0.5),
                         AppColors.primaryBlack.withOpacity(0.5)
@@ -215,8 +198,8 @@ class _OTPState extends State<OTP> with SingleTickerProviderStateMixin {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         elevation: 0,
-        minimumSize: Size(24, 24), // Smaller minimum size
-        padding: EdgeInsets.all(4.0), // Reduced padding
+        minimumSize: Size(24, 24),
+        padding: EdgeInsets.all(4.0),
       ),
       onPressed: () {
         String currentText = _otpController.text;

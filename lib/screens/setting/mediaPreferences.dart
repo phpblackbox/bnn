@@ -27,7 +27,6 @@ class _MediaPreferencesState extends State<MediaPreferences> {
 
   void _toggleAutoPlay(int index) {
     setState(() {
-      // Set all items to false and only select the tapped item
       for (var item in _selectedAutoPlay) {
         item['status'] = false;
       }
@@ -159,8 +158,8 @@ class _MediaPreferencesState extends State<MediaPreferences> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Grey background color
-                borderRadius: BorderRadius.circular(8.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               child: ListView.builder(
                 shrinkWrap: true,
@@ -222,8 +221,8 @@ class _MediaPreferencesState extends State<MediaPreferences> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: Color(0xFFE9E9E9), // Grey background color
-                borderRadius: BorderRadius.circular(8.0), // Border radius
+                color: Color(0xFFE9E9E9),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               child: ListView.builder(
                 shrinkWrap: true,

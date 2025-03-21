@@ -33,7 +33,7 @@ class ButtonPrimary extends StatelessWidget {
         ),
         child: Row(children: [
           Padding(
-            padding: const EdgeInsets.only(left: 14), // Add left padding here
+            padding: const EdgeInsets.only(left: 14),
             child: Icon(icon, color: textColor),
           ),
           Expanded(

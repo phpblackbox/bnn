@@ -206,7 +206,6 @@ class _OnePostState extends State<OnePost> {
                             ),
                             SizedBox(height: 5),
                             Text(
-                              // posts[index]['friend']!,
                               "Friends since January 2025",
                               style: TextStyle(
                                   fontFamily: "Poppins", fontSize: 10),
@@ -244,8 +243,6 @@ class _OnePostState extends State<OnePost> {
                             imageUrl: post!['avatar'],
                             name:
                                 "${post!['first_name']} ${post!['last_name']}");
-
-                        print(room);
 
                         navigator.pop();
                         await navigator.push(
@@ -588,7 +585,7 @@ class _OnePostState extends State<OnePost> {
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                                vertical: 5.0, horizontal: 16.0), // Add padding
+                                vertical: 5.0, horizontal: 16.0),
                             decoration: ShapeDecoration(
                               color: Colors.black.withOpacity(0.4),
                               shape: RoundedRectangleBorder(
@@ -618,7 +615,6 @@ class _OnePostState extends State<OnePost> {
                         GestureDetector(
                           onTap: () async {
                             final userId = supabase.auth.currentUser!.id;
-                            print(userId);
                             final existingBookmarksResponse = await supabase
                                 .from('post_bookmarks')
                                 .select()
@@ -675,9 +671,8 @@ class _OnePostState extends State<OnePost> {
                                 Text(
                                   post!['bookmarks'].toString(),
                                   style: TextStyle(
-                                    color: Colors
-                                        .white, // Set text color to contrast with the background
-                                    fontSize: 12.0, // Set font size
+                                    color: Colors.white,
+                                    fontSize: 12.0,
                                   ),
                                 ),
                               ],
@@ -685,9 +680,7 @@ class _OnePostState extends State<OnePost> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
-                            print('bakspace');
-                          },
+                          onTap: () {},
                           child: Container(
                             padding: EdgeInsets.symmetric(
                                 vertical: 5.0, horizontal: 16.0),

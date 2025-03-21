@@ -24,7 +24,6 @@ class _TermsOfServiceState extends State<TermsOfService>
       vsync: this,
     );
 
-    // Start the animation
     _controller.forward();
   }
 
@@ -50,7 +49,7 @@ class _TermsOfServiceState extends State<TermsOfService>
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(32.0), // Padding for the entire column
+          padding: const EdgeInsets.all(32.0),
           child: Stack(
             children: [
               Column(
@@ -111,10 +110,7 @@ class _TermsOfServiceState extends State<TermsOfService>
                     },
                     textColor: Colors.white,
                     gradientColors: isButtonEnabled
-                        ? [
-                            AppColors.primaryBlack,
-                            AppColors.primaryRed
-                          ] // Active gradient
+                        ? [AppColors.primaryBlack, AppColors.primaryRed]
                         : [
                             AppColors.primaryRed.withOpacity(0.5),
                             AppColors.primaryBlack.withOpacity(0.5)
