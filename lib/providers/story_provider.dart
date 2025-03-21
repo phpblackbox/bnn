@@ -101,7 +101,7 @@ class StoryProvider with ChangeNotifier {
             await _storyService.createStoryImage(userId!, imgUrls);
 
         loading = false;
-
+        Navigator.pop(context);
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -127,7 +127,7 @@ class StoryProvider with ChangeNotifier {
       await _reelService.createReel(userId!, videoUrl);
 
       loading = false;
-
+      Navigator.pop(context);
       Navigator.pushReplacementNamed(context, '/home');
     }
   }

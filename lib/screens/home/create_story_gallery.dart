@@ -13,6 +13,46 @@ class CreateStoryGallery extends StatefulWidget {
 }
 
 class _CreateStoryGalleryState extends State<CreateStoryGallery> {
+  void showLoadingModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Center(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFF30802)),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'please wait while we process your post',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'SF Pro Text',
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -46,10 +86,6 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
                           child: _buildImageGrid(provider),
                         )
                       : const Text(''),
-                  if (provider.loading)
-                    const Center(
-                      child: CircularProgressIndicator(),
-                    ),
                   const Spacer(),
                   _buildNextButton(provider, context),
                 ],
@@ -69,8 +105,10 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
             () => provider.cameraImage(context)),
         _buildImageSelectionButton(
             "assets/images/post/gallery.png", () => provider.pickImages()),
-        _buildImageSelectionButton("assets/images/post/video.png",
-            () => provider.uploadVideo(context)),
+        _buildImageSelectionButton("assets/images/post/video.png", () async {
+          showLoadingModal();
+          await provider.uploadVideo(context);
+        }),
       ],
     );
   }
@@ -121,6 +159,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
           child: ButtonGradientMain(
             label: 'Next',
             onPressed: () {
+              showLoadingModal();
               provider.uploadImages(context);
             },
             textColor: Colors.white,
