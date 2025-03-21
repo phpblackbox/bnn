@@ -54,6 +54,7 @@ class _HomeState extends State<Home> {
         }
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: Padding(
           padding: EdgeInsets.only(left: 16, top: 0, right: 16),
           child: Column(

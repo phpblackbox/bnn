@@ -209,27 +209,25 @@ class _SuggestedState extends State<Suggested> {
               ],
             ),
             SizedBox(height: 10),
-            Container(
-              child: CustomInputField(
-                placeholder: "Search for Suggested",
-                controller: searchController,
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                  if (value.isNotEmpty) {
-                    final temp = data!
-                        .where((item) =>
-                            (item['username'] as String?)
-                                ?.toLowerCase()
-                                .contains(value.toLowerCase()) ??
-                            false)
-                        .toList();
-                    filltered = temp;
-                  }
-                },
-                icon: Icons.search,
-              ),
+            CustomInputField(
+              placeholder: "Search for Suggested",
+              controller: searchController,
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+                if (value.isNotEmpty) {
+                  final temp = data!
+                      .where((item) =>
+                          (item['username'] as String?)
+                              ?.toLowerCase()
+                              .contains(value.toLowerCase()) ??
+                          false)
+                      .toList();
+                  filltered = temp;
+                }
+              },
+              icon: Icons.search,
             ),
             SizedBox(height: 16),
             Column(
@@ -329,7 +327,7 @@ class _SuggestedState extends State<Suggested> {
                   enabled: _loading,
                   enableSwitchAnimation: true,
                   child: ListView.builder(
-                    shrinkWrap: true,
+                    // shrinkWrap: true,
                     itemCount:
                         searchQuery.isEmpty ? data!.length : filltered.length,
                     itemBuilder: (context, index) {

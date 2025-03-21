@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:bnn/providers/auth_provider.dart';
@@ -27,7 +28,7 @@ class Posts extends StatefulWidget {
 class _PostsState extends State<Posts> {
   List<dynamic> comments = [];
   final ScrollController _scrollController =
-      ScrollController(initialScrollOffset: 5.0);
+      ScrollController(initialScrollOffset: Platform.isIOS ? 24 : 48);
 
   @override
   void initState() {
@@ -275,8 +276,7 @@ class _PostsState extends State<Posts> {
           //     child:
           ListView.builder(
         controller: _scrollController,
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
+        padding: EdgeInsets.zero,
         itemCount: postProvider.loadingMore
             ? postProvider.posts!.length + 1
             : postProvider.posts?.length,
@@ -466,8 +466,18 @@ class _PostsState extends State<Posts> {
                                                           strokeWidth: 2));
                                             } else if (snapshot.hasData &&
                                                 snapshot.data != null) {
-                                              return Image.memory(
-                                                  snapshot.data!);
+                                              return Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    Image.memory(
+                                                        snapshot.data!),
+                                                    Positioned(
+                                                      child: Icon(
+                                                        Icons.play_arrow,
+                                                        color: Colors.white,
+                                                      ),
+                                                    )
+                                                  ]);
                                             } else {
                                               return Text(
                                                   'Failed to load thumbnail');
