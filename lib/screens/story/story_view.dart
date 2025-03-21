@@ -339,6 +339,66 @@ class _StoryViewState extends State<StoryView> {
                           }),
                         ),
                       ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(21),
+                            ),
+                            child: ClipOval(
+                              // This will ensure the image is circular
+                              child: Image.network(
+                                storyViewProvider.story["profiles"]["avatar"],
+                                fit: BoxFit.fill,
+                                width: 42,
+                                height: 42,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            storyViewProvider.story["profiles"]["username"],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.33,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            storyViewProvider.story["timeDiff"],
+                            style: TextStyle(
+                              color:
+                                  Colors.white.withOpacity(0.8199999928474426),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: -0.07,
+                            ),
+                          ),
+                          Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: ImageIcon(
+                              AssetImage('assets/images/icons/close.png'),
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
