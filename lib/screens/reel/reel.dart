@@ -22,6 +22,7 @@ class _ReelScreenState extends State<ReelScreen>
   bool _isTransitioning = false;
   bool _isInitialized = false;
   ReelProvider? _reelProvider;
+  double _dragDistance = 0;
 
   @override
   void initState() {
@@ -124,13 +125,27 @@ class _ReelScreenState extends State<ReelScreen>
             AbsorbPointer(
               absorbing: _isTransitioning,
               child: GestureDetector(
+                onVerticalDragUpdate: (DragUpdateDetails details) {
+                  // Track the drag distance
+                  _dragDistance += details.delta.dy;
+                },
                 onVerticalDragEnd: (DragEndDetails details) {
-                  if (details.velocity.pixelsPerSecond.dy > 0 ||
-                      details.velocity.pixelsPerSecond.dy < 0 ||
-                      details.velocity.pixelsPerSecond.dx > 0) {
+                  // Check both velocity and distance for more reliable swipe detection
+                  if (details.velocity.pixelsPerSecond.dy.abs() > 150 ||
+                      _dragDistance.abs() > 50) {
+                    _handleSwipe();
+                  }
+                  // Reset drag distance
+                  _dragDistance = 0;
+                },
+                onHorizontalDragEnd: (DragEndDetails details) {
+                  // Also handle horizontal swipes
+                  if (details.velocity.pixelsPerSecond.dx.abs() > 150) {
                     _handleSwipe();
                   }
                 },
+                behavior:
+                    HitTestBehavior.opaque, // Make the entire area tappable
                 child: SlideTransition(
                   position: _slideUpAnimation,
                   child: FadeTransition(
