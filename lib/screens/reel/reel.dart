@@ -125,7 +125,9 @@ class _ReelScreenState extends State<ReelScreen>
               absorbing: _isTransitioning,
               child: GestureDetector(
                 onVerticalDragEnd: (DragEndDetails details) {
-                  if (details.velocity.pixelsPerSecond.dy < -100) {
+                  if (details.velocity.pixelsPerSecond.dy > 0 ||
+                      details.velocity.pixelsPerSecond.dy < 0 ||
+                      details.velocity.pixelsPerSecond.dx > 0) {
                     _handleSwipe();
                   }
                 },

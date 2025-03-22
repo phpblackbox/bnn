@@ -68,10 +68,21 @@ class StoryViewProvider extends ChangeNotifier {
   }
 
   Future<void> preloadNextStory() async {
+    int count = 0;
     int randomId;
     do {
       randomId = await _storyService.getRandomStoryId();
+      count++;
+      if (count > 10) {
+        break;
+      }
     } while (stories.any((story) => story['id'] == randomId));
+
+    if (count > 10) {
+      print("there are no more stories to load");
+      currentStoryIndex = 0;
+      return;
+    }
 
     final nextStory = await getStoryById(randomId);
     stories.add(nextStory);
@@ -79,10 +90,21 @@ class StoryViewProvider extends ChangeNotifier {
   }
 
   Future<void> preloadPreviousStory() async {
+    int count = 0;
     int randomId;
     do {
       randomId = await _storyService.getRandomStoryId();
+      count++;
+      if (count > 10) {
+        break;
+      }
     } while (stories.any((story) => story['id'] == randomId));
+
+    if (count > 10) {
+      print("there are no more stories to load");
+      currentStoryIndex = 0;
+      return;
+    }
 
     final prevStory = await getStoryById(randomId);
     stories.insert(0, prevStory);
