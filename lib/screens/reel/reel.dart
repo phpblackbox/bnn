@@ -18,9 +18,11 @@ class _ReelScreenState extends State<ReelScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideUpAnimation;
+  late Animation<Offset> _slideDownAnimation;
   late Animation<double> _fadeAnimation;
   bool _isTransitioning = false;
   bool _isInitialized = false;
+  bool _isSlidingUp = true;
   ReelProvider? _reelProvider;
   double _dragDistance = 0;
 
@@ -36,6 +38,14 @@ class _ReelScreenState extends State<ReelScreen>
     _slideUpAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, -0.99),
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+
+    _slideDownAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 0.99),
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOut,
@@ -91,18 +101,46 @@ class _ReelScreenState extends State<ReelScreen>
   Future<void> _handleSwipe() async {
     if (_isTransitioning) return;
 
-    _isTransitioning = true;
+    setState(() {
+      _isTransitioning = true;
+      _isSlidingUp = true;
+    });
 
     try {
       await _animationController.forward();
       _reelProvider?.controller?.pause();
       await _reelProvider?.nextStep();
-      await _animationController.reverse();
+      _animationController.reset();
     } catch (e) {
       print("Error during swipe transition: $e");
-      await _animationController.reverse();
+      _animationController.reset();
     } finally {
-      _isTransitioning = false;
+      setState(() {
+        _isTransitioning = false;
+      });
+    }
+  }
+
+  Future<void> _handlePreviousSwipe() async {
+    if (_isTransitioning) return;
+
+    setState(() {
+      _isTransitioning = true;
+      _isSlidingUp = false;
+    });
+
+    try {
+      await _animationController.forward();
+      _reelProvider?.controller?.pause();
+      await _reelProvider?.previousStep();
+      _animationController.reset();
+    } catch (e) {
+      print("Error during previous swipe transition: $e");
+      _animationController.reset();
+    } finally {
+      setState(() {
+        _isTransitioning = false;
+      });
     }
   }
 
@@ -133,21 +171,34 @@ class _ReelScreenState extends State<ReelScreen>
                   // Check both velocity and distance for more reliable swipe detection
                   if (details.velocity.pixelsPerSecond.dy.abs() > 150 ||
                       _dragDistance.abs() > 50) {
-                    _handleSwipe();
+                    if (_dragDistance > 0) {
+                      // Swipe down - go to previous
+                      _handlePreviousSwipe();
+                    } else {
+                      // Swipe up - go to next
+                      _handleSwipe();
+                    }
                   }
                   // Reset drag distance
                   _dragDistance = 0;
                 },
                 onHorizontalDragEnd: (DragEndDetails details) {
-                  // Also handle horizontal swipes
+                  // Handle horizontal swipes
                   if (details.velocity.pixelsPerSecond.dx.abs() > 150) {
-                    _handleSwipe();
+                    if (details.velocity.pixelsPerSecond.dx > 0) {
+                      // Swipe right - go to previous
+                      _handlePreviousSwipe();
+                    } else {
+                      // Swipe left - go to next
+                      _handleSwipe();
+                    }
                   }
                 },
                 behavior:
                     HitTestBehavior.opaque, // Make the entire area tappable
                 child: SlideTransition(
-                  position: _slideUpAnimation,
+                  position:
+                      _isSlidingUp ? _slideUpAnimation : _slideDownAnimation,
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: FutureBuilder<void>(

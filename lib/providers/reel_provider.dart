@@ -8,10 +8,15 @@ class ReelProvider extends ChangeNotifier {
   final ReelService reelService = ReelService();
   VideoPlayerController? controller;
   VideoPlayerController? _nextController;
+  VideoPlayerController? _prevController;
   ReelModel? _nextReel;
+  ReelModel? _prevReel;
   bool _isPreloadingNext = false;
-  static const int _maxPreloadAttempts = 3;
+  bool _isPreloadingPrev = false;
+  bool _isNoMoreReels = false;
+  static const int _maxPreloadAttempts = 4;
   int _preloadNextAttempts = 0;
+  int _preloadPrevAttempts = 0;
 
   bool _loading = true;
   bool get loading => _loading;
@@ -30,15 +35,20 @@ class ReelProvider extends ChangeNotifier {
     currentReel = null;
     currentIndex = 0;
     loading = true;
+    _isNoMoreReels = false;
 
     try {
+      // Load initial reel
       int randomReelId = await reelService.getRandomReelId();
       final reel = await reelService.getReelById(randomReelId);
       if (reel != null) {
         currentReel = reel;
         reels.add(reel);
         await loadVideo(currentReel!);
-        await _preloadNextVideo();
+
+        // Preload next reel and previous reel
+        await preloadNextReel();
+        await preloadPreviousReel();
       }
     } catch (e) {
       print("Error initializing reel: $e");
@@ -48,7 +58,7 @@ class ReelProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _preloadNextVideo() async {
+  Future<void> preloadNextReel() async {
     if (_nextReel != null ||
         _isPreloadingNext ||
         _preloadNextAttempts >= _maxPreloadAttempts) return;
@@ -56,30 +66,50 @@ class ReelProvider extends ChangeNotifier {
     _isPreloadingNext = true;
     _preloadNextAttempts++;
 
-    int count = 0;
     try {
-      int randomReelId;
-      do {
-        randomReelId = await reelService.getRandomReelId();
-        count++;
+      if (_isNoMoreReels) {
+        if (reels.isNotEmpty) {
+          if (currentIndex >= reels.length - 1) {
+            _nextReel = reels[0];
+          } else {
+            _nextReel = reels[currentIndex + 1];
+          }
+        }
+      } else {
+        int count = 0;
+        int randomReelId;
+        do {
+          randomReelId = await reelService.getRandomReelId();
+          count++;
+          if (count > 10) {
+            break;
+          }
+        } while (reels.any((reel) => reel.id == randomReelId));
+
         if (count > 10) {
           print("there are no more reels to load");
-          currentIndex = 0;
-          return;
+          _isNoMoreReels = true;
+          if (reels.isNotEmpty) {
+            if (currentIndex >= reels.length - 1) {
+              _nextReel = reels[0];
+            } else {
+              _nextReel = reels[currentIndex + 1];
+            }
+          }
+        } else {
+          if (currentIndex != reels.length - 1) {
+            _nextReel = reels[currentIndex + 1];
+          } else {
+            _nextReel = await reelService.getReelById(randomReelId);
+          }
         }
-      } while (reels.any((reel) => reel.id == randomReelId));
-
-      if (count > 10) {
-        print("there are no more reels to load");
-        return;
       }
-
-      _nextReel = await reelService.getReelById(randomReelId);
 
       if (_nextReel != null && _nextReel!.videoUrl.isNotEmpty) {
         _nextController = VideoPlayerController.networkUrl(
           Uri.parse(_nextReel!.videoUrl),
         );
+
         await _nextController?.initialize();
         _preloadNextAttempts = 0; // Reset attempts on success
       }
@@ -93,37 +123,109 @@ class ReelProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> preloadPreviousReel() async {
+    if (_prevReel != null ||
+        _isPreloadingPrev ||
+        _preloadPrevAttempts >= _maxPreloadAttempts) return;
+
+    _isPreloadingPrev = true;
+    _preloadPrevAttempts++;
+
+    try {
+      // Get the reel before current reel
+      if (currentIndex > 0) {
+        _prevReel = reels[currentIndex - 1];
+      } else {
+        _prevReel = reels.last;
+      }
+
+      if (_prevReel != null && _prevReel!.videoUrl.isNotEmpty) {
+        _prevController = VideoPlayerController.networkUrl(
+          Uri.parse(_prevReel!.videoUrl),
+        );
+
+        await _prevController?.initialize();
+        _preloadPrevAttempts = 0;
+      }
+    } catch (e) {
+      print("Error preloading previous video: $e");
+      _prevReel = null;
+      _prevController = null;
+    } finally {
+      _isPreloadingPrev = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> nextStep() async {
     if (_nextReel == null || _nextController == null) {
-      await _preloadNextVideo();
+      await preloadNextReel();
       return;
     }
 
     try {
-      // Store current controller before disposing
       final oldController = controller;
 
-      // Switch to preloaded content first
+      _prevReel = currentReel;
+      _prevController = controller;
+
       controller = _nextController;
       currentReel = _nextReel;
-      reels.add(_nextReel!);
+
+      if (!reels.contains(_nextReel)) {
+        reels.add(_nextReel!);
+      }
+
       currentIndex++;
 
-      // Start preloading next video
       _nextReel = null;
       _nextController = null;
-      _preloadNextVideo();
+      preloadNextReel();
+
+      controller?.setLooping(true);
+      controller?.play();
+
+      // Dispose old controller after switching
+      // if (oldController != null && oldController.value.isInitialized) {
+      //   await oldController.dispose();
+      // }
+    } catch (e) {
+      print("Error in nextStep: $e");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> previousStep() async {
+    if (_prevReel == null || _prevController == null) {
+      await preloadPreviousReel();
+      return;
+    }
+
+    try {
+      final oldController = controller;
+
+      _nextReel = currentReel;
+      _nextController = controller;
+
+      controller = _prevController;
+      currentReel = _prevReel;
+      currentIndex--;
+
+      _prevReel = null;
+      _prevController = null;
+      preloadPreviousReel();
 
       // Play current video
       controller?.setLooping(true);
       controller?.play();
 
       // Dispose old controller after switching
-      if (oldController != null && oldController.value.isInitialized) {
-        await oldController.dispose();
-      }
+      // if (oldController != null && oldController.value.isInitialized) {
+      //   await oldController.dispose();
+      // }
     } catch (e) {
-      print("Error in nextStep: $e");
+      print("Error in previousStep: $e");
     } finally {
       notifyListeners();
     }
@@ -137,14 +239,21 @@ class ReelProvider extends ChangeNotifier {
       if (_nextController != null && _nextController!.value.isInitialized) {
         await _nextController?.dispose();
       }
+      if (_prevController != null && _prevController!.value.isInitialized) {
+        await _prevController?.dispose();
+      }
     } catch (e) {
       print("Error disposing controllers: $e");
     } finally {
       controller = null;
       _nextController = null;
+      _prevController = null;
       _nextReel = null;
+      _prevReel = null;
       _isPreloadingNext = false;
+      _isPreloadingPrev = false;
       _preloadNextAttempts = 0;
+      _preloadPrevAttempts = 0;
       initializeVideoPlayerFuture = null;
     }
   }
@@ -168,9 +277,9 @@ class ReelProvider extends ChangeNotifier {
         });
 
         // Dispose old controller after new one is initialized
-        if (oldController != null && oldController.value.isInitialized) {
-          oldController.dispose();
-        }
+        // if (oldController != null && oldController.value.isInitialized) {
+        //   oldController.dispose();
+        // }
       } else {
         print("Video URL is not available");
       }
