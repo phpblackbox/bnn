@@ -56,11 +56,23 @@ class ReelProvider extends ChangeNotifier {
     _isPreloadingNext = true;
     _preloadNextAttempts++;
 
+    int count = 0;
     try {
       int randomReelId;
       do {
         randomReelId = await reelService.getRandomReelId();
+        count++;
+        if (count > 10) {
+          print("there are no more reels to load");
+          currentIndex = 0;
+          return;
+        }
       } while (reels.any((reel) => reel.id == randomReelId));
+
+      if (count > 10) {
+        print("there are no more reels to load");
+        return;
+      }
 
       _nextReel = await reelService.getReelById(randomReelId);
 
