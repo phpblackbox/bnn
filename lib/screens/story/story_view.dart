@@ -47,8 +47,6 @@ class _StoryViewState extends State<StoryView> {
   StoryViewProvider? _storyViewProvider;
   late FocusNode _focusNode;
 
-  final GlobalKey _videoKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +72,8 @@ class _StoryViewState extends State<StoryView> {
 
   void _startAutoSlide(StoryViewProvider storyViewProvider) {
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (!_pageController.hasClients) return;
+
       if (storyViewProvider.currentImageIndex <
           storyViewProvider.story["img_urls"].length - 1) {
         storyViewProvider.currentImageIndex++;
@@ -163,10 +163,17 @@ class _StoryViewState extends State<StoryView> {
       await _storyViewProvider!.controller!.pause();
     }
 
-    RenderRepaintBoundary boundary =
-        _videoKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final videoPlayerKey = GlobalKey();
+    final videoPlayer = _storyViewProvider!.controller!;
 
-    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+    final boundary = RenderRepaintBoundary();
+    final videoPlayerWidget = VideoPlayer(videoPlayer);
+    final videoPlayerElement = videoPlayerWidget.createElement();
+    videoPlayerElement.mount(null, null);
+    final renderObject =
+        videoPlayerElement.renderObject as RenderRepaintBoundary;
+
+    ui.Image image = await renderObject.toImage(pixelRatio: 2.0);
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     if (byteData != null) {
       String randomNumStr = Constants().generateRandomNumberString(8);
@@ -242,12 +249,16 @@ class _StoryViewState extends State<StoryView> {
                           onPageChanged: (i) async {
                             if (i > storyViewProvider.currentStoryIndex) {
                               FocusScope.of(context).unfocus();
-                              await storyViewProvider.controller!.pause();
+                              if (storyViewProvider.story!["type"] == "video") {
+                                await storyViewProvider.controller!.pause();
+                              }
                               await storyViewProvider.nextStory();
                             } else if (i <
                                 storyViewProvider.currentStoryIndex) {
                               FocusScope.of(context).unfocus();
-                              await storyViewProvider.controller!.pause();
+                              if (storyViewProvider.story!["type"] == "video") {
+                                await storyViewProvider.controller!.pause();
+                              }
                               await storyViewProvider.previousStory();
                             }
                             storyViewProvider.currentImageIndex = 0;
@@ -284,7 +295,7 @@ class _StoryViewState extends State<StoryView> {
                                             ConnectionState.done) {
                                           return Center(
                                             child: RepaintBoundary(
-                                              key: _videoKey,
+                                              key: GlobalKey(),
                                               child: AspectRatio(
                                                 aspectRatio: storyViewProvider
                                                     .controller!

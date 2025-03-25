@@ -1,5 +1,6 @@
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/post_comment_provider.dart';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +70,12 @@ class _CommentsModalState extends State<CommentsModal> {
                 ),
               ),
             ),
-            buildCommentInput(postCommentProvider),
+            FutureBuilder<Widget>(
+              future: buildCommentInput(postCommentProvider),
+              builder: (context, snapshot) {
+                return snapshot.data ?? Container();
+              },
+            ),
           ],
         ),
       ),
@@ -167,33 +173,37 @@ class _CommentsModalState extends State<CommentsModal> {
                     ]),
                     SizedBox(height: 6),
                     Row(children: [
-                      Text(
-                        comment['content'],
-                        style: TextStyle(
-                          color: Color(0xFF151923),
-                          fontSize: 12,
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w400,
-                          height: 1.37,
-                        ),
-                      ),
-                      SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {
-                          postCommentProvider.parentId = comment["id"];
-                          commentFocusNode.requestFocus();
-                        },
+                      Expanded(
                         child: Text(
-                          'Reply',
+                          comment['content'],
                           style: TextStyle(
-                            color: Color(0xFF939292),
-                            fontSize: 10,
+                            color: Color(0xFF151923),
+                            fontSize: 12,
                             fontFamily: 'Nunito',
                             fontWeight: FontWeight.w400,
+                            height: 1.37,
                           ),
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
                         ),
                       ),
                     ]),
+                    SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        postCommentProvider.parentId = comment["id"];
+                        commentFocusNode.requestFocus();
+                      },
+                      child: Text(
+                        'Reply',
+                        style: TextStyle(
+                          color: Color(0xFF939292),
+                          fontSize: 10,
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
                     SizedBox(height: 6),
                     GestureDetector(
                       onTap: () => postCommentProvider.toggleChildComments(
@@ -243,60 +253,72 @@ class _CommentsModalState extends State<CommentsModal> {
     );
   }
 
-  Widget buildCommentInput(PostCommentProvider postCommentProvider) {
+  Future<Widget> buildCommentInput(
+      PostCommentProvider postCommentProvider) async {
     final me = Provider.of<AuthProvider>(context, listen: false).profile!;
-    return SizedBox(
-      height: 30,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 15,
-            backgroundImage: NetworkImage(me.avatar!),
-            backgroundColor: Colors.grey[200],
-          ),
-          SizedBox(width: 10),
-          Expanded(
-            child: Focus(
-              child: TextField(
-                focusNode: commentFocusNode,
-                controller: _commentController,
-                onSubmitted: (value) async {
-                  if (value.isEmpty) {
-                    CustomToast.showToastWarningTop(context, 'Add a comment');
-                    return;
-                  }
-
-                  _commentController.clear();
-                  postCommentProvider.sendPostComment(widget.postId, value, me);
-                },
-                style: TextStyle(
-                  fontSize: 10.0,
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Add a comment...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.transparent),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.transparent),
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFFE9E9E9),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                ),
-              ),
+    final post = await Provider.of<PostProvider>(context, listen: false)
+        .getPostInfo(widget.postId);
+    return me.id != post['author_id']
+        ? Container(
+            constraints: BoxConstraints(
+              minHeight: 30,
+              maxHeight: 120,
             ),
-          ),
-        ],
-      ),
-    );
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 15,
+                  backgroundImage: NetworkImage(me.avatar!),
+                  backgroundColor: Colors.grey[200],
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Focus(
+                    child: TextFormField(
+                      focusNode: commentFocusNode,
+                      controller: _commentController,
+                      maxLines: null,
+                      minLines: 1,
+                      onFieldSubmitted: (value) async {
+                        if (value.isEmpty) {
+                          CustomToast.showToastWarningTop(
+                              context, 'Add a comment');
+                          return;
+                        }
+
+                        _commentController.clear();
+                        postCommentProvider.sendPostComment(
+                            widget.postId, value, me);
+                      },
+                      style: TextStyle(
+                        fontSize: 10.0,
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Add a comment...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        filled: true,
+                        fillColor: Color(0xFFE9E9E9),
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        : Container();
   }
 }

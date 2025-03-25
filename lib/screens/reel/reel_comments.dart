@@ -281,16 +281,22 @@ class _ReelCommandsState extends State<ReelCommands> {
                     ]),
                     SizedBox(height: 6),
                     Row(children: [
-                      Text(
-                        comment['content'],
-                        style: TextStyle(
-                          color: Color(0xFF151923),
-                          fontSize: 12,
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w400,
-                          height: 1.37,
+                      Row(children: [
+                        Expanded(
+                          child: Text(
+                            comment['content'],
+                            style: TextStyle(
+                              color: Color(0xFF151923),
+                              fontSize: 12,
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w400,
+                              height: 1.37,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
                         ),
-                      ),
+                      ]),
                       SizedBox(width: 6),
                       GestureDetector(
                         onTap: () {
@@ -404,10 +410,12 @@ class _ReelCommandsState extends State<ReelCommands> {
           ),
           SizedBox(width: 10),
           Expanded(
-            child: TextField(
+            child: TextFormField(
               focusNode: commentFocusNode,
               controller: _commentController,
-              onSubmitted: (value) async {
+              maxLines: null,
+              minLines: 1,
+              onFieldSubmitted: (value) async {
                 if (value.isEmpty) {
                   CustomToast.showToastWarningTop(context, "Add a comment");
                   return;

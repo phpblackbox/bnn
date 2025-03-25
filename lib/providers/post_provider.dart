@@ -37,6 +37,11 @@ class PostProvider extends ChangeNotifier {
   int offset = 0;
   final int _limit = 5;
 
+  Future<Map<String, dynamic>> getPostInfo(int postId) async {
+    final post = await postService.getPostById(postId);
+    return post;
+  }
+
   Future<void> loadPosts(
       {String? userId, bool? bookmark, String? currentUserId}) async {
     errorMessage = null;
