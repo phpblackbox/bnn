@@ -226,7 +226,7 @@ class _ReelScreenState extends State<ReelScreen>
             ),
           Positioned(
             top: Platform.isIOS ? 40 : 12,
-            left: 0,
+            right: 0,
             child: IconButton(
               icon: const Icon(Icons.close, size: 20, color: Colors.black),
               onPressed: () {

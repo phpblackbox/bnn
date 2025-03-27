@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:bnn/providers/story_view_provider.dart';
@@ -198,6 +199,16 @@ class _StoryViewState extends State<StoryView> {
       // backgroundColor: Colors.black,
       body: Stack(
         children: [
+          Positioned(
+            top: Platform.isIOS ? 40 : 12,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 20, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
           storyViewProvider.loading
               ? Center(child: CircularProgressIndicator())
               : GestureDetector(
@@ -398,16 +409,16 @@ class _StoryViewState extends State<StoryView> {
                             ),
                           ),
                           Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: ImageIcon(
-                              AssetImage('assets/images/icons/close.png'),
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     Navigator.pop(context);
+                          //   },
+                          //   child: ImageIcon(
+                          //     AssetImage('assets/images/icons/close.png'),
+                          //     color: Colors.black,
+                          //     size: 16,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],
