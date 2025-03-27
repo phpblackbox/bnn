@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -103,6 +102,20 @@ class StoryService {
 
   Future<int> getRandomStoryId() async {
     final storyId = await _supabase.rpc('get_random_story_id') ?? 0;
+    return storyId;
+  }
+
+  Future<int> getNextStoryId(int currentStoryId) async {
+    final storyRecord = await _supabase
+        .from('stories')
+        .select()
+        .lt('id', currentStoryId)
+        .gte('created_at',
+            DateTime.now().subtract(Duration(hours: 48)).toIso8601String())
+        .order('id', ascending: false)
+        .limit(1)
+        .single();
+    final storyId = storyRecord['id'];
     return storyId;
   }
 }
