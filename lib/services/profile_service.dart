@@ -58,6 +58,17 @@ class ProfileService {
         .rpc('is_friend', params: {'me_id': userId1, 'user_id': userId2});
   }
 
+  Future<Map<String, dynamic>?> getFriendInfo(
+      String meId, String userId) async {
+    final res = await _supabase
+        .from('relationships')
+        .select()
+        .eq('status', 'friend')
+        .or('and(follower_id.eq.${meId},followed_id.eq.${userId}),and(follower_id.eq.${userId},followed_id.eq.${meId})')
+        .maybeSingle();
+    return res;
+  }
+
   Future<int> getCountMutalFriends(String userA, String userB) async {
     return await _supabase.rpc('get_count_mutual_friends',
         params: {'usera': userA, 'userb': userB});

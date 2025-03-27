@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:intl/intl.dart';
 
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
+import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/comments.dart';
 import 'package:bnn/widgets/FullScreenVideo.dart';
@@ -84,172 +86,209 @@ class _PostsState extends State<Posts> {
     });
   }
 
-  void _showFriendDetail(BuildContext context, int index, postProvider) {
+  Future<void> _showFriendDetail(
+      BuildContext context, int index, postProvider) async {
+    bool isFriend = false;
+    print(postProvider.posts?[index]);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    final friendInfo = await profileProvider
+        .getFriendInfo(postProvider.posts?[index]['author_id']!);
+    print(friendInfo);
+    setState(() {
+      isFriend = friendInfo?["id"] != null;
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(20.0),
-          height: 300.0,
-          child: Column(
-            children: [
-              Row(
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.all(20.0),
+              height: 300.0,
+              child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundImage:
-                        NetworkImage(postProvider.posts?[index]['avatar']!),
-                  ),
-                  SizedBox(width: 6),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        postProvider.posts?[index]['name']!,
-                        style: TextStyle(
-                            fontFamily: "Nunito",
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
+                      CircleAvatar(
+                        radius: 35,
+                        backgroundImage:
+                            NetworkImage(postProvider.posts?[index]['avatar']!),
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        // posts[index]['friend']!,
-                        "Friends since January 2025",
-                        style: TextStyle(fontFamily: "Poppins", fontSize: 10),
-                      ),
+                      SizedBox(width: 6),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            postProvider.posts?[index]['name']!,
+                            style: TextStyle(
+                                fontFamily: "Nunito",
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            isFriend
+                                ? "Friends since ${DateFormat('MMMM').format(DateTime.parse(friendInfo!["created_at"]))} ${DateTime.parse(friendInfo["created_at"]).year}"
+                                : '',
+                            style:
+                                TextStyle(fontFamily: "Poppins", fontSize: 10),
+                          ),
+                        ],
+                      )
                     ],
-                  )
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                    height: 30,
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final authProvider = Provider.of<AuthProvider>(context);
+                      final meId = authProvider.user?.id;
+                      if (postProvider.posts?[index]['author_id'] == meId) {
+                        CustomToast.showToastWarningTop(
+                            context, "You can't send message to you");
+                        return;
+                      }
+
+                      types.User otherUser = types.User(
+                        id: postProvider.posts?[index]['author_id'],
+                        firstName: postProvider.posts?[index]['first_name'],
+                        lastName: postProvider.posts?[index]['last_name'],
+                        imageUrl: postProvider.posts?[index]['avatar'],
+                      );
+
+                      final navigator = Navigator.of(context);
+                      final temp =
+                          await SupabaseChatCore.instance.createRoom(otherUser);
+
+                      var room = temp.copyWith(
+                          imageUrl: postProvider.posts?[index]['avatar'],
+                          name:
+                              "${postProvider.posts?[index]['first_name']} ${postProvider.posts?[index]['last_name']}");
+
+                      navigator.pop();
+                      await navigator.push(
+                        MaterialPageRoute(
+                          builder: (context) => RoomPage(room: room),
+                        ),
+                      );
+                    },
+                    child: Row(children: [
+                      SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFF4D4C4A),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        padding: EdgeInsets.all(13),
+                        child: Icon(
+                          Icons.mode_comment_outlined,
+                          color: Colors.white,
+                          size: 17,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Message ${postProvider.posts?[index]["first_name"]}',
+                        style: TextStyle(
+                          color: Color(0xFF4D4C4A),
+                          fontSize: 11,
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.w700,
+                          height: 1.50,
+                        ),
+                      )
+                    ]),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () async {
+                      if (isFriend) {
+                        await profileProvider.unfollowPost(
+                            friendInfo!['id'], context);
+                        setState(() {
+                          isFriend = false;
+                        });
+                      } else {
+                        print(postProvider.posts?[index]['author_id']);
+                        await profileProvider.followUserPost(
+                            postProvider.posts?[index]['author_id']!, context);
+                        setState(() {
+                          isFriend = true;
+                        });
+                      }
+                    },
+                    child: Row(children: [
+                      SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFF4D4C4A),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        padding: EdgeInsets.all(13),
+                        child: Icon(
+                          Icons.person_off_outlined,
+                          color: Colors.white,
+                          size: 17,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        isFriend
+                            ? 'Unfollow ${postProvider.posts?[index]["first_name"]}'
+                            : 'Follow',
+                        style: TextStyle(
+                          color: Color(0xFF4D4C4A),
+                          fontSize: 11,
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.w700,
+                          height: 1.50,
+                        ),
+                      )
+                    ]),
+                  ),
+                  SizedBox(height: 10),
+                  isFriend
+                      ? GestureDetector(
+                          onTap: () {},
+                          child: Row(children: [
+                            SizedBox(width: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFF4D4C4A),
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                              padding: EdgeInsets.all(13),
+                              child: Icon(
+                                Icons.block_flipped,
+                                color: Colors.white,
+                                size: 17,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'Block ${postProvider.posts?[index]["first_name"]}',
+                              style: TextStyle(
+                                color: Color(0xFF4D4C4A),
+                                fontSize: 11,
+                                fontFamily: 'Nunito',
+                                fontWeight: FontWeight.w700,
+                                height: 1.50,
+                              ),
+                            )
+                          ]),
+                        )
+                      : Container(),
                 ],
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 30,
-              ),
-              GestureDetector(
-                onTap: () async {
-                  final authProvider = Provider.of<AuthProvider>(context);
-                  final meId = authProvider.user?.id;
-                  if (postProvider.posts?[index]['author_id'] == meId) {
-                    CustomToast.showToastWarningTop(
-                        context, "You can't send message to you");
-                    return;
-                  }
-
-                  types.User otherUser = types.User(
-                    id: postProvider.posts?[index]['author_id'],
-                    firstName: postProvider.posts?[index]['first_name'],
-                    lastName: postProvider.posts?[index]['last_name'],
-                    imageUrl: postProvider.posts?[index]['avatar'],
-                  );
-
-                  final navigator = Navigator.of(context);
-                  final temp =
-                      await SupabaseChatCore.instance.createRoom(otherUser);
-
-                  var room = temp.copyWith(
-                      imageUrl: postProvider.posts?[index]['avatar'],
-                      name:
-                          "${postProvider.posts?[index]['first_name']} ${postProvider.posts?[index]['last_name']}");
-
-                  navigator.pop();
-                  await navigator.push(
-                    MaterialPageRoute(
-                      builder: (context) => RoomPage(room: room),
-                    ),
-                  );
-                },
-                child: Row(children: [
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF4D4C4A),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    padding: EdgeInsets.all(13),
-                    child: Icon(
-                      Icons.mode_comment_outlined,
-                      color: Colors.white,
-                      size: 17,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Message ${postProvider.posts?[index]["first_name"]}',
-                    style: TextStyle(
-                      color: Color(0xFF4D4C4A),
-                      fontSize: 11,
-                      fontFamily: 'Nunito',
-                      fontWeight: FontWeight.w700,
-                      height: 1.50,
-                    ),
-                  )
-                ]),
-              ),
-              SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {},
-                child: Row(children: [
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF4D4C4A),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    padding: EdgeInsets.all(13),
-                    child: Icon(
-                      Icons.person_off_outlined,
-                      color: Colors.white,
-                      size: 17,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Unfollow  ${postProvider.posts?[index]["first_name"]}',
-                    style: TextStyle(
-                      color: Color(0xFF4D4C4A),
-                      fontSize: 11,
-                      fontFamily: 'Nunito',
-                      fontWeight: FontWeight.w700,
-                      height: 1.50,
-                    ),
-                  )
-                ]),
-              ),
-              SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {},
-                child: Row(children: [
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF4D4C4A),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    padding: EdgeInsets.all(13),
-                    child: Icon(
-                      Icons.block_flipped,
-                      color: Colors.white,
-                      size: 17,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Block ${postProvider.posts?[index]["first_name"]}',
-                    style: TextStyle(
-                      color: Color(0xFF4D4C4A),
-                      fontSize: 11,
-                      fontFamily: 'Nunito',
-                      fontWeight: FontWeight.w700,
-                      height: 1.50,
-                    ),
-                  )
-                ]),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -391,8 +430,8 @@ class _PostsState extends State<Posts> {
                       ),
                       Spacer(),
                       GestureDetector(
-                        onTap: () {
-                          _showFriendDetail(context, index, postProvider);
+                        onTap: () async {
+                          await _showFriendDetail(context, index, postProvider);
                         },
                         child: Container(
                           decoration: BoxDecoration(

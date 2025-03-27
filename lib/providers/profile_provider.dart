@@ -2,6 +2,7 @@ import 'package:bnn/models/profiles_model.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/profile_service.dart';
 import 'package:bnn/utils/constants.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 
 class ProfileProvider extends ChangeNotifier {
@@ -38,6 +39,13 @@ class ProfileProvider extends ChangeNotifier {
     loading = false;
   }
 
+  Future<Map<String, dynamic>?> getFriendInfo(String userId) async {
+    final meId = _authService.getCurrentUser()?.id;
+    print(meId);
+    final friendInfo = await _profileService.getFriendInfo(meId!, userId);
+    return friendInfo;
+  }
+
   Future<void> getFollowers() async {
     loading = true;
     final meId = _authService.getCurrentUser()?.id;
@@ -60,5 +68,15 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> unfollow(int relationshipId) async {
     await _profileService.unfollow(relationshipId);
     await getFollowing();
+  }
+
+  Future<void> followUserPost(String userId, BuildContext context) async {
+    await _profileService.followUser(userId);
+    CustomToast.showToastSuccessTop(context, 'Followed Successfully');
+  }
+
+  Future<void> unfollowPost(int relationshipId, BuildContext context) async {
+    await _profileService.unfollow(relationshipId);
+    CustomToast.showToastSuccessTop(context, 'Unfollowed Successfully');
   }
 }
