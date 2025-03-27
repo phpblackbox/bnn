@@ -25,10 +25,14 @@ class ReelVideoPlayer extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: controller!.value.aspectRatio,
-            child: VideoPlayer(controller!),
+        SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: controller!.value.size.width,
+              height: controller!.value.size.height,
+              child: VideoPlayer(controller!),
+            ),
           ),
         ),
         if (isTransitioning)

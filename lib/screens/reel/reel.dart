@@ -3,6 +3,7 @@ import 'package:bnn/screens/reel/reel_comments.dart';
 import 'package:bnn/screens/reel/user_info_section.dart';
 import 'package:bnn/screens/reel/widgets/reel_action_buttons.dart';
 import 'package:bnn/screens/reel/widgets/reel_video_player.dart';
+import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/reel_provider.dart';
@@ -149,7 +150,7 @@ class _ReelScreenState extends State<ReelScreen>
     final reelProvider = Provider.of<ReelProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      // backgroundColor: Colors.black,
       body: Stack(
         children: <Widget>[
           if (!_isInitialized || reelProvider.loading)
@@ -227,7 +228,7 @@ class _ReelScreenState extends State<ReelScreen>
             top: Platform.isIOS ? 40 : 12,
             left: 0,
             child: IconButton(
-              icon: const Icon(Icons.close, size: 20, color: Colors.white),
+              icon: const Icon(Icons.close, size: 20, color: Colors.black),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -269,6 +270,7 @@ class _ReelScreenState extends State<ReelScreen>
             ),
         ],
       ),
+      bottomNavigationBar: BottomNavigation(currentIndex: 3),
     );
   }
 }
