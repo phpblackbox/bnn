@@ -39,8 +39,9 @@ class ReelProvider extends ChangeNotifier {
 
     try {
       // Load initial reel
-      int randomReelId = await reelService.getRandomReelId();
-      final reel = await reelService.getReelById(randomReelId);
+      // int latestReelId = await reelService.getRandomReelId();
+      int latestReelId = await reelService.getLatestReelId(0);
+      final reel = await reelService.getReelById(latestReelId);
       if (reel != null) {
         currentReel = reel;
         reels.add(reel);
@@ -76,15 +77,15 @@ class ReelProvider extends ChangeNotifier {
           }
         }
       } else {
+        int nextReelId;
         int count = 0;
-        int randomReelId;
         do {
-          randomReelId = await reelService.getRandomReelId();
+          nextReelId = await reelService.getLatestReelId(currentReel!.id);
           count++;
           if (count > 10) {
             break;
           }
-        } while (reels.any((reel) => reel.id == randomReelId));
+        } while (reels.any((reel) => reel.id == nextReelId));
 
         if (count > 10) {
           print("there are no more reels to load");
@@ -100,7 +101,7 @@ class ReelProvider extends ChangeNotifier {
           if (currentIndex != reels.length - 1) {
             _nextReel = reels[currentIndex + 1];
           } else {
-            _nextReel = await reelService.getReelById(randomReelId);
+            _nextReel = await reelService.getReelById(nextReelId);
           }
         }
       }

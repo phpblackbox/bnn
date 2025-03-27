@@ -29,6 +29,32 @@ class ReelService {
     return reelId;
   }
 
+  Future<int> getLatestReelId(int currentReelId) async {
+    // get the latest reel id that is before the current reel id
+    if (currentReelId == 0) {
+      final reelRecord = await _supabase
+          .from('stories')
+          .select()
+          .eq('type', 'video')
+          .order('id', ascending: false)
+          .limit(1)
+          .single();
+      final reelId = reelRecord['id'];
+      return reelId;
+    } else {
+      final reelRecord = await _supabase
+          .from('stories')
+          .select()
+          .eq('type', 'video')
+          .lt('id', currentReelId)
+          .order('id', ascending: false)
+          .limit(1)
+          .single();
+      final reelId = reelRecord['id'];
+      return reelId;
+    }
+  }
+
   Future<ReelModel?> getReelById(int reelId) async {
     final reelRecord = await _supabase
         .from('stories')
