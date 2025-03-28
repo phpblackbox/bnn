@@ -310,12 +310,8 @@ class _ProfileState extends State<Profile> {
             ),
             if (_allorbookmark == 0)
               AllPost(param_allorbookmakr: _allorbookmark),
-            if (_allorbookmark == 1)
-              Expanded(
-                child: Container(
-                    padding: EdgeInsets.only(left: 12, right: 12, bottom: 8),
-                    child: Posts(bookmark: true)),
-              ),
+            // Posts(userId: meProfile.id),
+            if (_allorbookmark == 1) Posts(bookmark: true)
           ],
         ),
         bottomNavigationBar: BottomNavigation(currentIndex: 4),

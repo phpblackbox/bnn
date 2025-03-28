@@ -94,7 +94,7 @@ class _ReelScreenState extends State<ReelScreen>
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return ReelCommands(reelId: reelId);
+        return ReelComments(reelId: reelId);
       },
     );
   }

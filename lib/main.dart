@@ -4,6 +4,7 @@ import 'package:bnn/providers/notification_provider.dart';
 import 'package:bnn/providers/post_comment_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
+import 'package:bnn/providers/reel_comment_provider.dart';
 import 'package:bnn/providers/reel_provider.dart';
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/providers/story_view_provider.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PostCommentProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => ReelProvider()),
+        ChangeNotifierProvider(create: (_) => ReelCommentProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => UserProfileProvider()),
         ChangeNotifierProxyProvider<PostCommentProvider, PostProvider>(

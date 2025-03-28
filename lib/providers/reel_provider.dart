@@ -59,6 +59,10 @@ class ReelProvider extends ChangeNotifier {
     }
   }
 
+  Future<ReelModel?> getReelById(int reelId) async {
+    return await reelService.getReelById(reelId);
+  }
+
   Future<void> preloadNextReel() async {
     if (_nextReel != null ||
         _isPreloadingNext ||
