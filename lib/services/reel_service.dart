@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bnn/models/reel_model.dart';
+import 'package:bnn/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bnn/services/profile_service.dart';
 
@@ -53,6 +54,98 @@ class ReelService {
       final reelId = reelRecord['id'];
       return reelId;
     }
+  }
+
+  Future<List<dynamic>> getParentComments(int reelId) async {
+    try {
+      final data = await _supabase
+          .from('reel_comments')
+          .select('*, profiles(username, avatar, first_name, last_name)')
+          .eq('parent_id', 0)
+          .eq('reel_id', reelId)
+          .order('created_at', ascending: false);
+
+      for (int i = 0; i < data.length; i++) {
+        final nowString = await _supabase.rpc('get_server_time');
+        DateTime now = DateTime.parse(nowString);
+        DateTime createdAt = DateTime.parse(data[i]["created_at"]);
+
+        Duration difference = now.difference(createdAt);
+
+        data[i]['name'] =
+            '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
+
+        data[i]["time"] = Constants().formatDuration(difference);
+
+        dynamic likes = await _supabase
+                .rpc('get_count_reel_comment_likes_by_reelid', params: {
+              'param_reel_comment_id': data[i]["id"],
+            }) ??
+            0;
+
+        data[i]['likes'] = likes;
+      }
+
+      return data;
+    } catch (e) {
+      print('Caught error in CommentService: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> getChildComments(int reelId, String parentId) async {
+    try {
+      final data = await _supabase
+          .from('reel_comments')
+          .select('*, profiles(username, avatar, first_name, last_name)')
+          .eq('parent_id', parentId)
+          .eq('reel_id', reelId)
+          .order('created_at', ascending: false);
+
+      for (int i = 0; i < data.length; i++) {
+        final nowString = await _supabase.rpc('get_server_time');
+        DateTime now = DateTime.parse(nowString);
+        DateTime createdAt = DateTime.parse(data[i]["created_at"]);
+
+        Duration difference = now.difference(createdAt);
+
+        data[i]['name'] =
+            '${data[i]["profiles"]["first_name"]} ${data[i]["profiles"]["last_name"]}';
+
+        data[i]["time"] = Constants().formatDuration(difference);
+
+        dynamic likes = await _supabase
+                .rpc('get_count_reel_comment_likes_by_reelid', params: {
+              'param_reel_comment_id': data[i]["id"],
+            }) ??
+            0;
+
+        data[i]['likes'] = likes;
+      }
+
+      return data;
+    } catch (e) {
+      print('Caught error in CommentService: $e');
+      rethrow;
+    }
+  }
+
+  Future<dynamic> sendReelComment(
+      int reelId, int parentId, String value) async {
+    final meId = _supabase.auth.currentUser?.id;
+
+    final data = await _supabase
+        .from('reel_comments')
+        .upsert({
+          'author_id': meId,
+          'reel_id': reelId,
+          'parent_id': parentId,
+          'content': value,
+        })
+        .select()
+        .single();
+
+    return data;
   }
 
   Future<ReelModel?> getReelById(int reelId) async {
@@ -182,5 +275,50 @@ class ReelService {
       });
     }
     return currentBookmarksStatus;
+  }
+
+  Future<bool> toggleCommentLike(int reelCommentId) async {
+    final meId = _supabase.auth.currentUser?.id;
+    final response = await _supabase
+        .from('reel_comment_likes')
+        .select()
+        .eq('author_id', meId!)
+        .eq('reel_comment_id', reelCommentId)
+        .maybeSingle();
+
+    bool status = true;
+
+    if (response != null) {
+      status = response['is_like'] ?? false;
+      await _supabase
+          .from('reel_comment_likes')
+          .update({'is_like': !status})
+          .eq('author_id', meId)
+          .eq('reel_id', reelCommentId);
+    } else {
+      await _supabase.from('reel_comment_likes').upsert({
+        'author_id': meId,
+        'reel_id': reelCommentId,
+        'is_like': status,
+      });
+    }
+
+    return status; // return like or dislike
+  }
+
+  Future<void> deleteComment(int commentId) async {
+    try {
+      await _supabase.from('reel_comments').delete().eq('id', commentId);
+    } catch (e) {
+      print('Error deleting comment: $e');
+    }
+  }
+
+  Future<void> deletePost(int postId) async {
+    try {
+      await _supabase.from('posts').delete().eq('id', postId);
+    } catch (e) {
+      print('Error deleting post: $e');
+    }
   }
 }
