@@ -224,6 +224,8 @@ class ReelService {
         'reel_id': reelId,
         'is_like': currentLikeStatus,
       });
+
+      currentLikeStatus = false;
     }
 
     final noti = await _supabase
@@ -294,13 +296,15 @@ class ReelService {
           .from('reel_comment_likes')
           .update({'is_like': !status})
           .eq('author_id', meId)
-          .eq('reel_id', reelCommentId);
+          .eq('reel_comment_id', reelCommentId);
     } else {
       await _supabase.from('reel_comment_likes').upsert({
         'author_id': meId,
-        'reel_id': reelCommentId,
+        'reel_comment_id': reelCommentId,
         'is_like': status,
       });
+
+      status = false;
     }
 
     return status; // return like or dislike

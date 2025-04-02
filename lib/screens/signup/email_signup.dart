@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/sub/bottom-signup.dart';
+import '../../screens/signup/email_otp_verification.dart';
 
 class EmailSignUp extends StatefulWidget {
   const EmailSignUp({super.key});
@@ -45,7 +46,14 @@ class _EmailSignUpState extends State<EmailSignUp>
       );
 
       if (success) {
-        Navigator.pushReplacementNamed(context, '/create-profile');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmailOTPVerification(
+              email: emailController.text,
+            ),
+          ),
+        );
       } else {
         if (authProvider.errorMessage != null) {
           CustomToast.showToastWarningBottom(
@@ -170,7 +178,7 @@ class _EmailSignUpState extends State<EmailSignUp>
                           AppColors.primaryBlack.withOpacity(0.5)
                         ],
                 ),
-                BottomSignUp(),
+                // BottomSignUp(),
               ],
             ),
           ),

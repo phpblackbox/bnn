@@ -81,9 +81,8 @@ class PostService {
       });
     } else {
       if (userId != null) {
-        data = await _supabase.rpc('get_posts_by_userid', params: {
-          'param_user_id': userId
-        });
+        data = await _supabase
+            .rpc('get_posts_by_userid', params: {'param_user_id': userId});
       } else {
         data = await _supabase.rpc('get_posts', params: {
           'limit_value': limit,
@@ -246,13 +245,14 @@ class PostService {
           .from('post_comment_likes')
           .update({'is_like': !status})
           .eq('author_id', meId)
-          .eq('post_id', postCommentId);
+          .eq('post_comment_id', postCommentId);
     } else {
       await _supabase.from('post_comment_likes').upsert({
         'author_id': meId,
-        'post_id': postCommentId,
+        'post_comment_id': postCommentId,
         'is_like': status,
       });
+      status = false;
     }
 
     return status; // return like or dislike

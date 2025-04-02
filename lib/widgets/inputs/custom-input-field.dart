@@ -8,6 +8,7 @@ class CustomInputField extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onSubmitted;
+  final TextInputType? keyboardType;
 
   const CustomInputField({
     super.key,
@@ -18,6 +19,7 @@ class CustomInputField extends StatefulWidget {
     this.backgroundColor = const Color(0xFFEAEAEA),
     required this.onChanged,
     this.onSubmitted,
+    this.keyboardType,
   });
 
   @override
@@ -47,6 +49,7 @@ class _CustomInputState extends State<CustomInputField> {
         obscureText: widget.isPassword ? _obscureText : false,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
+        keyboardType: widget.keyboardType,
         decoration: InputDecoration(
           prefixIcon: Icon(
             widget.icon != Icons.abc ? widget.icon : null,

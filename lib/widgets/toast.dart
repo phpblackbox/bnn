@@ -78,4 +78,24 @@ class CustomToast {
           top: Radius.elliptical(5, 10), bottom: Radius.elliptical(5, 10)),
     );
   }
+
+  static void showToastSuccessBottom(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
 }

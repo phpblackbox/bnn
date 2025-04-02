@@ -105,7 +105,11 @@ class AuthService {
   }
 
   Future<AuthResponse> signUp(String email, String password) async {
-    return await _supabase.auth.signUp(email: email.trim(), password: password);
+    return await _supabase.auth.signUp(
+      email: email.trim(),
+      password: password,
+      emailRedirectTo: '${dotenv.env['APP_URL']}/auth/callback',
+    );
   }
 
   Future<String> uploadAvatar({
@@ -127,6 +131,109 @@ class AuthService {
       return publicUrl;
     } catch (e) {
       print('Error uploading avatar to Supabase: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      print('Error sending password reset OTP: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> verifyPasswordResetOTP(
+      String email, String otp, String newPassword) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.recovery,
+      );
+
+      if (response.user != null) {
+        await _supabase.auth.updateUser(
+          UserAttributes(
+            password: newPassword,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error verifying password reset OTP: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(
+          password: newPassword,
+        ),
+      );
+    } catch (e) {
+      print('Error updating password: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> verifyPhone(String phone) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: phone,
+      );
+    } catch (e) {
+      print('Error sending phone verification: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> verifyPhoneOTP(String phone, String otp) async {
+    try {
+      await _supabase.auth.verifyOTP(
+        phone: phone,
+        token: otp,
+        type: OtpType.signup,
+      );
+    } catch (e) {
+      print('Error verifying phone OTP: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> isEmailVerified() async {
+    final user = _supabase.auth.currentUser;
+    return user?.emailConfirmedAt != null;
+  }
+
+  Future<bool> isPhoneVerified() async {
+    final user = _supabase.auth.currentUser;
+    return user?.phoneConfirmedAt != null;
+  }
+
+  Future<void> verifyEmailOTP(String email, String otp) async {
+    try {
+      await _supabase.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.signup,
+      );
+    } catch (e) {
+      print('Error verifying email OTP: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> resendEmailOTP(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } catch (e) {
+      print('Error resending email OTP: $e');
       rethrow;
     }
   }

@@ -114,7 +114,9 @@ class AuthProvider with ChangeNotifier {
     _isLoading = true;
     if (password != confirmPassword) {
       _errorMessage =
-          'The passwords entered do not match. Let’s give it another try!';
+          "The passwords entered do not match. Let's give it another try!";
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
     _isLoading = true;
@@ -217,6 +219,79 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> verifyEmailOTP(String email, String otp) async {
+    try {
+      await _authService.verifyEmailOTP(email, otp);
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> resendEmailOTP(String email) async {
+    try {
+      await _authService.resendEmailOTP(email);
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> verifyPhone(String phone) async {
+    try {
+      await _authService.verifyPhone(phone);
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> verifyPhoneOTP(String phone, String otp) async {
+    try {
+      await _authService.verifyPhoneOTP(phone, otp);
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<bool> resetPassword(String email) async {
+    try {
+      await _authService.resetPassword(email);
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> verifyPasswordResetOTP(
+      String email, String otp, String newPassword) async {
+    try {
+      await _authService.verifyPasswordResetOTP(email, otp, newPassword);
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 }

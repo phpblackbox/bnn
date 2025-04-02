@@ -1,10 +1,14 @@
 import 'package:bnn/utils/colors.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:bnn/widgets/inputs/custom-input-field.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:country_flags/country_flags.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:bnn/providers/auth_provider.dart';
+import 'phone_otp_verification.dart';
 
 class PhoneSignUp extends StatefulWidget {
   const PhoneSignUp({super.key});
@@ -23,6 +27,7 @@ class _PhoneSignUp extends State<PhoneSignUp>
 
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedCountryCode;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -57,12 +62,11 @@ class _PhoneSignUp extends State<PhoneSignUp>
     }
   }
 
-  String selectedPhoneSignUp = '';
-
-  void selectPhoneSignUp(String PhoneSignUp) {
-    setState(() {
-      selectedPhoneSignUp = PhoneSignUp;
-    });
+  String get fullPhoneNumber {
+    if (_selectedCountryCode != null && _phoneController.text.isNotEmpty) {
+      return '+${_selectedCountryCode!}${_phoneController.text}';
+    }
+    return '';
   }
 
   @override
@@ -153,6 +157,7 @@ class _PhoneSignUp extends State<PhoneSignUp>
                           icon: Icons.phone,
                           placeholder: 'Phone Number',
                           controller: _phoneController,
+                          keyboardType: TextInputType.phone,
                           onChanged: (value) {
                             setState(() {});
                           },
@@ -166,34 +171,44 @@ class _PhoneSignUp extends State<PhoneSignUp>
                   Spacer(),
                   ButtonGradientMain(
                     label: 'Continue',
-                    onPressed: () async {
-                      if (isButtonEnabled) {
-                        // final AuthResponse res = await supabase.auth.verifyOTP(
-                        //   type: OtpType.sms,
-                        //   token: '111111',
-                        //   phone: '+12149374719',
-                        // );
-                        // final Session? session = res.session;
-                        // final User? user = res.user;
-                        await supabase.auth.signInWithOtp(
-                          phone: '+12149374719',
-                        );
-                        // Navigator.push(context,
-                        //     MaterialPageRoute(builder: (context) => OTP()));
-                      }
-                    },
+                    onPressed: isLoading
+                        ? () {}
+                        : () async {
+                            if (isButtonEnabled) {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              try {
+                                final authProvider = Provider.of<AuthProvider>(
+                                    context,
+                                    listen: false);
+                                await authProvider.verifyPhone(fullPhoneNumber);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PhoneOTPVerification(
+                                      phone: fullPhoneNumber,
+                                    ),
+                                  ),
+                                );
+                              } catch (e) {
+                                CustomToast.showToastDangerBottom(
+                                    context, e.toString());
+                              } finally {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
+                            }
+                          },
                     textColor: Colors.white,
                     gradientColors: isButtonEnabled
-                        ? [
-                            AppColors.primaryBlack,
-                            AppColors.primaryRed
-                          ] // Active gradient
+                        ? [AppColors.primaryBlack, AppColors.primaryRed]
                         : [
                             AppColors.primaryRed.withOpacity(0.5),
                             AppColors.primaryBlack.withOpacity(0.5)
                           ],
                   ),
-                  // Submit Button
                 ],
               ),
             ),
