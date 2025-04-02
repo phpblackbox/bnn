@@ -82,9 +82,7 @@ class PostService {
     } else {
       if (userId != null) {
         data = await _supabase.rpc('get_posts_by_userid', params: {
-          'param_user_id': userId,
-          'limit_value': limit,
-          'offset_value': offset,
+          'param_user_id': userId
         });
       } else {
         data = await _supabase.rpc('get_posts', params: {

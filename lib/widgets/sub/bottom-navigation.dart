@@ -55,7 +55,8 @@ class BottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: Platform.isIOS ? 90 : 67.0,
-      child: Padding(
+      child: Container(
+        color: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

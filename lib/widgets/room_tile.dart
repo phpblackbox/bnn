@@ -25,6 +25,7 @@ class RoomTile extends StatefulWidget {
 
 class _RoomTileState extends State<RoomTile> {
   ProfilesModel? userInfo;
+  types.User? otherUser;
 
   @override
   void initState() {
@@ -34,8 +35,20 @@ class _RoomTileState extends State<RoomTile> {
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
 
-      final userId = widget.room.users[1].id;
+      var otherUserIndex = -1;
+      types.User? otherUser;
+
+      if (widget.room.type == types.RoomType.direct) {
+        otherUserIndex = widget.room.users.indexWhere(
+          (u) => u.id != SupabaseChatCore.instance.loggedSupabaseUser!.id,
+        );
+        if (otherUserIndex >= 0) {
+          otherUser = widget.room.users[otherUserIndex];
+        }
+      }
+      final userId = otherUser!.id;
       final result = await profileProvider.getUserProfileById(userId);
+
       if (mounted) {
         setState(() {
           userInfo = result;
@@ -46,8 +59,7 @@ class _RoomTileState extends State<RoomTile> {
 
   @override
   Widget build(BuildContext context) {
-    return userInfo != null
-        ? Container(
+    return Container(
             padding: const EdgeInsets.all(4),
             margin: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -63,11 +75,11 @@ class _RoomTileState extends State<RoomTile> {
             ),
             child: ListTile(
               key: ValueKey(widget.room.id),
-              leading: _buildAvatar(widget.room),
+              leading: userInfo != null ? _buildAvatar(widget.room) : Text(''),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  userInfo != null ? Text(
                     '${userInfo!.firstName ?? ''} ${userInfo!.lastName ?? ''}'
                                 .trim()
                                 .length >
@@ -81,7 +93,7 @@ class _RoomTileState extends State<RoomTile> {
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w400,
                     ),
-                  ),
+                  ) : Text(''),
                   if (widget.room.lastMessages?.isNotEmpty == true)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -137,23 +149,12 @@ class _RoomTileState extends State<RoomTile> {
                   : null,
               onTap: () => widget.onTap(widget.room),
             ),
-          )
-        : Text('');
+          );
   }
 
   Widget _buildAvatar(types.Room room) {
     final color = getAvatarColor(room.id);
-    var otherUserIndex = -1;
-    types.User? otherUser;
-
-    if (room.type == types.RoomType.direct) {
-      otherUserIndex = room.users.indexWhere(
-        (u) => u.id != SupabaseChatCore.instance.loggedSupabaseUser!.id,
-      );
-      if (otherUserIndex >= 0) {
-        otherUser = room.users[otherUserIndex];
-      }
-    }
+    
 
     final hasImage = userInfo!.avatar != null;
     final name = room.name ?? userInfo!.firstName;
@@ -178,7 +179,7 @@ class _RoomTileState extends State<RoomTile> {
     return Padding(
       padding: const EdgeInsets.only(right: 6),
       child: UserOnlineStatusWidget(
-        uid: otherUser.id,
+        uid: otherUser!.id,
         builder: (status) => Stack(
           alignment: Alignment.bottomRight,
           children: [

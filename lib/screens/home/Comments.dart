@@ -280,6 +280,7 @@ class _CommentsModalState extends State<CommentsModal> {
                       controller: _commentController,
                       maxLines: null,
                       minLines: 1,
+                      textInputAction: TextInputAction.send,
                       onFieldSubmitted: (value) async {
                         if (value.isEmpty) {
                           CustomToast.showToastWarningTop(

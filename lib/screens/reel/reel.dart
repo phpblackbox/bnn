@@ -150,7 +150,7 @@ class _ReelScreenState extends State<ReelScreen>
     final reelProvider = Provider.of<ReelProvider>(context);
 
     return Scaffold(
-      // backgroundColor: Colors.black,
+      backgroundColor: Colors.black,
       body: Stack(
         children: <Widget>[
           if (!_isInitialized || reelProvider.loading)

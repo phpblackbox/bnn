@@ -452,7 +452,7 @@ class _RoomPageState extends State<RoomPage> {
             stream: _chatController.typingUsers,
             builder: (context, users) => Chat(
               // showUserNames: true,
-              showUserAvatars: true,
+              // showUserAvatars: true,
               theme: DefaultChatTheme(
                 backgroundColor: Colors.white,
                 primaryColor: Colors.transparent,
