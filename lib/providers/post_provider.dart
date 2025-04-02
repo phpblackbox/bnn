@@ -54,7 +54,9 @@ class PostProvider extends ChangeNotifier {
           currentUserId: currentUserId);
 
       for (var element in newItem) {
-        if (posts != null) {
+        final existingPostIndex =
+            posts!.indexWhere((post) => post['id'] == element['id']);
+        if (existingPostIndex == -1) {
           posts!.add(element);
         }
       }
