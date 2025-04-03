@@ -1,5 +1,4 @@
-import 'package:bnn/screens/home/posts.dart';
-import 'package:bnn/screens/livestream/livestream_view.dart';
+import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
 import 'package:bnn/screens/signup/signup_dash.dart';
 import 'package:bnn/widgets/sub/chat_view.dart';

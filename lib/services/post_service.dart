@@ -51,7 +51,10 @@ class PostService {
         });
 
         posts[i]["comments"] = res;
-        posts[i]["share"] = 2;
+        posts[i]["share"] = await _supabase.rpc('get_count_share', params: {
+          'p_post_id': posts[i]["id"],
+          'p_type': 'post',
+        });
         posts[i]['name'] = '${posts[i]["first_name"]} ${posts[i]["last_name"]}';
 
         final nowString = await _supabase.rpc('get_server_time');
@@ -320,6 +323,45 @@ class PostService {
       await _supabase.from('posts').delete().eq('id', postId);
     } catch (e) {
       print('Error deleting post: $e');
+    }
+  }
+
+  Future<bool> hasSharedPost(int postId, String authorId, String userId) async {
+    try {
+      final response = await _supabase
+          .from('shares')
+          .select()
+          .eq('post_id', postId)
+          .eq('author_id', authorId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      print('Error checking share: $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> addShare(
+      int postId, String authorId, String userId, String type) async {
+    try {
+      final response = await _supabase
+          .from('shares')
+          .insert({
+            'post_id': postId,
+            'author_id': authorId,
+            'user_id': userId,
+            'type': type,
+            'url': '',
+          })
+          .select()
+          .single();
+
+      return response;
+    } catch (e) {
+      print('Error adding share: $e');
+      rethrow;
     }
   }
 }

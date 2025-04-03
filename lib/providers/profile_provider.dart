@@ -79,4 +79,16 @@ class ProfileProvider extends ChangeNotifier {
     await _profileService.unfollow(relationshipId);
     CustomToast.showToastSuccessTop(context, 'Unfollowed Successfully');
   }
+
+  Future<List<dynamic>> getFriends() async {
+    try {
+      final meId = _authService.getCurrentUser()?.id;
+      if (meId == null) return [];
+
+      return await _profileService.getFriends(meId);
+    } catch (e) {
+      print('Error fetching friends: $e');
+      return [];
+    }
+  }
 }

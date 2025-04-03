@@ -4,7 +4,7 @@ import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/screens/story/story_slider.dart';
 import 'package:bnn/widgets/sub/feed_or_reels.dart';
 import 'package:bnn/screens/home/header.dart';
-import 'package:bnn/screens/home/posts.dart';
+import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';

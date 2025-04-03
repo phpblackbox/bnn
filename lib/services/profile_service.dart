@@ -141,4 +141,19 @@ class ProfileService {
       'user_id': userId,
     });
   }
+
+  Future<List<dynamic>> getFriends(String userId) async {
+    try {
+      final response = await _supabase
+          .from('relationships')
+          .select('*, profiles!relationships_followed_id_fkey(*)')
+          .eq('status', 'friend')
+          .or('follower_id.eq.${userId},followed_id.eq.${userId}');
+
+      return response.map((friend) => friend['profiles']).toList();
+    } catch (e) {
+      print('Error fetching friends: $e');
+      return [];
+    }
+  }
 }

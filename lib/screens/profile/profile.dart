@@ -4,7 +4,7 @@ import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/profile/following.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
-import 'package:bnn/screens/home/posts.dart';
+import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/screens/profile/all.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/screens/setting/edit.dart';

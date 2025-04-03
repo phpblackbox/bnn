@@ -553,25 +553,42 @@ class _RoomPageState extends State<RoomPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (message.metadata != null)
-                          isMe
-                              ? Text(
-                                  "You replied to their story",
-                                  style: TextStyle(
-                                      color: Color(0xFF4D4C4A), fontSize: 10),
-                                )
-                              : Text(
-                                  "Replied to your story",
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 10),
-                                ),
+                          if (message.metadata!["img_urls"] != null)
+                            isMe
+                                ? Text(
+                                    "You replied to their story",
+                                    style: TextStyle(
+                                        color: Color(0xFF4D4C4A), fontSize: 10),
+                                  )
+                                : Text(
+                                    "Replied to your story",
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 10),
+                                  ),
                         if (message.metadata != null)
-                          Image.network(
-                            message.metadata!["image_url"],
-                            fit: BoxFit.fill,
+                          if (message.metadata!["image_url"] != null)
+                            Image.network(
+                              message.metadata!["image_url"],
+                              fit: BoxFit.fill,
+                            ),
+                        GestureDetector(
+                          onTap: message.metadata?['post_id'] != null
+                              ? () {
+                                  print("action");
+                                }
+                              : null,
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: message.metadata?['post_id'] != null
+                                  ? 14
+                                  : 10,
+                              decoration: message.metadata?['post_id'] != null
+                                  ? TextDecoration.underline
+                                  : TextDecoration.none,
+                            ),
                           ),
-                        Text(
-                          message.text,
-                          style: TextStyle(color: Colors.black, fontSize: 10),
                         ),
                         SizedBox(height: 5),
                         Row(

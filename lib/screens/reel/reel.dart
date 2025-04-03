@@ -3,6 +3,7 @@ import 'package:bnn/screens/reel/reel_comments.dart';
 import 'package:bnn/screens/reel/user_info_section.dart';
 import 'package:bnn/screens/reel/widgets/reel_action_buttons.dart';
 import 'package:bnn/screens/reel/widgets/reel_video_player.dart';
+import 'package:bnn/widgets/post/share_modal.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -254,7 +255,14 @@ class _ReelScreenState extends State<ReelScreen>
                       .toggleBookmarkReel();
                 },
                 onShare: () {
-                  //TODO: Implement Share Functionality
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => ShareModal(
+                      post: widget.reelId,
+                      type: "reel",
+                    ),
+                  );
                 },
               ),
             ),

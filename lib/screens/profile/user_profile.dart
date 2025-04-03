@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:bnn/providers/user_profile_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
-import 'package:bnn/screens/home/posts.dart';
+import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/screens/profile/user_follower.dart';
 import 'package:bnn/screens/profile/user_following.dart';
 import 'package:bnn/utils/constants.dart';

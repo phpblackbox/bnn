@@ -60,6 +60,7 @@ class PostProvider extends ChangeNotifier {
           posts!.add(element);
         }
       }
+
       offset = offset + _limit;
       loading = false;
       newItem = await postService.getPostsInfo(newItem);
@@ -165,5 +166,14 @@ class PostProvider extends ChangeNotifier {
     await postService.deletePost(postId);
     posts!.removeWhere((post) => post["id"] == postId);
     notifyListeners();
+  }
+
+  Future<bool> hasSharedPost(int postId, String authorId, String userId) async {
+    return await postService.hasSharedPost(postId, authorId, userId);
+  }
+
+  Future<Map<String, dynamic>?> addShare(
+      int postId, String authorId, String userId, String type) async {
+    return await postService.addShare(postId, authorId, userId, type);
   }
 }
