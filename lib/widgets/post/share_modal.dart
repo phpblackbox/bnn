@@ -1,6 +1,7 @@
 import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/providers/auth_provider.dart';
@@ -54,8 +55,11 @@ class _ShareModalState extends State<ShareModal> {
 
     // Check if already shared
     final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+    final postId = widget.type == "post" ? widget.post['id'] : widget.post;
+
     final hasShared = await postProvider.hasSharedPost(
-      widget.post['id'],
+      postId,
       meId!,
       friend['id'],
     );
@@ -65,7 +69,6 @@ class _ShareModalState extends State<ShareModal> {
           "You have already shared this post to ${friend['first_name']}");
       return;
     }
-    final postId = widget.type == "post" ? widget.post['id'] : widget.post;
     final share = await postProvider.addShare(
       postId,
       meId,
@@ -96,7 +99,7 @@ class _ShareModalState extends State<ShareModal> {
     final message = types.PartialText(
       text: "Check out this post",
       metadata: {
-        'post_id': widget.post['id'],
+        'post_id': postId,
         'type': widget.type,
       },
     );

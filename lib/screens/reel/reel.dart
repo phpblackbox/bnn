@@ -259,7 +259,7 @@ class _ReelScreenState extends State<ReelScreen>
                     context: context,
                     isScrollControlled: true,
                     builder: (context) => ShareModal(
-                      post: widget.reelId,
+                      post: reelProvider.currentReel!.id,
                       type: "reel",
                     ),
                   );

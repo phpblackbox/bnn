@@ -162,7 +162,10 @@ class ReelService {
       reel.likes = await getReelLikesCount(reelId);
       reel.bookmarks = await getReelBookmarksCount(reelId);
       reel.comments = await getReelCommentsCount(reelId);
-      reel.share = 2;
+      reel.share = await _supabase.rpc('get_count_share', params: {
+          'p_post_id': reelId,
+          'p_type': 'reel',
+        });;
 
       final meId = _supabase.auth.currentUser?.id;
       if (meId == reel.authorId) {
