@@ -75,7 +75,7 @@ class _ReelScreenState extends State<ReelScreen>
 
   Future<void> _initializeProvider() async {
     if (!mounted) return;
-    await _reelProvider?.initialize();
+    await _reelProvider?.initialize(widget.reelId);
     if (mounted) {
       setState(() {
         _isInitialized = true;

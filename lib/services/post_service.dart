@@ -7,8 +7,10 @@ class PostService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<Map<String, dynamic>> getPostById(int postId) async {
-    final data =
-        await _supabase.from('posts').select().eq('id', postId).single();
+    final data = await _supabase
+        .rpc('get_post_by_id', params: {'post_id': postId})
+        .select()
+        .single();
     return data;
   }
 

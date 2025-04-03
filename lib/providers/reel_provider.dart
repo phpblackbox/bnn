@@ -30,7 +30,7 @@ class ReelProvider extends ChangeNotifier {
   List<ReelModel> reels = [];
   Future<void>? initializeVideoPlayerFuture;
 
-  Future<void> initialize() async {
+  Future<void> initialize(int? reelId) async {
     reels = [];
     currentReel = null;
     currentIndex = 0;
@@ -40,7 +40,7 @@ class ReelProvider extends ChangeNotifier {
     try {
       // Load initial reel
       // int latestReelId = await reelService.getRandomReelId();
-      int latestReelId = await reelService.getLatestReelId(0);
+      int latestReelId = await reelService.getLatestReelId(reelId ?? 0);
       final reel = await reelService.getReelById(latestReelId);
       if (reel != null) {
         currentReel = reel;

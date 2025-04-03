@@ -176,4 +176,15 @@ class PostProvider extends ChangeNotifier {
       int postId, String authorId, String userId, String type) async {
     return await postService.addShare(postId, authorId, userId, type);
   }
+
+  Future<dynamic> getPostById(int postId) async {
+    try {
+      final response = await postService.getPostById(postId);
+      final postInfo = await postService.getPostsInfo([response]);
+      return postInfo[0];
+    } catch (e) {
+      print('Error getting post: $e');
+      return null;
+    }
+  }
 }

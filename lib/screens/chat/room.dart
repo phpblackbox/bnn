@@ -2,7 +2,9 @@ import 'package:bnn/models/profiles_model.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/chat/one_video_call.dart';
 import 'package:bnn/screens/chat/one_voice_call.dart';
+import 'package:bnn/screens/post/post_detail.dart';
 import 'package:bnn/screens/profile/user_profile.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:bnn/utils/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
@@ -574,7 +576,22 @@ class _RoomPageState extends State<RoomPage> {
                         GestureDetector(
                           onTap: message.metadata?['post_id'] != null
                               ? () {
-                                  print("action");
+                                  if (message.metadata?['type'] == "post") {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => PostDetail(
+                                                postId: message
+                                                    .metadata?['post_id'])));
+                                  } else if (message.metadata?['type'] ==
+                                      "reel") {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ReelScreen(
+                                                reelId: message
+                                                    .metadata?['post_id'])));
+                                  }
                                 }
                               : null,
                           child: Text(
