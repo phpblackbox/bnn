@@ -40,7 +40,8 @@ class ReelProvider extends ChangeNotifier {
     try {
       // Load initial reel
       // int latestReelId = await reelService.getRandomReelId();
-      int latestReelId = await reelService.getLatestReelId(reelId ?? 0);
+      
+      int latestReelId = await reelService.getLatestReelId(reelId!=null ? reelId+1 : 0);
       final reel = await reelService.getReelById(latestReelId);
       if (reel != null) {
         currentReel = reel;
