@@ -70,9 +70,14 @@ class StoryViewProvider extends ChangeNotifier {
 
   Future<void> preloadNextStory() async {
     int count = 0;
-    int nextId;
+    int? nextId;
     do {
       nextId = await _storyService.getNextStoryId(stories.last['id']);
+      if (nextId == null) {
+        print("No more stories to load");
+        currentStoryIndex = 0;
+        return;
+      }
       count++;
       if (count > 10) {
         break;

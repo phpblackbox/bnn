@@ -105,17 +105,21 @@ class StoryService {
     return storyId;
   }
 
-  Future<int> getNextStoryId(int currentStoryId) async {
-    final storyRecord = await _supabase
-        .from('stories')
-        .select()
-        .lt('id', currentStoryId)
-        .gte('created_at',
-            DateTime.now().subtract(Duration(hours: 48)).toIso8601String())
-        .order('id', ascending: false)
-        .limit(1)
-        .single();
-    final storyId = storyRecord['id'];
-    return storyId;
+  Future<int?> getNextStoryId(int currentStoryId) async {
+    try {
+      final storyRecord = await _supabase
+          .from('stories')
+          .select()
+          .lt('id', currentStoryId)
+          .gte('created_at',
+              DateTime.now().subtract(Duration(hours: 48)).toIso8601String())
+          .order('id', ascending: false)
+          .limit(1)
+          .single();
+      return storyRecord['id'];
+    } catch (e) {
+      // If no story is found or other error occurs, return null
+      return null;
+    }
   }
 }
