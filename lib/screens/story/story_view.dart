@@ -350,7 +350,7 @@ class _StoryViewState extends State<StoryView>
                             },
                             child: ImageIcon(
                               AssetImage('assets/images/icons/close.png'),
-                              color: Colors.black,
+                              color: Colors.white,
                               size: 16,
                             ),
                           ),
