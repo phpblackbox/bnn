@@ -105,14 +105,27 @@ class StoryService {
     return storyId;
   }
 
-  Future<int?> getNextStoryId(int currentStoryId) async {
+  Future<int?> getNextStoryId(int? currentStoryId) async {
     try {
+      if (currentStoryId == null) {
+        // get the latest story id
+        final storyRecord = await _supabase
+            .from('stories')
+            .select()
+            .order('id', ascending: false)
+            .limit(1)
+            .single();
+        return storyRecord['id'];
+      }
       final storyRecord = await _supabase
           .from('stories')
           .select()
           .lt('id', currentStoryId)
-          .gte('created_at',
-              DateTime.now().subtract(Duration(hours: 48)).toIso8601String())
+          .gte(
+              'created_at',
+              DateTime.now()
+                  .subtract(Duration(hours: Constants.storyDuration))
+                  .toIso8601String())
           .order('id', ascending: false)
           .limit(1)
           .single();
@@ -121,5 +134,15 @@ class StoryService {
       // If no story is found or other error occurs, return null
       return null;
     }
+  }
+
+  Future<int> getStoryLatestId() async {
+    final storyRecord = await _supabase
+        .from('stories')
+        .select()
+        .order('id', ascending: false)
+        .limit(1)
+        .single();
+    return storyRecord['id'];
   }
 }

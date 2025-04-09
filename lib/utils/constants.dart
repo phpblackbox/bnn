@@ -15,6 +15,7 @@ class Constants {
   // static const String addphoto = 'assets/images/addphoto.png';
   // static const String logo = 'assets/images/bnn_logo.png';
 
+  static const int storyDuration = 48;
   String formatWithCommas(int number) {
     return number.toString().replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),

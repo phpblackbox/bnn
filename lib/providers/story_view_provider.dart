@@ -52,9 +52,11 @@ class StoryViewProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  int latestId = 0;
+
   Future<void> initialize(int storyId) async {
     loading = true;
-    
+
     stories = [];
     currentStoryIndex = 0;
     currentImageIndex = 0;
@@ -62,7 +64,7 @@ class StoryViewProvider extends ChangeNotifier {
     _nextStory = null;
     _prevStory = null;
     currentStory = null;
-    await close(); 
+    await close();
 
     try {
       final story = await getStoryById(storyId);
@@ -73,14 +75,14 @@ class StoryViewProvider extends ChangeNotifier {
 
         if (story['type'] == 'video') {
           print("PROVIDER: Initial story is video, calling loadVideo");
-          await loadVideo(story); 
+          await loadVideo(story);
         }
 
         // Start preloading adjacent stories
         // Don't await these, let them run in the background
+        latestId = await _storyService.getStoryLatestId();
         preloadNextStory();
         preloadPreviousStory();
-
       } else {
         print("PROVIDER: Failed to get story by ID: $storyId");
       }
@@ -121,7 +123,6 @@ class StoryViewProvider extends ChangeNotifier {
         if (stories.isNotEmpty) {
           if (currentStoryIndex >= stories.length - 1) {
             _nextStory = stories[0];
-            currentStoryIndex = -1;
           } else {
             _nextStory = stories[currentStoryIndex + 1];
           }
@@ -130,7 +131,10 @@ class StoryViewProvider extends ChangeNotifier {
         int? nextId;
         int count = 0;
         do {
-          nextId = await _storyService.getNextStoryId(stories.last['id']);
+          nextId = stories.last['id'] != latestId
+              ? await _storyService.getNextStoryId(null)
+              : await _storyService.getNextStoryId(stories.last['id']);
+
           if (nextId == null) {
             print("No more stories to load");
             _isNoMoreStories = true;
@@ -194,7 +198,6 @@ class StoryViewProvider extends ChangeNotifier {
         _prevStory = stories[currentStoryIndex - 1];
       } else {
         _prevStory = stories.last;
-        currentStoryIndex = stories.length;
       }
 
       if (_prevStory != null && _prevStory['type'] == 'video') {
@@ -238,9 +241,15 @@ class StoryViewProvider extends ChangeNotifier {
       }
 
       _nextStory = null;
-      preloadNextStory();
-      currentStoryIndex++;
+
+      if (currentStoryIndex >= stories.length - 1) {
+        currentStoryIndex = 0;
+      } else {
+        currentStoryIndex++;
+      }
+
       currentImageIndex = 0;
+      preloadNextStory();
     } catch (e) {
       print("Error in nextStory: $e");
     } finally {
@@ -262,13 +271,22 @@ class StoryViewProvider extends ChangeNotifier {
 
       _nextStory = currentStory;
       currentStory = _prevStory;
+
       if (currentStory['type'] == 'video') {
         await loadVideo(currentStory);
       }
+
       _prevStory = null;
-      preloadPreviousStory();
-      currentStoryIndex--;
+
       currentImageIndex = 0;
+
+      if (currentStoryIndex <= 0) {
+        currentStoryIndex = stories.length - 1;
+      } else {
+        currentStoryIndex--;
+      }
+
+      preloadPreviousStory();
     } catch (e) {
       print("Error in previousStory: $e");
     } finally {
@@ -336,17 +354,17 @@ class StoryViewProvider extends ChangeNotifier {
           controller!.setLooping(true);
           controller!.play();
           print("PROVIDER: Video initialized and playing: ${story['id']}");
-          notifyListeners(); 
+          notifyListeners();
         }).catchError((error) {
           print("PROVIDER: Error initializing video: $error");
         });
       } else {
         print("PROVIDER: Video URL is null or empty for story ${story['id']}");
-        initializeVideoPlayerFuture = Future.value(); 
+        initializeVideoPlayerFuture = Future.value();
       }
     } catch (e) {
       print("PROVIDER: Error creating video controller: $e");
-      initializeVideoPlayerFuture = Future.error(e); 
+      initializeVideoPlayerFuture = Future.error(e);
     }
   }
 }
