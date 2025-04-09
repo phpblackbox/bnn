@@ -52,8 +52,6 @@ class StoryViewProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  int latestId = 0;
-
   Future<void> initialize(int storyId) async {
     loading = true;
 
@@ -67,24 +65,50 @@ class StoryViewProvider extends ChangeNotifier {
     await close();
 
     try {
-      final story = await getStoryById(storyId);
-      if (story != null) {
-        currentStory = story;
-        stories.add(story);
-        print("PROVIDER: Initialized story ${story['id']}");
+      // Get all stories
+      stories = await _storyService.getLatestStories();
+      final nowString = await _storyService.getServerTime();
+      for (var story in stories) {
+        DateTime now = DateTime.parse(nowString);
+        DateTime createdAt = DateTime.parse(story["created_at"]);
+        Duration difference = now.difference(createdAt);
+        story['timeDiff'] = Constants().formatDuration(difference);
+      }
+      print("PROVIDER: Loaded ${stories.length} stories");
 
-        if (story['type'] == 'video') {
+      // Find the index of the current story ID in the stories list
+      int initialIndex = -1;
+      for (int i = 0; i < stories.length; i++) {
+        if (stories[i]['id'] == storyId) {
+          initialIndex = i;
+          break;
+        }
+      }
+
+      // If the story is not in the list, add it
+      if (initialIndex == -1) {
+        final story = await getStoryById(storyId);
+        if (story != null) {
+          stories.add(story);
+          initialIndex = stories.length - 1;
+        }
+      }
+
+      // Set the current story
+      if (initialIndex != -1) {
+        currentStory = stories[initialIndex];
+        currentStoryIndex = initialIndex;
+
+        if (currentStory['type'] == 'video') {
           print("PROVIDER: Initial story is video, calling loadVideo");
-          await loadVideo(story);
+          await loadVideo(currentStory);
         }
 
         // Start preloading adjacent stories
-        // Don't await these, let them run in the background
-        latestId = await _storyService.getStoryLatestId();
         preloadNextStory();
         preloadPreviousStory();
       } else {
-        print("PROVIDER: Failed to get story by ID: $storyId");
+        print("PROVIDER: Failed to find story with ID: $storyId");
       }
     } catch (e) {
       print("PROVIDER: Error initializing story: $e");
@@ -119,55 +143,22 @@ class StoryViewProvider extends ChangeNotifier {
     _preloadNextAttempts++;
 
     try {
-      if (_isNoMoreStories) {
-        if (stories.isNotEmpty) {
-          if (currentStoryIndex >= stories.length - 1) {
-            _nextStory = stories[0];
-          } else {
-            _nextStory = stories[currentStoryIndex + 1];
-          }
-        }
+      if (stories.isEmpty) return;
+
+      // Get the next story index
+      int nextIndex;
+      if (currentStoryIndex >= stories.length - 1) {
+        // If we're at the last story, wrap around to the first
+        nextIndex = 0;
       } else {
-        int? nextId;
-        int count = 0;
-        do {
-          nextId = stories.last['id'] != latestId
-              ? await _storyService.getNextStoryId(null)
-              : await _storyService.getNextStoryId(stories.last['id']);
-
-          if (nextId == null) {
-            print("No more stories to load");
-            _isNoMoreStories = true;
-            if (stories.isNotEmpty) {
-              if (currentStoryIndex >= stories.length - 1) {
-                _nextStory = stories[0];
-              } else {
-                _nextStory = stories[currentStoryIndex + 1];
-              }
-            }
-            return;
-          }
-          count++;
-          if (count > 10) {
-            break;
-          }
-        } while (stories.any((story) => story['id'] == nextId));
-
-        if (count > 10) {
-          print("there are no more stories to load");
-          _isNoMoreStories = true;
-          if (stories.isNotEmpty) {
-            if (currentStoryIndex >= stories.length - 1) {
-              _nextStory = stories[0];
-            } else {
-              _nextStory = stories[currentStoryIndex + 1];
-            }
-          }
-        } else {
-          _nextStory = await getStoryById(nextId!);
-        }
+        // Otherwise, get the next story
+        nextIndex = currentStoryIndex + 1;
       }
 
+      // Set the next story
+      _nextStory = stories[nextIndex];
+
+      // Preload video if needed
       if (_nextStory != null && _nextStory['type'] == 'video') {
         final tempController = VideoPlayerController.networkUrl(
           Uri.parse(_nextStory['video_url']),
@@ -175,6 +166,7 @@ class StoryViewProvider extends ChangeNotifier {
         await tempController.initialize();
         await tempController.dispose();
       }
+
       _preloadNextAttempts = 0;
     } catch (e) {
       print("Error preloading next story: $e");
@@ -194,11 +186,16 @@ class StoryViewProvider extends ChangeNotifier {
     _preloadPrevAttempts++;
 
     try {
-      if (currentStoryIndex > 0) {
-        _prevStory = stories[currentStoryIndex - 1];
+      if (stories.isEmpty) return;
+
+      int prevIndex;
+      if (currentStoryIndex <= 0) {
+        prevIndex = stories.length - 1;
       } else {
-        _prevStory = stories.last;
+        prevIndex = currentStoryIndex - 1;
       }
+
+      _prevStory = stories[prevIndex];
 
       if (_prevStory != null && _prevStory['type'] == 'video') {
         final tempController = VideoPlayerController.networkUrl(
@@ -207,6 +204,7 @@ class StoryViewProvider extends ChangeNotifier {
         await tempController.initialize();
         await tempController.dispose();
       }
+
       _preloadPrevAttempts = 0;
     } catch (e) {
       print("Error preloading previous story: $e");
@@ -234,10 +232,6 @@ class StoryViewProvider extends ChangeNotifier {
 
       if (currentStory['type'] == 'video') {
         await loadVideo(currentStory);
-      }
-
-      if (!stories.contains(_nextStory)) {
-        stories.add(_nextStory);
       }
 
       _nextStory = null;

@@ -38,6 +38,29 @@ class StoryService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getLatestStories() async {
+    try {
+      final data = await _supabase
+          .from('stories')
+          .select('*, profiles(id, avatar, username, first_name, last_name)')
+          .eq('is_published', true)
+          .gte(
+              'created_at',
+              DateTime.now()
+                  .subtract(Duration(hours: Constants.storyDuration))
+                  .toIso8601String())
+          .order('id', ascending: false);
+      return data;
+    } catch (e) {
+      print('Caught error: $e');
+      if (e.toString().contains("JWT expired")) {
+        await _supabase.auth.signOut();
+        throw Exception("JWT expired");
+      }
+      rethrow;
+    }
+  }
+
   Future<List<dynamic>> getStoriesByUserId(String userId) async {
     try {
       final response = await _supabase
@@ -45,6 +68,11 @@ class StoryService {
           .select('*, profiles(id, avatar, username, first_name, last_name)')
           .eq('author_id', userId)
           .eq('is_published', true)
+          .gte(
+              'created_at',
+              DateTime.now()
+                  .subtract(Duration(hours: Constants.storyDuration))
+                  .toIso8601String())
           .order('id', ascending: false);
 
       return response;
@@ -140,6 +168,11 @@ class StoryService {
     final storyRecord = await _supabase
         .from('stories')
         .select()
+        .gte(
+            'created_at',
+            DateTime.now()
+                .subtract(Duration(hours: Constants.storyDuration))
+                .toIso8601String())
         .order('id', ascending: false)
         .limit(1)
         .single();
