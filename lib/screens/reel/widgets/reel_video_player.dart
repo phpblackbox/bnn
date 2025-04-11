@@ -22,18 +22,30 @@ class ReelVideoPlayer extends StatelessWidget {
       );
     }
 
+    final size = controller!.value.size;
+    final isLandscape = size.width > size.height;
+
     return Stack(
       alignment: Alignment.center,
       children: [
         SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: controller!.value.size.width,
-              height: controller!.value.size.height,
-              child: VideoPlayer(controller!),
-            ),
-          ),
+          child: isLandscape
+              ? FittedBox(
+                  fit: BoxFit.contain,
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: VideoPlayer(controller!),
+                  ),
+                )
+              : FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: VideoPlayer(controller!),
+                  ),
+                ),
         ),
         if (isTransitioning)
           Container(
