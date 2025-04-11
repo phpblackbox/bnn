@@ -235,26 +235,6 @@ class _ReelScreenState extends State<ReelScreen>
               },
             ),
           ),
-          Positioned(
-            top: Platform.isIOS ? 40 : 24,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  Colors.grey, // Replace with your desired color
-                  BlendMode.srcIn,
-                ),
-                child: Image.asset(
-                  'assets/images/icons/live.png',
-                  width: 20.0,
-                  height: 20.0,
-                ),
-              ),
-            ),
-          ),
           if (reelProvider.currentReel != null)
             Positioned(
               bottom: 60,

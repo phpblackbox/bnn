@@ -1,4 +1,5 @@
 import 'package:bnn/screens/home/notifications.dart';
+import 'package:bnn/screens/live/liveDash.dart';
 import 'package:bnn/screens/profile/suggested.dart';
 import 'package:bnn/screens/reel/reel.dart';
 import 'package:flutter/material.dart';
@@ -62,17 +63,16 @@ class _HeaderState extends State<Header> {
                 InkWell(
                   onTap: () async {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ReelScreen()));
+                        MaterialPageRoute(builder: (context) => LiveDash()));
                   },
-                  child: Text(
-                    '9:16s',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      height: 1.20,
-                      letterSpacing: 0.50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Image.asset(
+                      'assets/images/icons/live.png',
+                      width: 20.0,
+                      height: 20.0,
                     ),
                   ),
                 ),

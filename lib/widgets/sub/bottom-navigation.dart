@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavigation extends StatelessWidget {
@@ -41,7 +42,8 @@ class BottomNavigation extends StatelessWidget {
         Navigator.pushNamed(context, '/create-post');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/live');
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => ReelScreen()));
         break;
       case 4:
         Navigator.pushReplacementNamed(context, '/profile');
