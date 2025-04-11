@@ -6,6 +6,7 @@ import 'package:bnn/widgets/sub/feed_or_reels.dart';
 import 'package:bnn/screens/home/header.dart';
 import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
+import 'package:bnn/widgets/sub/feed_title.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,13 +20,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _feedorReels = 0; // 0: feed, 1; reels
-  void _onFeedOrReel(int index) {
-    setState(() {
-      _feedorReels = index;
-    });
-  }
-
   var currentTime;
 
   @override
@@ -58,14 +52,15 @@ class _HomeState extends State<Home> {
         body: Padding(
           padding: EdgeInsets.only(left: 16, top: 0, right: 16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: EdgeInsets.only(top: 32, bottom: 0),
                 child: Header(),
               ),
-              FeedOrReel(index: _feedorReels, onPressed: _onFeedOrReel),
+              FeedTitle(),
               StorySlider(),
-              if (_feedorReels == 0) Posts(),
+              Posts(),
             ],
           ),
         ),

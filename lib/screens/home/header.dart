@@ -1,6 +1,7 @@
 import 'package:bnn/screens/livestream/livestream_dash.dart';
 import 'package:bnn/screens/home/notifications.dart';
 import 'package:bnn/screens/profile/suggested.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:flutter/material.dart';
 
 class Header extends StatefulWidget {
@@ -24,21 +25,20 @@ class _HeaderState extends State<Header> {
             ),
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => LivestreamDash()));
+                InkWell(
+                  onTap: () async {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ReelScreen()));
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Image.asset(
-                      'assets/images/icons/live.png',
-                      width: 20.0,
-                      height: 20.0,
+                  child: Text(
+                    '9:16s',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      height: 1.20,
+                      letterSpacing: 0.50,
                     ),
                   ),
                 ),
