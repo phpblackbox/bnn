@@ -32,6 +32,18 @@ class _PostsState extends State<Posts> {
     });
   }
 
+  @override
+  void didUpdateWidget(Posts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.bookmark != widget.bookmark) {
+      _isInitialized = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        initialData(widget.userId, widget.bookmark);
+      });
+    }
+  }
+
   _scrollListener() {
     if (!mounted || _isLoading) return;
 
@@ -70,7 +82,7 @@ class _PostsState extends State<Posts> {
   }
 
   Future<void> initialData(String? userId, bool? bookmark) async {
-    if (_isInitialized || _isLoading) return;
+    // if (_isInitialized || _isLoading) return;
 
     setState(() {
       _isLoading = true;
@@ -114,7 +126,7 @@ class _PostsState extends State<Posts> {
       return Expanded(
         child: Center(
           child: Text(
-            'No posts yet',
+            'No items yet',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],

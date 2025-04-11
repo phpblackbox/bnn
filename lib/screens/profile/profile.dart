@@ -308,10 +308,8 @@ class _ProfileState extends State<Profile> {
                 ),
               ],
             ),
-            if (_allorbookmark == 0)
-              // AllPost(param_allorbookmakr: _allorbookmark),
-              Posts(userId: meProfile.id),
-            if (_allorbookmark == 1) Posts(bookmark: true)
+            if (_allorbookmark == 0) Posts(userId: meProfile.id),
+            if (_allorbookmark == 1) Posts(bookmark: true),
           ],
         ),
         bottomNavigationBar: BottomNavigation(currentIndex: 4),

@@ -89,7 +89,7 @@ class _PostItemState extends State<PostItem> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.post['name']!,
+                            widget.post['username']!,
                             style: TextStyle(
                                 fontFamily: "Nunito",
                                 fontSize: 12,
@@ -217,8 +217,10 @@ class _PostItemState extends State<PostItem> {
       });
     } else {
       await profileProvider.followUserPost(widget.post['author_id']!, context);
+      friendInfo =
+          await profileProvider.getFriendInfo(widget.post['author_id']!);
       setState(() {
-        isFriend = true;
+        isFriend = friendInfo?["id"] != null;
       });
     }
   }
