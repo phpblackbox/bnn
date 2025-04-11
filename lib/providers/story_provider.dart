@@ -1,4 +1,4 @@
-import 'package:bnn/screens/home/create_story.dart';
+import 'package:bnn/screens/story/create_story.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/reel_service.dart';
 import 'package:bnn/widgets/toast.dart';
@@ -107,28 +107,38 @@ class StoryProvider with ChangeNotifier {
             MaterialPageRoute(
                 builder: (context) => CreateStory(storyId: newStory["id"])));
       } catch (e) {
+        loading = false;
+        Navigator.pop(context);
         CustomToast.showToastDangerTop(
             context, 'Error uploading image: ${e.toString()}');
       }
     }
   }
 
-  Future<void> uploadVideo(BuildContext context) async {
+  Future<void> uploadVideo(
+      BuildContext context, Function showLoadingModal) async {
     FilePickerResult? result =
         await FilePicker.platform.pickFiles(type: FileType.video);
 
     if (result != null) {
       String filePath = result.files.single.path!;
-
+      showLoadingModal();
       loading = true;
-      String videoUrl = await _reelService.uploadVideo(filePath);
 
-      final userId = _authService.getCurrentUser()?.id;
-      await _reelService.createReel(userId!, videoUrl);
+      try {
+        String videoUrl = await _reelService.uploadVideo(filePath);
+        final userId = _authService.getCurrentUser()?.id;
+        await _reelService.createReel(userId!, videoUrl);
 
-      loading = false;
-      Navigator.pop(context);
-      Navigator.pushReplacementNamed(context, '/home');
+        loading = false;
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/home');
+      } catch (e) {
+        loading = false;
+        Navigator.pop(context);
+        CustomToast.showToastDangerTop(
+            context, 'Error uploading video: ${e.toString()}');
+      }
     }
   }
 }

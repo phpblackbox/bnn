@@ -36,12 +36,23 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'please wait while we process your post',
+                    'Uploading your story...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SF Pro Text',
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Please wait while we process your content',
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'SF Pro Text',
                       decoration: TextDecoration.none,
                       fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
                     ),
                   ),
                 ],
@@ -106,8 +117,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
         _buildImageSelectionButton(
             "assets/images/post/gallery.png", () => provider.pickImages()),
         _buildImageSelectionButton("assets/images/post/video.png", () async {
-          showLoadingModal();
-          await provider.uploadVideo(context);
+          await provider.uploadVideo(context, showLoadingModal);
         }),
       ],
     );
