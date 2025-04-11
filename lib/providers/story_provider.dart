@@ -2,10 +2,10 @@ import 'package:bnn/screens/story/create_story.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/reel_service.dart';
 import 'package:bnn/widgets/toast.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/story_service.dart';
+import 'dart:io';
 
 class StoryProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -115,18 +115,34 @@ class StoryProvider with ChangeNotifier {
     }
   }
 
+  Future<File?> pickVideo() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? videoFile = await picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+
+      if (videoFile != null) {
+        return File(videoFile.path);
+      }
+      return null;
+    } catch (e) {
+      print('Error picking video: $e');
+      return null;
+    }
+  }
+
   Future<void> uploadVideo(
       BuildContext context, Function showLoadingModal) async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.video);
+    File? videoFile = await pickVideo();
 
-    if (result != null) {
-      String filePath = result.files.single.path!;
+    if (videoFile != null) {
       showLoadingModal();
       loading = true;
 
       try {
-        String videoUrl = await _reelService.uploadVideo(filePath);
+        String videoUrl = await _reelService.uploadVideo(videoFile.path);
         final userId = _authService.getCurrentUser()?.id;
         await _reelService.createReel(userId!, videoUrl);
 

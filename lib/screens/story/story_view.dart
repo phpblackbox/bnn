@@ -173,13 +173,16 @@ class _StoryViewState extends State<StoryView>
               children: [
                 GestureDetector(
                   onHorizontalDragUpdate: (DragUpdateDetails details) {
-                    _dragDistance += details.delta.dx; // Track horizontal distance
+                    _dragDistance +=
+                        details.delta.dx; // Track horizontal distance
                   },
                   onHorizontalDragEnd: (DragEndDetails details) {
-                    if (details.primaryVelocity!.abs() > 150 || _dragDistance.abs() > 50) { 
+                    if (details.primaryVelocity!.abs() > 150 ||
+                        _dragDistance.abs() > 50) {
                       if (details.primaryVelocity! < 0 || _dragDistance < -50) {
                         _handleSwipe();
-                      } else if (details.primaryVelocity! > 0 || _dragDistance > 50) {
+                      } else if (details.primaryVelocity! > 0 ||
+                          _dragDistance > 50) {
                         _handlePreviousSwipe();
                       }
                     }
@@ -195,37 +198,49 @@ class _StoryViewState extends State<StoryView>
                       child: _isInitialContentLoaded
                           ? (storyViewProvider.currentStory == null)
                               ? const SizedBox.shrink()
-                              : storyViewProvider.currentStory["type"] == "image"
+                              : storyViewProvider.currentStory["type"] ==
+                                      "image"
                                   ? Builder(builder: (context) {
-                                      final index = storyViewProvider.currentStoryIndex;
-                                      if (!_imagePageControllers.containsKey(index)) {
+                                      final index =
+                                          storyViewProvider.currentStoryIndex;
+                                      if (!_imagePageControllers
+                                          .containsKey(index)) {
                                         print(
                                             "BUILD: Creating PageController for index $index with initial page ${storyViewProvider.currentImageIndex}");
-                                        _imagePageControllers[index] = PageController(
-                                            initialPage: storyViewProvider.currentImageIndex);
+                                        _imagePageControllers[index] =
+                                            PageController(
+                                                initialPage: storyViewProvider
+                                                    .currentImageIndex);
                                       } else {
                                         print(
                                             "BUILD: PageController already exists for index $index");
                                       }
-                                      final controller = _imagePageControllers[index];
+                                      final controller =
+                                          _imagePageControllers[index];
                                       if (controller == null) {
                                         print(
                                             "BUILD ERROR: Controller is null for index $index!");
                                         return Center(
-                                            child: Text("Error loading story content",
-                                                style: TextStyle(color: Colors.red)));
+                                            child: Text(
+                                                "Error loading story content",
+                                                style: TextStyle(
+                                                    color: Colors.red)));
                                       }
                                       return PageView.builder(
                                         controller: controller,
-                                        itemCount: storyViewProvider.currentStory["img_urls"].length,
+                                        itemCount: storyViewProvider
+                                            .currentStory["img_urls"].length,
                                         onPageChanged: (imageIndex) {
-                                          storyViewProvider.currentImageIndex = imageIndex;
+                                          storyViewProvider.currentImageIndex =
+                                              imageIndex;
                                           _stopAutoSlide();
                                           _startAutoSlide(storyViewProvider);
                                         },
                                         itemBuilder: (context, imageIndex) {
                                           return Image.network(
-                                            storyViewProvider.currentStory["img_urls"][imageIndex],
+                                            storyViewProvider
+                                                    .currentStory["img_urls"]
+                                                [imageIndex],
                                             fit: BoxFit.cover,
                                             width: double.infinity,
                                             height: double.infinity,
@@ -234,25 +249,36 @@ class _StoryViewState extends State<StoryView>
                                       );
                                     })
                                   : FutureBuilder<void>(
-                                      future: storyViewProvider.initializeVideoPlayerFuture,
+                                      future: storyViewProvider
+                                          .initializeVideoPlayerFuture,
                                       builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.done) {
-                                          if (storyViewProvider.controller != null &&
-                                              storyViewProvider.controller!.value.isInitialized) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.done) {
+                                          if (storyViewProvider.controller !=
+                                                  null &&
+                                              storyViewProvider.controller!
+                                                  .value.isInitialized) {
                                             return Center(
                                               child: AspectRatio(
-                                                aspectRatio: storyViewProvider.controller!.value.aspectRatio,
-                                                child: VideoPlayer(storyViewProvider.controller!),
+                                                aspectRatio: storyViewProvider
+                                                    .controller!
+                                                    .value
+                                                    .aspectRatio,
+                                                child: VideoPlayer(
+                                                    storyViewProvider
+                                                        .controller!),
                                               ),
                                             );
                                           } else {
                                             return const Center(
-                                              child: Icon(Icons.error_outline, color: Colors.red, size: 50),
+                                              child: Icon(Icons.error_outline,
+                                                  color: Colors.red, size: 50),
                                             );
                                           }
                                         } else if (snapshot.hasError) {
                                           return const Center(
-                                            child: Icon(Icons.error, color: Colors.red, size: 50),
+                                            child: Icon(Icons.error,
+                                                color: Colors.red, size: 50),
                                           );
                                         } else {
                                           return const Center(
@@ -350,7 +376,7 @@ class _StoryViewState extends State<StoryView>
                             },
                             child: ImageIcon(
                               AssetImage('assets/images/icons/close.png'),
-                              color: Colors.black,
+                              color: Colors.white,
                               size: 16,
                             ),
                           ),
@@ -568,21 +594,22 @@ class _StoryViewState extends State<StoryView>
 
       await Future.delayed(Duration(milliseconds: 100));
 
-      final boundary = repaintBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary = repaintBoundaryKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       if (boundary == null) return "";
 
       final image = await boundary.toImage(pixelRatio: 2.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      
+
       if (byteData != null) {
         String randomNumStr = Constants().generateRandomNumberString(8);
         final filename = '$randomNumStr.png';
         List<int> bytes = byteData.buffer.asUint8List();
         Uint8List uint8ByteData = Uint8List.fromList(bytes);
         await supabase.storage.from('story').uploadBinary(
-          filename,
-          uint8ByteData,
-        );
+              filename,
+              uint8ByteData,
+            );
 
         return supabase.storage.from('story').getPublicUrl(filename);
       }
