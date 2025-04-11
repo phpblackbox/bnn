@@ -242,32 +242,6 @@ class UserProfileInfo extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              ImageIcon(
-                                AssetImage(
-                                    'assets/images/icons/speedometer.png'),
-                                size: 22.0,
-                                color: Color(0xFF4D4C4A),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                userProfileProvider.userInfo!.age.toString(),
-                                style: TextStyle(
-                                  color: Color(0xFF4D4C4A),
-                                  fontSize: 12,
-                                  fontFamily: 'Abel',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                   Column(
