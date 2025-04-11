@@ -54,7 +54,7 @@ class _NotificationsState extends State<Notifications> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, size: 20.0),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
         backgroundColor: Colors.transparent,
