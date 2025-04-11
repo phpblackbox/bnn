@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/screens/story/story_slider.dart';
 import 'package:bnn/screens/home/header.dart';
 import 'package:bnn/screens/post/posts.dart';
@@ -20,6 +21,25 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   var currentTime;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize posts when home screen is mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      postProvider.reset(); // Reset any existing post state
+      postProvider.loadPosts(); // Load home posts
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up when leaving home screen
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.reset();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

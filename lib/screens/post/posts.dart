@@ -44,6 +44,12 @@ class _PostsState extends State<Posts> {
     }
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   _scrollListener() {
     if (!mounted || _isLoading) return;
 
@@ -75,14 +81,8 @@ class _PostsState extends State<Posts> {
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   Future<void> initialData(String? userId, bool? bookmark) async {
-    // if (_isInitialized || _isLoading) return;
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
@@ -93,10 +93,6 @@ class _PostsState extends State<Posts> {
       final postProvider = Provider.of<PostProvider>(context, listen: false);
       final currentUserId = authProvider.user?.id;
       if (currentUserId != null) {
-        postProvider.offset = 0;
-        postProvider.posts = [];
-        postProvider.loadingMore = false;
-
         await postProvider.loadPosts(
             userId: userId, bookmark: bookmark, currentUserId: currentUserId);
         _isInitialized = true;
