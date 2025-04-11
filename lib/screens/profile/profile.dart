@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/screens/profile/following.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:bnn/screens/post/posts.dart';
-import 'package:bnn/screens/profile/all.dart';
 import 'package:bnn/screens/profile/followers.dart';
 import 'package:bnn/screens/setting/edit.dart';
 import 'package:bnn/screens/setting/settings.dart';
@@ -26,7 +26,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   final supabase = Supabase.instance.client;
 
-  int _allorbookmark = 0;
+  int _userorbookmark = 0;
 
   @override
   void initState() {
@@ -34,15 +34,19 @@ class _ProfileState extends State<Profile> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
       profileProvider.loading = true;
+      postProvider.reset();
       await profileProvider.getCountsOfProfileInfo();
     });
   }
 
-  void _onAllOrSave(int index) {
+  void _onUserOrBookmark(int index) {
     setState(() {
-      _allorbookmark = index;
+      _userorbookmark = index;
     });
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.reset();
   }
 
   @override
@@ -50,6 +54,17 @@ class _ProfileState extends State<Profile> {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     final meProfile = authProvider.profile!;
     final profileProvider = Provider.of<ProfileProvider>(context);
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+    if (postProvider.currentContext != 'profile_${meProfile.id}' &&
+        _userorbookmark == 0) {
+      postProvider.reset();
+      postProvider.loadPosts(userId: meProfile.id);
+    } else if (postProvider.currentContext != 'bookmarks' &&
+        _userorbookmark == 1) {
+      postProvider.reset();
+      postProvider.loadPosts(bookmark: true);
+    }
 
     var currentTime;
     return WillPopScope(
@@ -284,11 +299,11 @@ class _ProfileState extends State<Profile> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    _onAllOrSave(0);
+                    _onUserOrBookmark(0);
                   },
                   child: ImageIcon(
                     AssetImage('assets/images/icons/all.png'),
-                    color: _allorbookmark == 0
+                    color: _userorbookmark == 0
                         ? Colors.black
                         : Colors.black.withOpacity(0.5),
                     size: 24,
@@ -296,11 +311,11 @@ class _ProfileState extends State<Profile> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    _onAllOrSave(1);
+                    _onUserOrBookmark(1);
                   },
                   child: ImageIcon(
                     AssetImage('assets/images/icons/bookmark.png'),
-                    color: _allorbookmark == 1
+                    color: _userorbookmark == 1
                         ? Colors.black.withOpacity(1)
                         : Colors.black.withOpacity(0.5),
                     size: 24,
@@ -308,8 +323,8 @@ class _ProfileState extends State<Profile> {
                 ),
               ],
             ),
-            if (_allorbookmark == 0) Posts(userId: meProfile.id),
-            if (_allorbookmark == 1) Posts(bookmark: true),
+            if (_userorbookmark == 0) Posts(userId: meProfile.id),
+            if (_userorbookmark == 1) Posts(bookmark: true),
           ],
         ),
         bottomNavigationBar: BottomNavigation(currentIndex: 4),

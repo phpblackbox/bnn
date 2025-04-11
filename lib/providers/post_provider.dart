@@ -19,6 +19,7 @@ class PostProvider extends ChangeNotifier {
   bool _loading = false;
   String? errorMessage;
   String? _currentContext; // Track current context (home, profile, etc.)
+  String? get currentContext => _currentContext;
 
   bool get loading => _loading;
 
@@ -45,7 +46,6 @@ class PostProvider extends ChangeNotifier {
     offset = 0;
     _loading = false;
     _loadingMore = true;
-    _currentContext = null;
     notifyListeners();
   }
 
@@ -57,7 +57,9 @@ class PostProvider extends ChangeNotifier {
   Future<void> loadPosts(
       {String? userId, bool? bookmark, String? currentUserId}) async {
     // Reset if context changed
-    String newContext = userId ?? (bookmark == true ? 'bookmarks' : 'home');
+    String newContext = userId != null
+        ? 'profile_$userId'
+        : (bookmark == true ? 'bookmarks' : 'home');
     if (_currentContext != newContext) {
       reset();
       _currentContext = newContext;
@@ -76,6 +78,11 @@ class PostProvider extends ChangeNotifier {
 
       if (posts == null) {
         posts = [];
+      }
+
+      // Clear existing posts if this is a new context
+      if (offset == 0) {
+        posts!.clear();
       }
 
       for (var element in newItem) {
