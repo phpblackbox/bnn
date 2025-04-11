@@ -26,7 +26,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _loadingMore = false;
+  bool _loadingMore = true;
   bool get loadingMore => _loadingMore;
 
   set loadingMore(bool value) {
@@ -45,6 +45,8 @@ class PostProvider extends ChangeNotifier {
   Future<void> loadPosts(
       {String? userId, bool? bookmark, String? currentUserId}) async {
     errorMessage = null;
+    loadingMore = true;
+
     try {
       List<dynamic> newItem = await postService.getPosts(
           offset: offset,
@@ -74,11 +76,14 @@ class PostProvider extends ChangeNotifier {
       }
 
       loading = false;
+      loadingMore = false;
     } catch (e) {
       errorMessage = e.toString();
       loading = false;
+      loadingMore = false;
     } finally {
       loading = false;
+      loadingMore = false;
     }
   }
 

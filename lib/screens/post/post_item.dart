@@ -37,6 +37,7 @@ class PostItem extends StatefulWidget {
 class _PostItemState extends State<PostItem> {
   bool isFriend = false;
   dynamic friendInfo;
+  bool _isCheckingFriendStatus = false;
 
   @override
   void initState() {
@@ -45,12 +46,23 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future<void> _checkFriendStatus() async {
-    final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
-    friendInfo = await profileProvider.getFriendInfo(widget.post['author_id']!);
-    setState(() {
-      isFriend = friendInfo?["id"] != null;
-    });
+    if (!mounted || _isCheckingFriendStatus) return;
+
+    _isCheckingFriendStatus = true;
+
+    try {
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      friendInfo =
+          await profileProvider.getFriendInfo(widget.post['author_id']!);
+      if (mounted) {
+        setState(() {
+          isFriend = friendInfo?["id"] != null;
+        });
+      }
+    } finally {
+      _isCheckingFriendStatus = false;
+    }
   }
 
   Future<void> _showFriendDetail(BuildContext context) async {

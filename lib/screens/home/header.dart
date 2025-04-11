@@ -15,20 +15,35 @@ class Header extends StatefulWidget {
 class _HeaderState extends State<Header> {
   late NotificationProvider _notificationProvider;
   bool _hasNotifications = false;
+  bool _isCheckingNotifications = false;
 
   @override
   void initState() {
     super.initState();
-    _notificationProvider =
-        Provider.of<NotificationProvider>(context, listen: false);
-    _checkNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _notificationProvider =
+            Provider.of<NotificationProvider>(context, listen: false);
+        _checkNotifications();
+      }
+    });
   }
 
   Future<void> _checkNotifications() async {
-    await _notificationProvider.getMyNotifications();
-    setState(() {
-      _hasNotifications = _notificationProvider.data.isNotEmpty;
-    });
+    if (!mounted || _isCheckingNotifications) return;
+
+    _isCheckingNotifications = true;
+
+    try {
+      await _notificationProvider.getMyNotifications();
+      if (mounted) {
+        setState(() {
+          _hasNotifications = _notificationProvider.data.isNotEmpty;
+        });
+      }
+    } finally {
+      _isCheckingNotifications = false;
+    }
   }
 
   @override
@@ -85,7 +100,7 @@ class _HeaderState extends State<Header> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => Notifications()));
-                    if (result == true) {
+                    if (result == true && mounted) {
                       await _checkNotifications();
                     }
                   },

@@ -94,7 +94,10 @@ class _FollowersState extends State<Followers> {
                     return Container(
                       padding: EdgeInsets.only(bottom: 12),
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.pushNamed(context, '/user-profile',
+                              arguments: {'userId': item['id']});
+                        },
                         child: Row(
                           children: [
                             CircleAvatar(

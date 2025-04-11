@@ -1,9 +1,5 @@
-import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/providers/user_profile_provider.dart';
-import 'package:bnn/utils/colors.dart';
-import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:bnn/widgets/inputs/custom-input-field.dart';
-import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -56,7 +52,7 @@ class _FollowingState extends State<UserFollowing> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, size: 20.0),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
             profileProvider.getCountsOfProfileInfo(widget.userId);
           },
         ),
@@ -103,7 +99,11 @@ class _FollowingState extends State<UserFollowing> {
                     return Container(
                       padding: EdgeInsets.only(bottom: 12),
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.pushNamedAndRemoveUntil(context,
+                              '/user-profile', (route) => route.isFirst,
+                              arguments: {'userId': item['id']});
+                        },
                         child: Row(
                           children: [
                             CircleAvatar(
