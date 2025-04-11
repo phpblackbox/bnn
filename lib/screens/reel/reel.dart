@@ -229,10 +229,30 @@ class _ReelScreenState extends State<ReelScreen>
             top: Platform.isIOS ? 40 : 12,
             right: 0,
             child: IconButton(
-              icon: const Icon(Icons.close, size: 20, color: Colors.black),
+              icon: const Icon(Icons.close, size: 20, color: Colors.white),
               onPressed: () {
                 Navigator.pop(context);
               },
+            ),
+          ),
+          Positioned(
+            top: Platform.isIOS ? 40 : 24,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.grey, // Replace with your desired color
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/images/icons/live.png',
+                  width: 20.0,
+                  height: 20.0,
+                ),
+              ),
             ),
           ),
           if (reelProvider.currentReel != null)
