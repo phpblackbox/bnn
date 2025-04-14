@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:bnn/providers/story_view_provider.dart';
@@ -628,6 +627,12 @@ class _StoryViewState extends State<StoryView>
       controller.dispose();
     }
     _stopAutoSlide();
+    // Dispose video controller if it exists and is playing
+    if (storyViewProvider.controller != null &&
+        storyViewProvider.controller!.value.isInitialized) {
+      storyViewProvider.controller!.pause();
+      storyViewProvider.controller!.dispose();
+    }
     super.dispose();
   }
 }
