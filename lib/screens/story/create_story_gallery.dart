@@ -91,7 +91,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
               padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
-                  _buildImageSelectionRow(context, provider),
+                  _buildButtons(context, provider),
                   provider.selectedImages.isNotEmpty
                       ? Expanded(
                           child: _buildImageGrid(provider),
@@ -108,16 +108,16 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
     );
   }
 
-  Widget _buildImageSelectionRow(BuildContext context, StoryProvider provider) {
+  Widget _buildButtons(BuildContext context, StoryProvider provider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildImageSelectionButton("assets/images/post/camera0.png",
             () => provider.cameraImage(context)),
         _buildImageSelectionButton(
-            "assets/images/post/gallery.png", () => provider.pickImages()),
+            "assets/images/post/gallery.png", () => provider.pickMedia()),
         _buildImageSelectionButton("assets/images/post/video.png", () async {
-          await provider.uploadVideo(context, showLoadingModal);
+          await provider.uploadReel(context, showLoadingModal);
         }),
       ],
     );

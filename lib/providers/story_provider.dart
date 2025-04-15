@@ -57,7 +57,7 @@ class StoryProvider with ChangeNotifier {
     }
   }
 
-  Future<void> pickImages() async {
+  Future<void> pickMedia() async {
     try {
       final List<XFile> pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles.isNotEmpty) {
@@ -133,7 +133,7 @@ class StoryProvider with ChangeNotifier {
     }
   }
 
-  Future<void> uploadVideo(
+  Future<void> uploadReel(
       BuildContext context, Function showLoadingModal) async {
     File? videoFile = await pickVideo();
 

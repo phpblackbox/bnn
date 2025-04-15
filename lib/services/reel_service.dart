@@ -12,16 +12,15 @@ class ReelService {
     final bytes = await File(filePath).readAsBytes();
     String filename = '${DateTime.now().millisecondsSinceEpoch}.mp4';
 
-    await _supabase.storage.from('story').uploadBinary(filename, bytes);
+    await _supabase.storage.from('reels').uploadBinary(filename, bytes);
 
-    return _supabase.storage.from('story').getPublicUrl(filename);
+    return _supabase.storage.from('reels').getPublicUrl(filename);
   }
 
   Future<void> createReel(String userId, String videoUrl) async {
-    await _supabase.from('stories').upsert({
+    await _supabase.from('reels').upsert({
       'author_id': userId,
       'video_url': videoUrl,
-      'type': 'video',
     });
   }
 
@@ -31,12 +30,10 @@ class ReelService {
   }
 
   Future<int> getLatestReelId(int currentReelId) async {
-    // get the latest reel id that is before the current reel id
     if (currentReelId == 0) {
       final reelRecord = await _supabase
-          .from('stories')
+          .from('reels')
           .select()
-          .eq('type', 'video')
           .order('id', ascending: false)
           .limit(1)
           .single();
@@ -44,9 +41,8 @@ class ReelService {
       return reelId;
     } else {
       final reelRecord = await _supabase
-          .from('stories')
+          .from('reels')
           .select()
-          .eq('type', 'video')
           .lt('id', currentReelId)
           .order('id', ascending: false)
           .limit(1)
@@ -150,7 +146,7 @@ class ReelService {
 
   Future<ReelModel?> getReelById(int reelId) async {
     final reelRecord = await _supabase
-        .from('stories')
+        .from('reels')
         .select()
         .eq("id", reelId)
         .eq('type', 'video')
@@ -163,9 +159,10 @@ class ReelService {
       reel.bookmarks = await getReelBookmarksCount(reelId);
       reel.comments = await getReelCommentsCount(reelId);
       reel.share = await _supabase.rpc('get_count_share', params: {
-          'p_post_id': reelId,
-          'p_type': 'reel',
-        });;
+        'p_post_id': reelId,
+        'p_type': 'reel',
+      });
+      ;
 
       final meId = _supabase.auth.currentUser?.id;
       if (meId == reel.authorId) {
