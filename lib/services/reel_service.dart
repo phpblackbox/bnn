@@ -149,7 +149,6 @@ class ReelService {
         .from('reels')
         .select()
         .eq("id", reelId)
-        .eq('type', 'video')
         .single();
 
     if (reelRecord.isNotEmpty) {
@@ -224,8 +223,6 @@ class ReelService {
         'reel_id': reelId,
         'is_like': currentLikeStatus,
       });
-
-      currentLikeStatus = false;
     }
 
     final noti = await _supabase

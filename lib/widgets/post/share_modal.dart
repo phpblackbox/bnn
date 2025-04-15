@@ -97,7 +97,7 @@ class _ShareModalState extends State<ShareModal> {
     );
 
     final message = types.PartialText(
-      text: "Check out this post",
+      text: "Check out this ${widget.type == "post" ? "post" : "9:16s"}",
       metadata: {
         'post_id': postId,
         'type': widget.type,
