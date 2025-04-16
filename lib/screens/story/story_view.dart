@@ -24,7 +24,7 @@ class StoryView extends StatefulWidget {
 }
 
 class _StoryViewState extends State<StoryView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController _msgController = TextEditingController();
   final FocusNode _msgFocusNode = FocusNode();
@@ -58,6 +58,7 @@ class _StoryViewState extends State<StoryView>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     storyViewProvider = Provider.of<StoryViewProvider>(context, listen: false);
     _storyPageController = PageController();
     _imagePageControllers = {};
@@ -88,6 +89,20 @@ class _StoryViewState extends State<StoryView>
     ));
     _msgFocusNode.addListener(_onMsgFocusChange);
     _initializeStory();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      if (storyViewProvider.controller != null &&
+          storyViewProvider.controller!.value.isInitialized &&
+          storyViewProvider.controller!.value.isPlaying) {
+        storyViewProvider.controller!.pause();
+      }
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   void _onMsgFocusChange() async {
@@ -709,6 +724,7 @@ class _StoryViewState extends State<StoryView>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _msgFocusNode.dispose();
     _storyPageController.dispose();
     _slideController.dispose();
