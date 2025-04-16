@@ -27,6 +27,7 @@ class _StoryViewState extends State<StoryView>
     with SingleTickerProviderStateMixin {
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController _msgController = TextEditingController();
+  final FocusNode _msgFocusNode = FocusNode();
   final List<String> emojis = [
     '😫',
     '🤥',
@@ -85,7 +86,20 @@ class _StoryViewState extends State<StoryView>
       parent: _slideController,
       curve: Curves.easeOut,
     ));
+    _msgFocusNode.addListener(_onMsgFocusChange);
     _initializeStory();
+  }
+
+  void _onMsgFocusChange() async {
+    if (_msgFocusNode.hasFocus) {
+      _stopAutoSlide();
+      final currentMediaUrl = storyViewProvider.currentStory?["media_urls"][storyViewProvider.currentImageIndex];
+      if (currentMediaUrl != null && _isVideo(currentMediaUrl) && storyViewProvider.controller != null) {
+        if (storyViewProvider.controller!.value.isPlaying) {
+          await storyViewProvider.controller!.pause();
+        }
+      }
+    }
   }
 
   void _initializeStory() {
@@ -103,7 +117,7 @@ class _StoryViewState extends State<StoryView>
   }
 
   void _startAutoSlide(StoryViewProvider storyViewProvider) {
-    _autoSlideTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _autoSlideTimer = Timer.periodic(Duration(seconds: 10), (timer) {
       if (!_imagePageControllers
           .containsKey(storyViewProvider.currentStoryIndex)) return;
 
@@ -111,8 +125,14 @@ class _StoryViewState extends State<StoryView>
           _imagePageControllers[storyViewProvider.currentStoryIndex];
       if (!currentController!.hasClients) return;
 
+      final currentMediaUrl = storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex];
+      if (_isVideo(currentMediaUrl)) {
+        // If current media is a video, do not auto-slide
+        return;
+      }
+
       if (storyViewProvider.currentImageIndex <
-          storyViewProvider.currentStory["img_urls"].length - 1) {
+          storyViewProvider.currentStory["media_urls"].length - 1) {
         storyViewProvider.currentImageIndex++;
       } else {
         storyViewProvider.currentImageIndex = 0;
@@ -139,10 +159,20 @@ class _StoryViewState extends State<StoryView>
     _isSlidingLeft = true;
     _slideController.forward(from: 0.0);
     FocusScope.of(context).unfocus();
-    if (storyViewProvider.currentStory!["type"] == "video") {
+    final currentMediaUrl = storyViewProvider.currentStory!["media_urls"][storyViewProvider.currentImageIndex];
+    if (_isVideo(currentMediaUrl) && storyViewProvider.controller != null) {
       await storyViewProvider.controller!.pause();
     }
     await storyViewProvider.nextStory();
+    _msgController.clear();
+    final newIndex = storyViewProvider.currentStoryIndex;
+    if (_imagePageControllers.containsKey(newIndex)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_imagePageControllers[newIndex]?.hasClients ?? false) {
+          _imagePageControllers[newIndex]!.jumpToPage(0);
+        }
+      });
+    }
     _isTransitioning = false;
     _startAutoSlide(storyViewProvider);
   }
@@ -153,10 +183,20 @@ class _StoryViewState extends State<StoryView>
     _isSlidingLeft = false;
     _slideController.forward(from: 0.0);
     FocusScope.of(context).unfocus();
-    if (storyViewProvider.currentStory!["type"] == "video") {
+    final currentMediaUrl = storyViewProvider.currentStory!["media_urls"][storyViewProvider.currentImageIndex];
+    if (_isVideo(currentMediaUrl) && storyViewProvider.controller != null) {
       await storyViewProvider.controller!.pause();
     }
     await storyViewProvider.previousStory();
+    _msgController.clear();
+    final newIndex = storyViewProvider.currentStoryIndex;
+    if (_imagePageControllers.containsKey(newIndex)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_imagePageControllers[newIndex]?.hasClients ?? false) {
+          _imagePageControllers[newIndex]!.jumpToPage(0);
+        }
+      });
+    }
     _isTransitioning = false;
     _startAutoSlide(storyViewProvider);
   }
@@ -188,6 +228,7 @@ class _StoryViewState extends State<StoryView>
                     _dragDistance = 0;
                   },
                   behavior: HitTestBehavior.opaque,
+                  
                   child: SlideTransition(
                     position: _isSlidingLeft
                         ? _slideLeftAnimation
@@ -197,98 +238,140 @@ class _StoryViewState extends State<StoryView>
                       child: _isInitialContentLoaded
                           ? (storyViewProvider.currentStory == null)
                               ? const SizedBox.shrink()
-                              : storyViewProvider.currentStory["type"] ==
-                                      "image"
-                                  ? Builder(builder: (context) {
-                                      final index =
-                                          storyViewProvider.currentStoryIndex;
-                                      if (!_imagePageControllers
-                                          .containsKey(index)) {
-                                        print(
-                                            "BUILD: Creating PageController for index $index with initial page ${storyViewProvider.currentImageIndex}");
-                                        _imagePageControllers[index] =
-                                            PageController(
-                                                initialPage: storyViewProvider
-                                                    .currentImageIndex);
-                                      } else {
-                                        print(
-                                            "BUILD: PageController already exists for index $index");
-                                      }
-                                      final controller =
-                                          _imagePageControllers[index];
-                                      if (controller == null) {
-                                        print(
-                                            "BUILD ERROR: Controller is null for index $index!");
-                                        return Center(
-                                            child: Text(
-                                                "Error loading story content",
-                                                style: TextStyle(
-                                                    color: Colors.red)));
-                                      }
-                                      return PageView.builder(
-                                        controller: controller,
-                                        itemCount: storyViewProvider
-                                            .currentStory["img_urls"].length,
-                                        onPageChanged: (imageIndex) {
-                                          storyViewProvider.currentImageIndex =
-                                              imageIndex;
+                              : Builder(builder: (context) {
+                                  final index = storyViewProvider.currentStoryIndex;
+                                  if (!_imagePageControllers.containsKey(index)) {
+                                    _imagePageControllers[index] = PageController(
+                                        initialPage: storyViewProvider.currentImageIndex);
+                                  }
+                                  final controller = _imagePageControllers[index];
+                                  if (controller == null) {
+                                    return Center(
+                                        child: Text("Error loading story content",
+                                            style: TextStyle(color: Colors.red)));
+                                  }
+                                  return Stack(
+                                    children: [
+                                      GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTapUp: (details) async {
+                                          final box = context.findRenderObject() as RenderBox;
+                                          final localPosition = box.globalToLocal(details.globalPosition);
+                                          final width = box.size.width;
+                                          final mediaCount = storyViewProvider.currentStory["media_urls"].length;
+                                          final currentIndex = storyViewProvider.currentImageIndex;
+
+                                          if (localPosition.dx < width / 2) {
+                                            // Tap left: previous media or previous story
+                                            if (currentIndex > 0) {
+                                              storyViewProvider.currentImageIndex = currentIndex - 1;
+                                              controller.jumpToPage(storyViewProvider.currentImageIndex);
+                                              final mediaUrl = storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex];
+                                              if (_isVideo(mediaUrl)) {
+                                                await storyViewProvider.loadVideo(mediaUrl);
+                                              } else {
+                                                if (storyViewProvider.controller != null) {
+                                                  await storyViewProvider.controller!.dispose();
+                                                  storyViewProvider.controller = null;
+                                                  storyViewProvider.initializeVideoPlayerFuture = null;
+                                                }
+                                              }
+                                            } else {
+                                              // At first media, go to previous story
+                                              await storyViewProvider.previousStory();
+                                              final newIndex = storyViewProvider.currentStoryIndex;
+                                              if (_imagePageControllers.containsKey(newIndex)) {
+                                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                  if (_imagePageControllers[newIndex]?.hasClients ?? false) {
+                                                    _imagePageControllers[newIndex]!.jumpToPage(0);
+                                                  }
+                                                });
+                                              }
+                                            }
+                                          } else {
+                                            // Tap right: next media or next story
+                                            if (currentIndex < mediaCount - 1) {
+                                              storyViewProvider.currentImageIndex = currentIndex + 1;
+                                              controller.jumpToPage(storyViewProvider.currentImageIndex);
+                                              final mediaUrl = storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex];
+                                              if (_isVideo(mediaUrl)) {
+                                                await storyViewProvider.loadVideo(mediaUrl);
+                                              } else {
+                                                if (storyViewProvider.controller != null) {
+                                                  await storyViewProvider.controller!.dispose();
+                                                  storyViewProvider.controller = null;
+                                                  storyViewProvider.initializeVideoPlayerFuture = null;
+                                                }
+                                              }
+                                            } else {
+                                              // At last media, go to next story
+                                              await storyViewProvider.nextStory();
+                                              final newIndex = storyViewProvider.currentStoryIndex;
+                                              if (_imagePageControllers.containsKey(newIndex)) {
+                                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                  if (_imagePageControllers[newIndex]?.hasClients ?? false) {
+                                                    _imagePageControllers[newIndex]!.jumpToPage(0);
+                                                  }
+                                                });
+                                              }
+                                            }
+                                          }
                                           _stopAutoSlide();
                                           _startAutoSlide(storyViewProvider);
                                         },
-                                        itemBuilder: (context, imageIndex) {
-                                          return Image.network(
-                                            storyViewProvider
-                                                    .currentStory["img_urls"]
-                                                [imageIndex],
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                          );
-                                        },
-                                      );
-                                    })
-                                  : FutureBuilder<void>(
-                                      future: storyViewProvider
-                                          .initializeVideoPlayerFuture,
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          if (storyViewProvider.controller !=
-                                                  null &&
-                                              storyViewProvider.controller!
-                                                  .value.isInitialized) {
-                                            return Center(
-                                              child: AspectRatio(
-                                                aspectRatio: storyViewProvider
-                                                    .controller!
-                                                    .value
-                                                    .aspectRatio,
-                                                child: VideoPlayer(
-                                                    storyViewProvider
-                                                        .controller!),
-                                              ),
-                                            );
-                                          } else {
-                                            return const Center(
-                                              child: Icon(Icons.error_outline,
-                                                  color: Colors.red, size: 50),
-                                            );
-                                          }
-                                        } else if (snapshot.hasError) {
-                                          return const Center(
-                                            child: Icon(Icons.error,
-                                                color: Colors.red, size: 50),
-                                          );
-                                        } else {
-                                          return const Center(
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    )
+                                        child: PageView.builder(
+                                          controller: controller,
+                                          itemCount: storyViewProvider.currentStory["media_urls"].length,
+                                          physics: NeverScrollableScrollPhysics(),
+                                          onPageChanged: null, // Disable onPageChanged, handled by tap
+                                          itemBuilder: (context, mediaIndex) {
+                                            final mediaUrl = storyViewProvider.currentStory["media_urls"][mediaIndex];
+                                            if (_isVideo(mediaUrl)) {
+                                              return FutureBuilder<void>(
+                                                future: storyViewProvider.initializeVideoPlayerFuture,
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.connectionState == ConnectionState.done) {
+                                                    if (storyViewProvider.controller != null &&
+                                                        storyViewProvider.controller!.value.isInitialized) {
+                                                      return Center(
+                                                        child: AspectRatio(
+                                                          aspectRatio: storyViewProvider.controller!.value.aspectRatio,
+                                                          child: VideoPlayer(storyViewProvider.controller!),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      return const Center(
+                                                        child: Icon(Icons.error_outline, color: Colors.red, size: 50),
+                                                      );
+                                                    }
+                                                  } else if (snapshot.hasError) {
+                                                    return const Center(
+                                                      child: Icon(Icons.error, color: Colors.red, size: 50),
+                                                    );
+                                                  } else {
+                                                    return const Center(
+                                                      child: CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              );
+                                            } else {
+                                              return Image.network(
+                                                mediaUrl,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                })
                           : const SizedBox.shrink(),
                     ),
                   ),
@@ -304,7 +387,7 @@ class _StoryViewState extends State<StoryView>
                         child: Row(
                           children: List.generate(
                               storyViewProvider
-                                  .currentStory!["img_urls"].length, (index) {
+                                  .currentStory!["media_urls"].length, (index) {
                             return Expanded(
                               child: Container(
                                 margin: EdgeInsets.symmetric(horizontal: 1.5),
@@ -393,6 +476,7 @@ class _StoryViewState extends State<StoryView>
                       Expanded(
                         child: TextField(
                           controller: _msgController,
+                          focusNode: _msgFocusNode,
                           style: TextStyle(
                             fontSize: 10.0,
                             color: Colors.black,
@@ -449,10 +533,9 @@ class _StoryViewState extends State<StoryView>
                               name:
                                   "${storyViewProvider.currentStory['profiles']['first_name']} ${storyViewProvider.currentStory['profiles']['last_name']}");
                           final imageUrl =
-                              storyViewProvider.currentStory['type'] == "image"
-                                  ? storyViewProvider.currentStory["img_urls"]
-                                      [storyViewProvider.currentImageIndex]
-                                  : await capturePausedFrame();
+                              _isVideo(storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex])
+                                  ? await capturePausedFrame()
+                                  : storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex];
                           final message = types.PartialText(
                               text: _msgController.text,
                               metadata: {
@@ -619,8 +702,14 @@ class _StoryViewState extends State<StoryView>
     return "";
   }
 
+  bool _isVideo(String url) {
+    final videoExtensions = ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.mkv'];
+    return videoExtensions.any((ext) => url.toLowerCase().endsWith(ext));
+  }
+
   @override
   void dispose() {
+    _msgFocusNode.dispose();
     _storyPageController.dispose();
     _slideController.dispose();
     for (var controller in _imagePageControllers.values) {

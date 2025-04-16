@@ -7,7 +7,7 @@ class StoryViewProvider extends ChangeNotifier {
   final StoryService _storyService = StoryService();
 
   dynamic currentStory = {
-    "img_urls": [],
+    "media_urls": [],
     "video_url": "",
     "id": 0,
     "username": "",
@@ -99,9 +99,9 @@ class StoryViewProvider extends ChangeNotifier {
         currentStory = stories[initialIndex];
         currentStoryIndex = initialIndex;
 
-        if (currentStory['type'] == 'video') {
-          print("PROVIDER: Initial story is video, calling loadVideo");
-          await loadVideo(currentStory);
+        // If the first media is a video, load it
+        if (currentStory['media_urls'].isNotEmpty && _isVideo(currentStory['media_urls'][0])) {
+          await loadVideo(currentStory['media_urls'][0]);
         }
 
         // Start preloading adjacent stories
@@ -158,13 +158,18 @@ class StoryViewProvider extends ChangeNotifier {
       // Set the next story
       _nextStory = stories[nextIndex];
 
-      // Preload video if needed
-      if (_nextStory != null && _nextStory['type'] == 'video') {
-        final tempController = VideoPlayerController.networkUrl(
-          Uri.parse(_nextStory['video_url']),
-        );
-        await tempController.initialize();
-        await tempController.dispose();
+      // Preload first video if any
+      if (_nextStory != null && _nextStory['media_urls'].isNotEmpty) {
+        for (var mediaUrl in _nextStory['media_urls']) {
+          if (_isVideo(mediaUrl)) {
+            final tempController = VideoPlayerController.networkUrl(
+              Uri.parse(mediaUrl),
+            );
+            await tempController.initialize();
+            await tempController.dispose();
+            break;
+          }
+        }
       }
 
       _preloadNextAttempts = 0;
@@ -197,12 +202,17 @@ class StoryViewProvider extends ChangeNotifier {
 
       _prevStory = stories[prevIndex];
 
-      if (_prevStory != null && _prevStory['type'] == 'video') {
-        final tempController = VideoPlayerController.networkUrl(
-          Uri.parse(_prevStory['video_url']),
-        );
-        await tempController.initialize();
-        await tempController.dispose();
+      if (_prevStory != null && _prevStory['media_urls'].isNotEmpty) {
+        for (var mediaUrl in _prevStory['media_urls']) {
+          if (_isVideo(mediaUrl)) {
+            final tempController = VideoPlayerController.networkUrl(
+              Uri.parse(mediaUrl),
+            );
+            await tempController.initialize();
+            await tempController.dispose();
+            break;
+          }
+        }
       }
 
       _preloadPrevAttempts = 0;
@@ -229,12 +239,13 @@ class StoryViewProvider extends ChangeNotifier {
 
       _prevStory = currentStory;
       currentStory = _nextStory;
-
-      if (currentStory['type'] == 'video') {
-        await loadVideo(currentStory);
-      }
-
       _nextStory = null;
+
+      currentImageIndex = 0;
+      // If first media is video, load it
+      if (currentStory['media_urls'].isNotEmpty && _isVideo(currentStory['media_urls'][0])) {
+        await loadVideo(currentStory['media_urls'][0]);
+      }
 
       if (currentStoryIndex >= stories.length - 1) {
         currentStoryIndex = 0;
@@ -242,7 +253,6 @@ class StoryViewProvider extends ChangeNotifier {
         currentStoryIndex++;
       }
 
-      currentImageIndex = 0;
       preloadNextStory();
     } catch (e) {
       print("Error in nextStory: $e");
@@ -265,14 +275,12 @@ class StoryViewProvider extends ChangeNotifier {
 
       _nextStory = currentStory;
       currentStory = _prevStory;
-
-      if (currentStory['type'] == 'video') {
-        await loadVideo(currentStory);
-      }
-
       _prevStory = null;
 
       currentImageIndex = 0;
+      if (currentStory['media_urls'].isNotEmpty && _isVideo(currentStory['media_urls'][0])) {
+        await loadVideo(currentStory['media_urls'][0]);
+      }
 
       if (currentStoryIndex <= 0) {
         currentStoryIndex = stories.length - 1;
@@ -289,22 +297,40 @@ class StoryViewProvider extends ChangeNotifier {
   }
 
   void nextImage() {
-    if (currentStory['img_urls'].length > 1) {
-      if (currentImageIndex == currentStory['img_urls'].length - 1) {
+    if (currentStory['media_urls'].length > 1) {
+      if (currentImageIndex == currentStory['media_urls'].length - 1) {
         currentImageIndex = 0;
       } else {
         currentImageIndex = currentImageIndex + 1;
+      }
+      // If next media is video, load it
+      if (_isVideo(currentStory['media_urls'][currentImageIndex])) {
+        loadVideo(currentStory['media_urls'][currentImageIndex]);
+      } else {
+        if (controller != null) {
+          controller!.dispose();
+          controller = null;
+        }
       }
       notifyListeners();
     }
   }
 
   void prevImage() {
-    if (currentStory['img_urls'].length > 1) {
+    if (currentStory['media_urls'].length > 1) {
       if (currentImageIndex == 0) {
-        currentImageIndex = currentStory['img_urls'].length - 1;
+        currentImageIndex = currentStory['media_urls'].length - 1;
       } else {
         currentImageIndex = currentImageIndex - 1;
+      }
+      // If prev media is video, load it
+      if (_isVideo(currentStory['media_urls'][currentImageIndex])) {
+        loadVideo(currentStory['media_urls'][currentImageIndex]);
+      } else {
+        if (controller != null) {
+          controller!.dispose();
+          controller = null;
+        }
       }
       notifyListeners();
     }
@@ -329,7 +355,7 @@ class StoryViewProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadVideo(dynamic story) async {
+  Future<void> loadVideo(String videoUrl) async {
     try {
       if (controller != null) {
         await controller!.dispose();
@@ -338,27 +364,32 @@ class StoryViewProvider extends ChangeNotifier {
         print("PROVIDER: Disposed existing video controller");
       }
 
-      if (story['video_url'] != null && story['video_url'].isNotEmpty) {
-        print("PROVIDER: Creating video controller for ${story['video_url']}");
+      if (videoUrl.isNotEmpty) {
+        print("PROVIDER: Creating video controller for $videoUrl");
         controller = VideoPlayerController.networkUrl(
-          Uri.parse(story['video_url']),
+          Uri.parse(videoUrl),
         );
 
         initializeVideoPlayerFuture = controller!.initialize().then((_) {
           controller!.setLooping(true);
           controller!.play();
-          print("PROVIDER: Video initialized and playing: ${story['id']}");
+          print("PROVIDER: Video initialized and playing");
           notifyListeners();
         }).catchError((error) {
           print("PROVIDER: Error initializing video: $error");
         });
       } else {
-        print("PROVIDER: Video URL is null or empty for story ${story['id']}");
+        print("PROVIDER: Video URL is empty");
         initializeVideoPlayerFuture = Future.value();
       }
     } catch (e) {
       print("PROVIDER: Error creating video controller: $e");
       initializeVideoPlayerFuture = Future.error(e);
     }
+  }
+
+  bool _isVideo(String url) {
+    final videoExtensions = ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.mkv'];
+    return videoExtensions.any((ext) => url.toLowerCase().endsWith(ext));
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/utils/colors.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
@@ -148,13 +149,49 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
           mainAxisSpacing: 10,
         ),
         itemBuilder: (BuildContext context, int index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.file(
-              File(provider.selectedImages[index].path),
-              fit: BoxFit.cover,
-            ),
-          );
+          final fileType = provider.getFileType(provider.selectedImages[index].path);
+          if (fileType == 'image') {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Image.file(
+                File(provider.selectedImages[index].path),
+                fit: BoxFit.cover,
+              ),
+            );
+          } else if (fileType == 'video') {
+            return FutureBuilder<Uint8List?>(
+              future: provider.generateThumbnail(provider.selectedImages[index].path),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator(strokeWidth: 2));
+                } else if (snapshot.hasData && snapshot.data != null) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image.memory(
+                          snapshot.data!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        child: Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return Center(child: Text('Failed to load thumbnail'));
+                }
+              },
+            );
+          } else {
+            return Center(child: Text('Unsupported file'));
+          }
         },
       ),
     );
@@ -170,7 +207,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
             label: 'Next',
             onPressed: () {
               showLoadingModal();
-              provider.uploadImages(context);
+              provider.uploadStories(context);
             },
             textColor: Colors.white,
             gradientColors: [AppColors.primaryBlack, AppColors.primaryRed],
