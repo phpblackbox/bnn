@@ -27,6 +27,7 @@ class UserProfileProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get following => _following;
 
   Future<void> getCountsOfProfileInfo(String userId) async {
+    loading = true;
     userInfo = await _profileService.getUserProfileById(userId);
     countFollowers = await _profileService.getCountFollowers(userId);
     countFollowing = await _profileService.getCountFollowing(userId);

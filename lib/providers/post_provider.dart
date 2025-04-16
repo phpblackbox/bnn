@@ -18,6 +18,8 @@ class PostProvider extends ChangeNotifier {
   List<dynamic>? comments = [];
   bool _loading = false;
   String? errorMessage;
+  String? _currentContext; // Track current context (home, profile, etc.)
+  String? get currentContext => _currentContext;
 
   bool get loading => _loading;
 
@@ -26,7 +28,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _loadingMore = false;
+  bool _loadingMore = true;
   bool get loadingMore => _loadingMore;
 
   set loadingMore(bool value) {
@@ -37,6 +39,16 @@ class PostProvider extends ChangeNotifier {
   int offset = 0;
   final int _limit = 5;
 
+  // Add reset method to clear state
+  void reset() {
+    posts = [];
+    comments = [];
+    offset = 0;
+    _loading = false;
+    _loadingMore = true;
+    notifyListeners();
+  }
+
   Future<Map<String, dynamic>> getPostInfo(int postId) async {
     final post = await postService.getPostById(postId);
     return post;
@@ -44,7 +56,18 @@ class PostProvider extends ChangeNotifier {
 
   Future<void> loadPosts(
       {String? userId, bool? bookmark, String? currentUserId}) async {
+    // Reset if context changed
+    String newContext = userId != null
+        ? 'profile_$userId'
+        : (bookmark == true ? 'bookmarks' : 'home');
+    if (_currentContext != newContext) {
+      reset();
+      _currentContext = newContext;
+    }
+
     errorMessage = null;
+    loadingMore = true;
+
     try {
       List<dynamic> newItem = await postService.getPosts(
           offset: offset,
@@ -52,6 +75,15 @@ class PostProvider extends ChangeNotifier {
           userId: userId,
           bookmark: bookmark,
           currentUserId: currentUserId);
+
+      if (posts == null) {
+        posts = [];
+      }
+
+      // Clear existing posts if this is a new context
+      if (offset == 0) {
+        posts!.clear();
+      }
 
       for (var element in newItem) {
         final existingPostIndex =
@@ -74,11 +106,14 @@ class PostProvider extends ChangeNotifier {
       }
 
       loading = false;
+      loadingMore = false;
     } catch (e) {
       errorMessage = e.toString();
       loading = false;
+      loadingMore = false;
     } finally {
       loading = false;
+      loadingMore = false;
     }
   }
 

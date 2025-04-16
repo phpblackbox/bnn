@@ -14,16 +14,25 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<dynamic> data = Constants.fakeNotifications;
+  List<dynamic> _data = Constants.fakeNotifications;
+  List<dynamic> get data => _data;
 
   Future<void> getMyNotifications() async {
     loading = true;
-    final meId = _authService.getCurrentUser()?.id;
-    data = await _notificationService.getNotificationsByUserId(meId!);
-    loading = false;
+    try {
+      final meId = _authService.getCurrentUser()?.id;
+      if (meId != null) {
+        _data = await _notificationService.getNotificationsByUserId(meId);
+        notifyListeners();
+      }
+    } finally {
+      loading = false;
+    }
   }
 
   Future<void> readNotificaiton(int noificationId) async {
     await _notificationService.updateNotification(noificationId);
+    // Optionally refresh notifications after marking as read
+    await getMyNotifications();
   }
 }

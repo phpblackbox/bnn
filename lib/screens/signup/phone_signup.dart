@@ -21,36 +21,15 @@ class _PhoneSignUp extends State<PhoneSignUp>
     with SingleTickerProviderStateMixin {
   final supabase = Supabase.instance.client;
 
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedCountryCode;
+  String? _selectedCountryPhoneCode;
   bool isLoading = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
-
-    _slideAnimation = Tween<Offset>(begin: Offset(0, 0.5), end: Offset(0, 0))
-        .animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    ));
-
-    _controller.forward();
   }
 
   bool get isButtonEnabled {
@@ -63,10 +42,50 @@ class _PhoneSignUp extends State<PhoneSignUp>
   }
 
   String get fullPhoneNumber {
-    if (_selectedCountryCode != null && _phoneController.text.isNotEmpty) {
-      return '+${_selectedCountryCode!}${_phoneController.text}';
+    if (_selectedCountryPhoneCode != null && _phoneController.text.isNotEmpty) {
+      String cleanPhone =
+          _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
+      return '+${_selectedCountryPhoneCode!}$cleanPhone';
     }
     return '';
+  }
+
+  Future<void> _handlePhoneVerification() async {
+    if (!isButtonEnabled) return;
+
+    setState(() {
+      isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.verifyPhone(fullPhoneNumber);
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhoneOTPVerification(
+              phone: fullPhoneNumber,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+      if (mounted) {
+        CustomToast.showToastDangerBottom(context, _errorMessage!);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -88,130 +107,109 @@ class _PhoneSignUp extends State<PhoneSignUp>
         body: Container(
           color: Colors.white,
           padding: const EdgeInsets.all(16.0),
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(100, 40),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                        ),
-                        onPressed: () {
-                          showCountryPicker(
-                            context: context,
-                            favorite: <String>['US'],
-                            showPhoneCode: true,
-                            onSelect: (Country country) {
-                              setState(() {
-                                _selectedCountryCode = country.countryCode;
-                              });
-                            },
-                            moveAlongWithKeyboard: false,
-                            countryListTheme: CountryListThemeData(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(40.0),
-                                topRight: Radius.circular(40.0),
-                              ),
-                              inputDecoration: InputDecoration(
-                                labelText: 'Search',
-                                hintText: 'Start typing to search',
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: const Color(0xFF8C98A8)
-                                        .withOpacity(0.2),
-                                  ),
-                                ),
-                              ),
-                              searchTextStyle: TextStyle(
-                                color: Colors.blue,
-                                fontSize: 12,
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(100, 40),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    ),
+                    onPressed: () {
+                      showCountryPicker(
+                        context: context,
+                        favorite: <String>['US'],
+                        showPhoneCode: true,
+                        onSelect: (Country country) {
+                          setState(() {
+                            _selectedCountryCode = country.countryCode;
+                            _selectedCountryPhoneCode = country.phoneCode;
+                            _errorMessage = null;
+                          });
+                        },
+                        moveAlongWithKeyboard: false,
+                        countryListTheme: CountryListThemeData(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(40.0),
+                            topRight: Radius.circular(40.0),
+                          ),
+                          inputDecoration: InputDecoration(
+                            labelText: 'Search',
+                            hintText: 'Start typing to search',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: const Color(0xFF8C98A8).withOpacity(0.2),
                               ),
                             ),
-                          );
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_selectedCountryCode != null)
-                              SizedBox(
-                                width: 24.0,
-                                height: 24.0,
-                                child: CountryFlag.fromCountryCode(
-                                    _selectedCountryCode!),
-                              ),
-                            SizedBox(width: 8.0),
-                          ],
+                          ),
+                          searchTextStyle: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 8.0),
-                      Expanded(
-                        child: CustomInputField(
-                          icon: Icons.phone,
-                          placeholder: 'Phone Number',
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          onChanged: (value) {
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                    ],
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_selectedCountryCode != null)
+                          SizedBox(
+                            width: 18.0,
+                            height: 18.0,
+                            child: CountryFlag.fromCountryCode(
+                                _selectedCountryCode!),
+                          ),
+                        if (_selectedCountryPhoneCode != null)
+                          Text('  +$_selectedCountryPhoneCode '),
+                        SizedBox(width: 8.0),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                      "When you tap Continue, BNN will send a verification code. Message and data rates may apply. The verified phone number can be used to login. Learn what happens when your number changes"),
-                  Spacer(),
-                  ButtonGradientMain(
-                    label: 'Continue',
-                    onPressed: isLoading
-                        ? () {}
-                        : () async {
-                            if (isButtonEnabled) {
-                              setState(() {
-                                isLoading = true;
-                              });
-                              try {
-                                final authProvider = Provider.of<AuthProvider>(
-                                    context,
-                                    listen: false);
-                                await authProvider.verifyPhone(fullPhoneNumber);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PhoneOTPVerification(
-                                      phone: fullPhoneNumber,
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                CustomToast.showToastDangerBottom(
-                                    context, e.toString());
-                              } finally {
-                                setState(() {
-                                  isLoading = false;
-                                });
-                              }
-                            }
-                          },
-                    textColor: Colors.white,
-                    gradientColors: isButtonEnabled
-                        ? [AppColors.primaryBlack, AppColors.primaryRed]
-                        : [
-                            AppColors.primaryRed.withOpacity(0.5),
-                            AppColors.primaryBlack.withOpacity(0.5)
-                          ],
+                  SizedBox(width: 8.0),
+                  Expanded(
+                    child: CustomInputField(
+                      icon: Icons.phone,
+                      placeholder: 'Phone Number',
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ],
               ),
-            ),
+              SizedBox(height: 10),
+              Text(
+                  "When you tap Continue, BNN will send a verification code. Message and data rates may apply. The verified phone number can be used to login. Learn what happens when your number changes"),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              Spacer(),
+              ButtonGradientMain(
+                label: isLoading ? 'Sending Code...' : 'Continue',
+                onPressed: isLoading ? () {} : () => _handlePhoneVerification(),
+                textColor: Colors.white,
+                gradientColors: isButtonEnabled && !isLoading
+                    ? [AppColors.primaryBlack, AppColors.primaryRed]
+                    : [
+                        AppColors.primaryRed.withOpacity(0.5),
+                        AppColors.primaryBlack.withOpacity(0.5)
+                      ],
+              ),
+            ],
           ),
         ),
       ),

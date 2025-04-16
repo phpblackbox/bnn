@@ -100,9 +100,9 @@ class StoryService {
   }
 
   Future<Map<String, dynamic>> createStoryImage(
-      String userId, List<String> imgUrls) async {
+      String userId, List<String> mediaUrls) async {
     final newStory = await _supabase.from('stories').upsert(
-        {'author_id': userId, 'img_urls': imgUrls, 'type': 'image'}).select();
+        {'author_id': userId, 'media_urls': mediaUrls}).select();
 
     return newStory[0];
   }
@@ -115,9 +115,9 @@ class StoryService {
     return;
   }
 
-  Future<String> uploadImage(String userId, String imagePath) async {
+  Future<String> uploadStoryItem(String userId, String imagePath, String type) async {
     String randomNumStr = Constants().generateRandomNumberString(8);
-    final filename = '${userId}_$randomNumStr.png';
+    final filename = '${userId}_$randomNumStr.$type';
     final fileBytes = await File(imagePath).readAsBytes();
 
     await _supabase.storage.from('story').uploadBinary(

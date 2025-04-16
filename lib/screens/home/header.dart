@@ -1,7 +1,10 @@
-import 'package:bnn/screens/livestream/livestream_dash.dart';
 import 'package:bnn/screens/home/notifications.dart';
+import 'package:bnn/screens/live/liveDash.dart';
 import 'package:bnn/screens/profile/suggested.dart';
+import 'package:bnn/screens/reel/reel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:bnn/providers/notification_provider.dart';
 
 class Header extends StatefulWidget {
   const Header({super.key});
@@ -11,6 +14,39 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
+  late NotificationProvider _notificationProvider;
+  bool _hasNotifications = false;
+  bool _isCheckingNotifications = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _notificationProvider =
+            Provider.of<NotificationProvider>(context, listen: false);
+        _checkNotifications();
+      }
+    });
+  }
+
+  Future<void> _checkNotifications() async {
+    if (!mounted || _isCheckingNotifications) return;
+
+    _isCheckingNotifications = true;
+
+    try {
+      await _notificationProvider.getMyNotifications();
+      if (mounted) {
+        setState(() {
+          _hasNotifications = _notificationProvider.data.isNotEmpty;
+        });
+      }
+    } finally {
+      _isCheckingNotifications = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -24,12 +60,10 @@ class _HeaderState extends State<Header> {
             ),
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => LivestreamDash()));
+                InkWell(
+                  onTap: () async {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LiveDash()));
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -61,20 +95,25 @@ class _HeaderState extends State<Header> {
                 ),
                 SizedBox(width: 10),
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => Notifications()));
+                    if (result == true && mounted) {
+                      await _checkNotifications();
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Image.asset(
-                      'assets/images/icons/notification_plus.png',
-                      width: 20.0,
-                      height: 20.0,
+                      _hasNotifications
+                          ? 'assets/images/icons/notification_plus.png'
+                          : 'assets/images/icons/notification.png',
+                      width: _hasNotifications ? 20.0 : 17,
+                      height: _hasNotifications ? 20.0 : 17,
                     ),
                   ),
                 ),

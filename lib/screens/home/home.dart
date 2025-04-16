@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:bnn/providers/auth_provider.dart';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/screens/story/story_slider.dart';
-import 'package:bnn/widgets/sub/feed_or_reels.dart';
 import 'package:bnn/screens/home/header.dart';
 import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
+import 'package:bnn/widgets/sub/feed_title.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,14 +20,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _feedorReels = 0; // 0: feed, 1; reels
-  void _onFeedOrReel(int index) {
-    setState(() {
-      _feedorReels = index;
+  var currentTime;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize posts when home screen is mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      postProvider.reset(); // Reset any existing post state
+      postProvider.loadPosts(); // Load home posts
     });
   }
 
-  var currentTime;
+  @override
+  void dispose() {
+    // Clean up when leaving home screen
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.reset();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,14 +71,15 @@ class _HomeState extends State<Home> {
         body: Padding(
           padding: EdgeInsets.only(left: 16, top: 0, right: 16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: EdgeInsets.only(top: 32, bottom: 0),
                 child: Header(),
               ),
-              FeedOrReel(index: _feedorReels, onPressed: _onFeedOrReel),
+              FeedTitle(),
               StorySlider(),
-              if (_feedorReels == 0) Posts(),
+              Posts(),
             ],
           ),
         ),

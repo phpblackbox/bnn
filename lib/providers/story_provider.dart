@@ -1,11 +1,15 @@
-import 'package:bnn/screens/home/create_story.dart';
+import 'package:bnn/screens/home/home.dart';
+import 'package:bnn/screens/story/create_story.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/reel_service.dart';
 import 'package:bnn/widgets/toast.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get_thumbnail_video/index.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/story_service.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:get_thumbnail_video/video_thumbnail.dart';
 
 class StoryProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -14,11 +18,11 @@ class StoryProvider with ChangeNotifier {
   List<Map<String, dynamic>> stories = [];
   Map<String, dynamic> story = {};
   final ImagePicker _picker = ImagePicker();
-  List<XFile> _selectedImages = [];
+  List<XFile> _selectedMediaList = [];
 
   bool _loading = false;
   bool get loading => _loading;
-  List<XFile> get selectedImages => _selectedImages;
+  List<XFile> get selectedImages => _selectedMediaList;
 
   set loading(bool value) {
     _loading = value;
@@ -57,11 +61,11 @@ class StoryProvider with ChangeNotifier {
     }
   }
 
-  Future<void> pickImages() async {
+  Future<void> pickMedia() async {
     try {
-      final List<XFile> pickedFiles = await _picker.pickMultiImage();
+      final List<XFile> pickedFiles = await _picker.pickMultipleMedia();
       if (pickedFiles.isNotEmpty) {
-        _selectedImages = pickedFiles;
+        _selectedMediaList = pickedFiles;
         notifyListeners();
       }
     } catch (e) {
@@ -74,7 +78,7 @@ class StoryProvider with ChangeNotifier {
       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
 
       if (image != null) {
-        _selectedImages.add(image);
+        _selectedMediaList.add(image);
         notifyListeners();
       }
     } catch (e) {
@@ -83,52 +87,109 @@ class StoryProvider with ChangeNotifier {
     }
   }
 
-  Future<void> uploadImages(BuildContext context) async {
-    if (_selectedImages.isNotEmpty) {
+  Future<void> uploadStories(BuildContext context) async {
+    if (_selectedMediaList.isNotEmpty) {
       loading = true;
 
-      List<String> imgUrls = [];
+      List<String> mediaUrls = [];
       try {
         final userId = _authService.getCurrentUser()?.id;
 
-        for (var image in _selectedImages) {
-          String publicUrl =
-              await _storyService.uploadImage(userId!, image.path);
-          imgUrls.add(publicUrl);
+        for (var file in _selectedMediaList) {
+          String publicUrl;
+          if (getFileType(file.path) == 'image') {
+            publicUrl = await _storyService.uploadStoryItem(userId!, file.path, 'png');
+          } else if (getFileType(file.path) == 'video') {
+            publicUrl = await _storyService.uploadStoryItem(userId!, file.path, 'mp4');
+          } else {
+            continue; // skip unsupported files
+          }
+          mediaUrls.add(publicUrl);
         }
 
         Map<String, dynamic> newStory =
-            await _storyService.createStoryImage(userId!, imgUrls);
+            await _storyService.createStoryImage(userId!, mediaUrls);
 
         loading = false;
         Navigator.pop(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CreateStory(storyId: newStory["id"])));
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => CreateStory(storyId: newStory["id"])));
+        Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) => Home()));
       } catch (e) {
+        loading = false;
+        Navigator.pop(context);
         CustomToast.showToastDangerTop(
             context, 'Error uploading image: ${e.toString()}');
       }
     }
   }
 
-  Future<void> uploadVideo(BuildContext context) async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.video);
+  Future<File?> pickVideo() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? videoFile = await picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
 
-    if (result != null) {
-      String filePath = result.files.single.path!;
-
-      loading = true;
-      String videoUrl = await _reelService.uploadVideo(filePath);
-
-      final userId = _authService.getCurrentUser()?.id;
-      await _reelService.createReel(userId!, videoUrl);
-
-      loading = false;
-      Navigator.pop(context);
-      Navigator.pushReplacementNamed(context, '/home');
+      if (videoFile != null) {
+        return File(videoFile.path);
+      }
+      return null;
+    } catch (e) {
+      print('Error picking video: $e');
+      return null;
     }
+  }
+
+  Future<void> uploadReel(
+      BuildContext context, Function showLoadingModal) async {
+    File? videoFile = await pickVideo();
+
+    if (videoFile != null) {
+      showLoadingModal();
+      loading = true;
+
+      try {
+        String videoUrl = await _reelService.uploadVideo(videoFile.path);
+        final userId = _authService.getCurrentUser()?.id;
+        await _reelService.createReel(userId!, videoUrl);
+
+        loading = false;
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/home');
+      } catch (e) {
+        loading = false;
+        Navigator.pop(context);
+        CustomToast.showToastDangerTop(
+            context, 'Error uploading video: ${e.toString()}');
+      }
+    }
+  }
+
+  String getFileType(String path) {
+    final fileExtension = path.split('.').last.toLowerCase();
+    final imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'];
+    final videoExtensions = ['mp4', 'mov', 'avi', 'flv', 'wmv', 'mkv'];
+
+    if (imageExtensions.contains(fileExtension)) {
+      return 'image';
+    } else if (videoExtensions.contains(fileExtension)) {
+      return 'video';
+    }
+    return 'unknown';
+  }
+
+  Future<Uint8List?> generateThumbnail(String videoPath) async {
+    final uint8list = await VideoThumbnail.thumbnailData(
+      video: videoPath,
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 128,
+      quality: 75,
+    );
+    return uint8list;
   }
 }

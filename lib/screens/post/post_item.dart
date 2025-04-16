@@ -6,11 +6,10 @@ import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/home/comments.dart';
-import 'package:bnn/widgets/FullScreenVideo.dart';
 import 'package:bnn/widgets/buttons/button-post-action.dart';
 import 'package:bnn/widgets/toast.dart';
-import 'package:bnn/widgets/FullScreenImage.dart';
 import 'package:bnn/widgets/post/share_modal.dart';
+import 'package:bnn/widgets/post/PostMediaViewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
@@ -37,6 +36,7 @@ class PostItem extends StatefulWidget {
 class _PostItemState extends State<PostItem> {
   bool isFriend = false;
   dynamic friendInfo;
+  bool _isCheckingFriendStatus = false;
 
   @override
   void initState() {
@@ -45,12 +45,23 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future<void> _checkFriendStatus() async {
-    final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
-    friendInfo = await profileProvider.getFriendInfo(widget.post['author_id']!);
-    setState(() {
-      isFriend = friendInfo?["id"] != null;
-    });
+    if (!mounted || _isCheckingFriendStatus) return;
+
+    _isCheckingFriendStatus = true;
+
+    try {
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      friendInfo =
+          await profileProvider.getFriendInfo(widget.post['author_id']!);
+      if (mounted) {
+        setState(() {
+          isFriend = friendInfo?["id"] != null;
+        });
+      }
+    } finally {
+      _isCheckingFriendStatus = false;
+    }
   }
 
   Future<void> _showFriendDetail(BuildContext context) async {
@@ -77,7 +88,7 @@ class _PostItemState extends State<PostItem> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.post['name']!,
+                            widget.post['username']!,
                             style: TextStyle(
                                 fontFamily: "Nunito",
                                 fontSize: 12,
@@ -205,8 +216,10 @@ class _PostItemState extends State<PostItem> {
       });
     } else {
       await profileProvider.followUserPost(widget.post['author_id']!, context);
+      friendInfo =
+          await profileProvider.getFriendInfo(widget.post['author_id']!);
       setState(() {
-        isFriend = true;
+        isFriend = friendInfo?["id"] != null;
       });
     }
   }
@@ -364,21 +377,14 @@ class _PostItemState extends State<PostItem> {
                       postProvider.getFileType(widget.post['img_urls'][index2]);
                   return GestureDetector(
                     onTap: () {
-                      if (fileType == "image") {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullScreenImage(
-                                imageUrl: widget.post['img_urls'][index2]!),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PostMediaViewer(
+                            mediaUrls: widget.post['img_urls'],
+                            initialIndex: index2,
                           ),
-                        );
-                      } else if (fileType == "video") {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullScreenVideo(
-                                videoUrl: widget.post['img_urls'][index2]!),
-                          ),
-                        );
-                      }
+                        ),
+                      );
                     },
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 5.0),

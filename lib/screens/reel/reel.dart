@@ -229,7 +229,7 @@ class _ReelScreenState extends State<ReelScreen>
             top: Platform.isIOS ? 40 : 12,
             right: 0,
             child: IconButton(
-              icon: const Icon(Icons.close, size: 20, color: Colors.black),
+              icon: const Icon(Icons.close, size: 20, color: Colors.white),
               onPressed: () {
                 Navigator.pop(context);
               },

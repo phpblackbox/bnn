@@ -346,13 +346,19 @@ class _FriendsState extends State<Friends> {
                     searchQuery = value;
                   });
                   if (value.isNotEmpty) {
-                    final temp = data!
-                        .where((item) =>
-                            (item['username'] as String?)
-                                ?.toLowerCase()
-                                .contains(value.toLowerCase()) ??
-                            false)
-                        .toList();
+                    final temp = data!.where((item) {
+                      final username =
+                          (item['username'] as String?)?.toLowerCase() ?? '';
+                      final firstName =
+                          (item['first_name'] as String?)?.toLowerCase() ?? '';
+                      final lastName =
+                          (item['last_name'] as String?)?.toLowerCase() ?? '';
+                      final searchValue = value.toLowerCase();
+
+                      return username.contains(searchValue) ||
+                          firstName.contains(searchValue) ||
+                          lastName.contains(searchValue);
+                    }).toList();
                     filltered = temp;
                   }
                 },
@@ -490,15 +496,27 @@ class _FriendsState extends State<Friends> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    item['username'],
-                                    style: TextStyle(
-                                      color: Color(0xFF4D4C4A),
-                                      fontSize: 12,
-                                      fontFamily: 'Nunito',
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.50,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '${item['username']}',
+                                        style: TextStyle(
+                                          color: Color(0xFF4D4C4A),
+                                          fontSize: 12,
+                                          fontFamily: 'Nunito',
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        '${item['first_name']} ${item['last_name']}',
+                                        style: TextStyle(
+                                          color: Color(0xFF8E8E8E),
+                                          fontFamily: "Poppins",
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Text(
                                     item['mutal'] ?? "",

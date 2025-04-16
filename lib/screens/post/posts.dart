@@ -18,17 +18,41 @@ class Posts extends StatefulWidget {
 class _PostsState extends State<Posts> {
   final ScrollController _scrollController =
       ScrollController(initialScrollOffset: Platform.isIOS ? 24 : 48);
+  bool _isInitialized = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    initialData(widget.userId, widget.bookmark);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.addListener(_scrollListener);
+      if (!_isInitialized) {
+        initialData(widget.userId, widget.bookmark);
+      }
     });
   }
 
+  @override
+  void didUpdateWidget(Posts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.bookmark != widget.bookmark) {
+      _isInitialized = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        initialData(widget.userId, widget.bookmark);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   _scrollListener() {
+    if (!mounted || _isLoading) return;
+
     final postProvider = Provider.of<PostProvider>(context, listen: false);
     if (_scrollController.hasClients && _scrollController.position != null) {
       if (_scrollController.offset >=
@@ -40,42 +64,74 @@ class _PostsState extends State<Posts> {
               Provider.of<AuthProvider>(context, listen: false);
 
           final currentUserId = authProvider.user?.id;
-          postProvider.loadingMore = true;
           if (currentUserId != null) {
+            setState(() {
+              _isLoading = true;
+            });
             await postProvider.loadPosts(
                 userId: widget.userId,
                 bookmark: widget.bookmark,
                 currentUserId: currentUserId);
+            setState(() {
+              _isLoading = false;
+            });
           }
-          postProvider.loadingMore = false;
+        });
+      }
+    }
+  }
+
+  Future<void> initialData(String? userId, bool? bookmark) async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      final currentUserId = authProvider.user?.id;
+      if (currentUserId != null) {
+        await postProvider.loadPosts(
+            userId: userId, bookmark: bookmark, currentUserId: currentUserId);
+        _isInitialized = true;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
         });
       }
     }
   }
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> initialData(String? userId, bool? bookmark) async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final postProvider = Provider.of<PostProvider>(context, listen: false);
-      final currentUserId = authProvider.user?.id;
-      if (currentUserId != null) {
-        postProvider.offset = 0;
-        postProvider.posts = [];
-        postProvider.loadPosts(
-            userId: userId, bookmark: bookmark, currentUserId: currentUserId);
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
+
+    if (_isLoading && postProvider.posts!.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (!_isLoading && postProvider.posts!.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Text(
+            'No items yet',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: ListView.builder(
         controller: _scrollController,

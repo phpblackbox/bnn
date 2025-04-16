@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/utils/colors.dart';
 import 'package:bnn/widgets/buttons/button-gradient-main.dart';
@@ -36,12 +37,23 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'please wait while we process your post',
+                    'Uploading your story...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SF Pro Text',
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Please wait while we process your content',
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'SF Pro Text',
                       decoration: TextDecoration.none,
                       fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
                     ),
                   ),
                 ],
@@ -80,7 +92,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
               padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
-                  _buildImageSelectionRow(context, provider),
+                  _buildButtons(context, provider),
                   provider.selectedImages.isNotEmpty
                       ? Expanded(
                           child: _buildImageGrid(provider),
@@ -97,17 +109,16 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
     );
   }
 
-  Widget _buildImageSelectionRow(BuildContext context, StoryProvider provider) {
+  Widget _buildButtons(BuildContext context, StoryProvider provider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildImageSelectionButton("assets/images/post/camera0.png",
             () => provider.cameraImage(context)),
         _buildImageSelectionButton(
-            "assets/images/post/gallery.png", () => provider.pickImages()),
+            "assets/images/post/gallery.png", () => provider.pickMedia()),
         _buildImageSelectionButton("assets/images/post/video.png", () async {
-          showLoadingModal();
-          await provider.uploadVideo(context);
+          await provider.uploadReel(context, showLoadingModal);
         }),
       ],
     );
@@ -138,13 +149,49 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
           mainAxisSpacing: 10,
         ),
         itemBuilder: (BuildContext context, int index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.file(
-              File(provider.selectedImages[index].path),
-              fit: BoxFit.cover,
-            ),
-          );
+          final fileType = provider.getFileType(provider.selectedImages[index].path);
+          if (fileType == 'image') {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Image.file(
+                File(provider.selectedImages[index].path),
+                fit: BoxFit.cover,
+              ),
+            );
+          } else if (fileType == 'video') {
+            return FutureBuilder<Uint8List?>(
+              future: provider.generateThumbnail(provider.selectedImages[index].path),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator(strokeWidth: 2));
+                } else if (snapshot.hasData && snapshot.data != null) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image.memory(
+                          snapshot.data!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        child: Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return Center(child: Text('Failed to load thumbnail'));
+                }
+              },
+            );
+          } else {
+            return Center(child: Text('Unsupported file'));
+          }
         },
       ),
     );
@@ -160,7 +207,7 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
             label: 'Next',
             onPressed: () {
               showLoadingModal();
-              provider.uploadImages(context);
+              provider.uploadStories(context);
             },
             textColor: Colors.white,
             gradientColors: [AppColors.primaryBlack, AppColors.primaryRed],
