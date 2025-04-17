@@ -273,10 +273,17 @@ class _StoryViewState extends State<StoryView>
                                           final box = context.findRenderObject() as RenderBox;
                                           final localPosition = box.globalToLocal(details.globalPosition);
                                           final width = box.size.width;
+                                          final height = box.size.height;
+                                          final leftThreshold = width * 0.25;
+                                          final rightThreshold = width * 0.75;
+                                          final topThreshold = height * 0.25;
+                                          final bottomThreshold = height * 0.75;
                                           final mediaCount = storyViewProvider.currentStory["media_urls"].length;
                                           final currentIndex = storyViewProvider.currentImageIndex;
 
-                                          if (localPosition.dx < width / 2) {
+                                          if (localPosition.dx < leftThreshold && 
+                                              localPosition.dy > topThreshold && 
+                                              localPosition.dy < bottomThreshold) {
                                             // Tap left: previous media or previous story
                                             if (currentIndex > 0) {
                                               storyViewProvider.currentImageIndex = currentIndex - 1;
@@ -303,7 +310,9 @@ class _StoryViewState extends State<StoryView>
                                                 });
                                               }
                                             }
-                                          } else {
+                                          } else if (localPosition.dx > rightThreshold && 
+                                                   localPosition.dy > topThreshold && 
+                                                   localPosition.dy < bottomThreshold) {
                                             // Tap right: next media or next story
                                             if (currentIndex < mediaCount - 1) {
                                               storyViewProvider.currentImageIndex = currentIndex + 1;
@@ -468,15 +477,22 @@ class _StoryViewState extends State<StoryView>
                           ),
                           Spacer(),
                           GestureDetector(
-                            onTap: () {
+                            onTap: () async {
+                              // Pause video and stop audio before closing
+                              if (storyViewProvider.controller != null &&
+                                  storyViewProvider.controller!.value.isInitialized &&
+                                  storyViewProvider.controller!.value.isPlaying) {
+                                await storyViewProvider.controller!.pause();
+                              }
                               Navigator.pop(context);
                             },
                             child: ImageIcon(
                               AssetImage('assets/images/icons/close.png'),
                               color: Colors.white,
-                              size: 16,
+                              size: 20,
                             ),
                           ),
+                          SizedBox(width: 8),
                         ],
                       ),
                     ],
@@ -575,7 +591,7 @@ class _StoryViewState extends State<StoryView>
                         },
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/images/icons/back.png',
+                            'assets/images/icons/send.png',
                             color: Colors.black,
                             width: 20,
                             height: 20,
