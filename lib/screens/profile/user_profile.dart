@@ -1,16 +1,13 @@
 import 'dart:io';
+import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/providers/user_profile_provider.dart';
 import 'package:bnn/screens/chat/room.dart';
 import 'package:bnn/screens/post/posts.dart';
-import 'package:bnn/screens/profile/user_follower.dart';
-import 'package:bnn/screens/profile/user_following.dart';
 import 'package:bnn/screens/profile/user_profile_info.dart';
-import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_chat_core/flutter_supabase_chat_core.dart';
 import 'package:provider/provider.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,22 +29,44 @@ class _UserProfileState extends State<UserProfile> {
   void initState() {
     _isProfileLoaded = false;
     super.initState();
-    _loadProfileData();
-  }
-
-  Future<void> _loadProfileData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      postProvider.reset();
+      postProvider.loading = true;
+      await postProvider.loadPosts(userId: widget.userId);
+
       final userProfileProvider =
           Provider.of<UserProfileProvider>(context, listen: false);
       userProfileProvider.loading = true;
       await userProfileProvider.getCountsOfProfileInfo(widget.userId);
       await userProfileProvider.increaseUserView(widget.userId);
+      
       if (mounted) {
         setState(() {
           _isProfileLoaded = true;
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(UserProfile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) {
+      setState(() {
+        _isProfileLoaded = false;
+      });
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      postProvider.reset();
+      postProvider.loading = true;
+      postProvider.loadPosts(userId: widget.userId).then((_) {
+        if (mounted) {
+          setState(() {
+            _isProfileLoaded = true;
+          });
+        }
+      });
+    }
   }
 
   void message() async {
@@ -93,17 +112,32 @@ class _UserProfileState extends State<UserProfile> {
       );
     }
 
+    final postProvider = Provider.of<PostProvider>(context);
+
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          UserProfileInfo(
+          Column(
+            children: [
+              UserProfileInfo(
             key: ValueKey('profile_${widget.userId}'),
             onMessageTap: message,
           ),
-          Posts(
+          postProvider.loading ? Center(child: CircularProgressIndicator()) : Posts(
             key: ValueKey('posts_${widget.userId}'),
-            userId: widget.userId,
-          )
+                userId: widget.userId,
+              ),
+            ],
+          ),
+          Positioned(
+            top: Platform.isIOS ? 40 : 12,
+            child: IconButton(
+              icon: Icon(Icons.close, color: Color(0xFF4D4C4A)),
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/home');
+              },
+            ),
+          ),
         ],
       ),
     );

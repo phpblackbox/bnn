@@ -58,15 +58,7 @@ class UserProfileInfo extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: Platform.isIOS ? 40 : 12,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: Color(0xFF4D4C4A)),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
+                
                 Positioned(
                   bottom: 0,
                   right: 10,

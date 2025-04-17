@@ -28,18 +28,11 @@ class _HomeState extends State<Home> {
     // Initialize posts when home screen is mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final postProvider = Provider.of<PostProvider>(context, listen: false);
-      postProvider.reset(); // Reset any existing post state
-      postProvider.loadPosts(); // Load home posts
+      postProvider.reset(); 
+      postProvider.loadPosts();
     });
   }
 
-  @override
-  void dispose() {
-    // Clean up when leaving home screen
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    postProvider.reset();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +45,7 @@ class _HomeState extends State<Home> {
         Navigator.pushReplacementNamed(context, '/login');
       });
     }
+
 
     return WillPopScope(
       onWillPop: () {

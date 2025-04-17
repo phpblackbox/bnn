@@ -38,6 +38,7 @@ class _PostsState extends State<Posts> {
     if (oldWidget.userId != widget.userId ||
         oldWidget.bookmark != widget.bookmark) {
       _isInitialized = false;
+      _isLoading = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         initialData(widget.userId, widget.bookmark);
       });

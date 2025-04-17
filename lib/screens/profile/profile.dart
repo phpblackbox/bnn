@@ -50,6 +50,14 @@ class _ProfileState extends State<Profile> {
   }
 
   @override
+  void dispose() {
+    // Clean up when leaving home screen
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.reset();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     final meProfile = authProvider.profile!;
@@ -63,7 +71,7 @@ class _ProfileState extends State<Profile> {
     } else if (postProvider.currentContext != 'bookmarks' &&
         _userorbookmark == 1) {
       postProvider.reset();
-      postProvider.loadPosts(bookmark: true);
+      postProvider.loadPosts(bookmark: true, currentUserId: meProfile.id);
     }
 
     var currentTime;
