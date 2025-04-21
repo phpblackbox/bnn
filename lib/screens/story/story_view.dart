@@ -45,7 +45,6 @@ class _StoryViewState extends State<StoryView>
   late StoryViewProvider storyViewProvider;
   late PageController _storyPageController;
   late Map<int, PageController> _imagePageControllers;
-  Timer? _autoSlideTimer;
   bool _isTransitioning = false;
   double _dragDistance = 0;
   late AnimationController _slideController;
@@ -107,7 +106,7 @@ class _StoryViewState extends State<StoryView>
 
   void _onMsgFocusChange() async {
     if (_msgFocusNode.hasFocus) {
-      _stopAutoSlide();
+      _slideController.forward();
       final currentMediaUrl = storyViewProvider.currentStory?["media_urls"][storyViewProvider.currentImageIndex];
       if (currentMediaUrl != null && _isVideo(currentMediaUrl) && storyViewProvider.controller != null) {
         if (storyViewProvider.controller!.value.isPlaying) {
@@ -124,48 +123,10 @@ class _StoryViewState extends State<StoryView>
         setState(() {
           _isInitialContentLoaded = true;
         });
-        _startAutoSlide(storyViewProvider);
         _slideController.forward();
         print("INITIALIZE: Triggered slideController.forward()");
       }
     });
-  }
-
-  void _startAutoSlide(StoryViewProvider storyViewProvider) {
-    _autoSlideTimer = Timer.periodic(Duration(seconds: 10), (timer) {
-      if (!_imagePageControllers
-          .containsKey(storyViewProvider.currentStoryIndex)) return;
-
-      final currentController =
-          _imagePageControllers[storyViewProvider.currentStoryIndex];
-      if (!currentController!.hasClients) return;
-
-      final currentMediaUrl = storyViewProvider.currentStory["media_urls"][storyViewProvider.currentImageIndex];
-      if (_isVideo(currentMediaUrl)) {
-        // If current media is a video, do not auto-slide
-        return;
-      }
-
-      if (storyViewProvider.currentImageIndex <
-          storyViewProvider.currentStory["media_urls"].length - 1) {
-        storyViewProvider.currentImageIndex++;
-      } else {
-        storyViewProvider.currentImageIndex = 0;
-      }
-
-      if (currentController.hasClients) {
-        currentController.animateToPage(
-          storyViewProvider.currentImageIndex,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  void _stopAutoSlide() {
-    _autoSlideTimer?.cancel();
-    _autoSlideTimer = null;
   }
 
   void _handleSwipe() async {
@@ -189,7 +150,6 @@ class _StoryViewState extends State<StoryView>
       });
     }
     _isTransitioning = false;
-    _startAutoSlide(storyViewProvider);
   }
 
   void _handlePreviousSwipe() async {
@@ -213,7 +173,6 @@ class _StoryViewState extends State<StoryView>
       });
     }
     _isTransitioning = false;
-    _startAutoSlide(storyViewProvider);
   }
 
   @override
@@ -340,8 +299,6 @@ class _StoryViewState extends State<StoryView>
                                               }
                                             }
                                           }
-                                          _stopAutoSlide();
-                                          _startAutoSlide(storyViewProvider);
                                         },
                                         child: PageView.builder(
                                           controller: controller,
@@ -747,7 +704,6 @@ class _StoryViewState extends State<StoryView>
     for (var controller in _imagePageControllers.values) {
       controller.dispose();
     }
-    _stopAutoSlide();
     // Dispose video controller if it exists and is playing
     if (storyViewProvider.controller != null &&
         storyViewProvider.controller!.value.isInitialized) {

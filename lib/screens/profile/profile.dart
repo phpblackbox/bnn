@@ -64,7 +64,8 @@ class _ProfileState extends State<Profile> {
     final profileProvider = Provider.of<ProfileProvider>(context);
     final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-    if (postProvider.currentContext != 'profile_${meProfile.id}' &&
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (postProvider.currentContext != 'profile_${meProfile.id}' &&
         _userorbookmark == 0) {
       postProvider.reset();
       postProvider.loadPosts(userId: meProfile.id);
@@ -73,6 +74,8 @@ class _ProfileState extends State<Profile> {
       postProvider.reset();
       postProvider.loadPosts(bookmark: true, currentUserId: meProfile.id);
     }
+    });
+    
 
     var currentTime;
     return WillPopScope(
