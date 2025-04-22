@@ -433,6 +433,52 @@ class _StoryViewState extends State<StoryView>
                             ),
                           ),
                           Spacer(),
+                          if (storyViewProvider.currentStory['author_id'] == supabase.auth.currentUser!.id)
+                            GestureDetector(
+                              onTap: () async {
+                                // Show confirmation dialog
+                                final shouldDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Delete Story'),
+                                      content: Text('Are you sure you want to delete this story?'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(false);
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(true);
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (shouldDelete == true) {
+                                  try {
+                                    await storyViewProvider.deleteStory();
+                                    if (!mounted) return;
+                                    Navigator.pushReplacementNamed(context, '/home');
+                                  } catch (e) {
+                                    if (!mounted) return;
+                                    CustomToast.showToastDangerTop(context, 'Failed to delete story');
+                                  }
+                                }
+                              },
+                              child: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                iconSize: 30,
+                                onPressed: null, // onPressed is handled by GestureDetector
+                              ),
+                            ),
+                          SizedBox(width: 8),
                           GestureDetector(
                             onTap: () async {
                               // Pause video and stop audio before closing

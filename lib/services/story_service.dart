@@ -178,4 +178,13 @@ class StoryService {
         .single();
     return storyRecord['id'];
   }
+
+  Future<void> deleteStory(int storyId) async {
+    try {
+      await _supabase.from('stories').delete().eq('id', storyId);
+    } catch (e) {
+      print('Error deleting story: $e');
+      rethrow;
+    }
+  }
 }

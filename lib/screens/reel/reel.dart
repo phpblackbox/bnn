@@ -228,11 +228,58 @@ class _ReelScreenState extends State<ReelScreen>
           Positioned(
             top: Platform.isIOS ? 50 : 12,
             right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.close, size: 30, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+            child: Row(
+              children: [
+                if (reelProvider.currentReel != null && 
+                    reelProvider.currentReel!.authorId == reelProvider.currentUserId)
+                  IconButton(
+                    icon: const Icon(Icons.delete, size: 30, color: Colors.white),
+                    onPressed: () async {
+                      final shouldDelete = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Delete Reel'),
+                            content: Text('Are you sure you want to delete this reel?'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                              ),
+                              TextButton(
+                                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (shouldDelete == true) {
+                        try {
+                          await reelProvider.deleteReel();
+                          if (!mounted) return;
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } catch (e) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to delete reel')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 30, color: Colors.white),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
           ),
           if (reelProvider.currentReel != null)

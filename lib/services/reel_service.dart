@@ -322,4 +322,8 @@ class ReelService {
       print('Error deleting post: $e');
     }
   }
+
+  Future<void> deleteReel(int reelId) async {
+    await _supabase.from('reels').delete().eq('id', reelId);
+  }
 }

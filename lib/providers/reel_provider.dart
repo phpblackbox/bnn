@@ -3,6 +3,7 @@ import 'package:bnn/services/reel_service.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:video_player/video_player.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReelProvider extends ChangeNotifier {
   final ReelService reelService = ReelService();
@@ -313,6 +314,14 @@ class ReelProvider extends ChangeNotifier {
     if (currentReel == null) return;
     bool status = await reelService.toggleBookmarkReel(currentReel!);
     currentReel!.bookmarks += status ? 1 : -1;
+    notifyListeners();
+  }
+
+  String get currentUserId => Supabase.instance.client.auth.currentUser!.id;
+
+  Future<void> deleteReel() async {
+    if (currentReel == null) return;
+    await reelService.deleteReel(currentReel!.id);
     notifyListeners();
   }
 }

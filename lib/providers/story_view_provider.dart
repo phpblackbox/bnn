@@ -337,20 +337,50 @@ class StoryViewProvider extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    
+    if (controller != null) {
+      await controller!.dispose();
+      controller = null;
+    }
+
+    _nextStory = null;
+    _prevStory = null;
+    _isPreloadingNext = false;
+    _isPreloadingPrev = false;
+    _preloadNextAttempts = 0;
+    _preloadPrevAttempts = 0;
+    initializeVideoPlayerFuture = null;
+  }
+
+  Future<void> deleteStory() async {
+    if (currentStory == null) return;
+    
     try {
-      if (controller != null && controller!.value.isInitialized) {
-        await controller?.dispose();
+      await _storyService.deleteStory(currentStory['id']);
+      // Remove the current story from the stories list
+      stories.removeAt(currentStoryIndex);
+      
+      // If there are no more stories, set currentStory to null
+      if (stories.isEmpty) {
+        currentStory = null;
+      } else {
+        // Otherwise, move to the next story or previous story
+        if (currentStoryIndex >= stories.length) {
+          currentStoryIndex = stories.length - 1;
+        }
+        currentStory = stories[currentStoryIndex];
+        currentImageIndex = 0;
+        
+        // If first media is video, load it
+        if (currentStory['media_urls'].isNotEmpty && _isVideo(currentStory['media_urls'][0])) {
+          await loadVideo(currentStory['media_urls'][0]);
+        }
       }
+      
+      notifyListeners();
     } catch (e) {
       print("Error disposing controllers: $e");
     } finally {
-      controller = null;
-      _nextStory = null;
-      _prevStory = null;
-      _isPreloadingNext = false;
-      _isPreloadingPrev = false;
-      _preloadNextAttempts = 0;
-      _preloadPrevAttempts = 0;
       initializeVideoPlayerFuture = null;
     }
   }
