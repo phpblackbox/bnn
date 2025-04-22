@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
+import 'package:bnn/providers/story_provider.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get_thumbnail_video/index.dart';
@@ -57,6 +58,57 @@ class _CreatePostState extends State<CreatePost> {
       CustomToast.showToastDangerTop(
           context, 'No camera found. Please check your device settings.');
     }
+  }
+
+  void showLoadingModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Center(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFF30802)),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Uploading your reel...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SF Pro Text',
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Please wait while we process your content',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'SF Pro Text',
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> post(PostProvider postProvider) async {
@@ -124,6 +176,7 @@ class _CreatePostState extends State<CreatePost> {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     final meProfile = authProvider.profile!;
     final PostProvider postProvider = Provider.of<PostProvider>(context);
+    final StoryProvider storyProvider = Provider.of<StoryProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -169,47 +222,94 @@ class _CreatePostState extends State<CreatePost> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap:
-                        postProvider.loading ? null : () => post(postProvider),
-                    child: Container(
-                      decoration: ShapeDecoration(
-                        color: postProvider.loading
-                            ? Color(0xFFF30802).withOpacity(0.5)
-                            : Color(0xFFF30802),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(17),
-                        ),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (postProvider.loading)
-                            Container(
-                              width: 12,
-                              height: 12,
-                              margin: EdgeInsets.only(right: 8),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            ),
-                          Text(
-                            'Post',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Nunito',
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: -0.50,
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap:
+                        postProvider.loading ? null : () async => await storyProvider.uploadReel(context, showLoadingModal),
+                        child: Container(
+                          decoration: ShapeDecoration(
+                            color: postProvider.loading
+                                ? Color(0xFF4CAF50).withOpacity(0.5)
+                                : Color(0xFF4CAF50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(17),
                             ),
                           ),
-                        ],
+                          padding:
+                              EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (postProvider.loading)
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              Text(
+                                '9:16s',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontFamily: 'Nunito',
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: -0.50,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(width: 8),
+                      GestureDetector(
+                        onTap:
+                            postProvider.loading ? null : () => post(postProvider),
+                        child: Container(
+                          decoration: ShapeDecoration(
+                            color: postProvider.loading
+                                ? Color(0xFFF30802).withOpacity(0.5)
+                                : Color(0xFFF30802),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(17),
+                            ),
+                          ),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (postProvider.loading)
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              Text(
+                                'Post',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontFamily: 'Nunito',
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: -0.50,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -117,9 +117,6 @@ class _CreateStoryGalleryState extends State<CreateStoryGallery> {
             () => provider.cameraImage(context)),
         _buildImageSelectionButton(
             "assets/images/post/gallery.png", () => provider.pickMedia()),
-        _buildImageSelectionButton("assets/images/post/video.png", () async {
-          await provider.uploadReel(context, showLoadingModal);
-        }),
       ],
     );
   }

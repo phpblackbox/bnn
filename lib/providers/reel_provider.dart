@@ -1,9 +1,9 @@
 import 'package:bnn/models/reel_model.dart';
 import 'package:bnn/services/reel_service.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:video_player/video_player.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReelProvider extends ChangeNotifier {
   final ReelService reelService = ReelService();
