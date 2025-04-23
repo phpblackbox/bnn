@@ -230,17 +230,20 @@ class _ReelScreenState extends State<ReelScreen>
             right: 0,
             child: Row(
               children: [
-                if (reelProvider.currentReel != null && 
-                    reelProvider.currentReel!.authorId == reelProvider.currentUserId)
+                if (reelProvider.currentReel != null &&
+                    reelProvider.currentReel!.authorId ==
+                        reelProvider.currentUserId)
                   IconButton(
-                    icon: const Icon(Icons.delete, size: 30, color: Colors.white),
+                    icon:
+                        const Icon(Icons.delete, size: 30, color: Colors.white),
                     onPressed: () async {
                       final shouldDelete = await showDialog<bool>(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Delete Reel'),
-                            content: Text('Are you sure you want to delete this reel?'),
+                            title: Text('Delete'),
+                            content: Text(
+                                'Are you sure you want to delete this video?'),
                             actions: <Widget>[
                               TextButton(
                                 child: Text('Cancel'),
@@ -249,7 +252,8 @@ class _ReelScreenState extends State<ReelScreen>
                                 },
                               ),
                               TextButton(
-                                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                child: Text('Delete',
+                                    style: TextStyle(color: Colors.red)),
                                 onPressed: () {
                                   Navigator.of(context).pop(true);
                                 },
