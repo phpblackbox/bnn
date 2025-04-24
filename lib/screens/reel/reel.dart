@@ -25,6 +25,7 @@ class _ReelScreenState extends State<ReelScreen>
   bool _isTransitioning = false;
   bool _isInitialized = false;
   bool _isSlidingUp = true;
+  bool _isHandlingPress = false;
   ReelProvider? _reelProvider;
   double _dragDistance = 0;
 
@@ -83,10 +84,19 @@ class _ReelScreenState extends State<ReelScreen>
     }
   }
 
+  Future<void> _cleanup() async {
+    if (_reelProvider?.controller != null) {
+      await _reelProvider?.controller?.pause();
+      await _reelProvider?.controller?.dispose();
+      _reelProvider?.controller = null;
+    }
+    _reelProvider?.close();
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
-    _reelProvider?.close();
+    _cleanup();
     super.dispose();
   }
 
@@ -101,10 +111,11 @@ class _ReelScreenState extends State<ReelScreen>
   }
 
   Future<void> _handleSwipe() async {
-    if (_isTransitioning) return;
+    if (_isTransitioning || _isHandlingPress) return;
 
     setState(() {
       _isTransitioning = true;
+      _isHandlingPress = true;
       _isSlidingUp = true;
     });
 
@@ -117,17 +128,21 @@ class _ReelScreenState extends State<ReelScreen>
       print("Error during swipe transition: $e");
       _animationController.reset();
     } finally {
-      setState(() {
-        _isTransitioning = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTransitioning = false;
+          _isHandlingPress = false;
+        });
+      }
     }
   }
 
   Future<void> _handlePreviousSwipe() async {
-    if (_isTransitioning) return;
+    if (_isTransitioning || _isHandlingPress) return;
 
     setState(() {
       _isTransitioning = true;
+      _isHandlingPress = true;
       _isSlidingUp = false;
     });
 
@@ -140,9 +155,12 @@ class _ReelScreenState extends State<ReelScreen>
       print("Error during previous swipe transition: $e");
       _animationController.reset();
     } finally {
-      setState(() {
-        _isTransitioning = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTransitioning = false;
+          _isHandlingPress = false;
+        });
+      }
     }
   }
 
@@ -150,186 +168,194 @@ class _ReelScreenState extends State<ReelScreen>
   Widget build(BuildContext context) {
     final reelProvider = Provider.of<ReelProvider>(context);
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: <Widget>[
-          if (!_isInitialized || reelProvider.loading)
-            const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
+    return WillPopScope(
+      onWillPop: () async {
+        await _cleanup();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: <Widget>[
+            if (!_isInitialized || reelProvider.loading)
+              const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            else
+              AbsorbPointer(
+                absorbing: _isTransitioning,
+                child: GestureDetector(
+                  onVerticalDragUpdate: (DragUpdateDetails details) {
+                    // Track the drag distance
+                    _dragDistance += details.delta.dy;
+                  },
+                  onVerticalDragEnd: (DragEndDetails details) {
+                    // Check both velocity and distance for more reliable swipe detection
+                    if (details.velocity.pixelsPerSecond.dy.abs() > 150 ||
+                        _dragDistance.abs() > 50) {
+                      if (_dragDistance > 0) {
+                        // Swipe down - go to previous
+                        _handlePreviousSwipe();
+                      } else {
+                        // Swipe up - go to next
+                        _handleSwipe();
+                      }
+                    }
+                    // Reset drag distance
+                    _dragDistance = 0;
+                  },
+                  onHorizontalDragEnd: (DragEndDetails details) {
+                    // Handle horizontal swipes
+                    if (details.velocity.pixelsPerSecond.dx.abs() > 150) {
+                      if (details.velocity.pixelsPerSecond.dx > 0) {
+                        // Swipe right - go to previous
+                        _handlePreviousSwipe();
+                      } else {
+                        // Swipe left - go to next
+                        _handleSwipe();
+                      }
+                    }
+                  },
+                  behavior:
+                      HitTestBehavior.opaque, // Make the entire area tappable
+                  child: SlideTransition(
+                    position:
+                        _isSlidingUp ? _slideUpAnimation : _slideDownAnimation,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: FutureBuilder<void>(
+                        future: reelProvider.initializeVideoPlayerFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            return ReelVideoPlayer(
+                              controller: reelProvider.controller,
+                              isTransitioning: _isTransitioning,
+                            );
+                          } else {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            )
-          else
-            AbsorbPointer(
-              absorbing: _isTransitioning,
-              child: GestureDetector(
-                onVerticalDragUpdate: (DragUpdateDetails details) {
-                  // Track the drag distance
-                  _dragDistance += details.delta.dy;
-                },
-                onVerticalDragEnd: (DragEndDetails details) {
-                  // Check both velocity and distance for more reliable swipe detection
-                  if (details.velocity.pixelsPerSecond.dy.abs() > 150 ||
-                      _dragDistance.abs() > 50) {
-                    if (_dragDistance > 0) {
-                      // Swipe down - go to previous
-                      _handlePreviousSwipe();
-                    } else {
-                      // Swipe up - go to next
-                      _handleSwipe();
-                    }
-                  }
-                  // Reset drag distance
-                  _dragDistance = 0;
-                },
-                onHorizontalDragEnd: (DragEndDetails details) {
-                  // Handle horizontal swipes
-                  if (details.velocity.pixelsPerSecond.dx.abs() > 150) {
-                    if (details.velocity.pixelsPerSecond.dx > 0) {
-                      // Swipe right - go to previous
-                      _handlePreviousSwipe();
-                    } else {
-                      // Swipe left - go to next
-                      _handleSwipe();
-                    }
-                  }
-                },
-                behavior:
-                    HitTestBehavior.opaque, // Make the entire area tappable
-                child: SlideTransition(
-                  position:
-                      _isSlidingUp ? _slideUpAnimation : _slideDownAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: FutureBuilder<void>(
-                      future: reelProvider.initializeVideoPlayerFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return ReelVideoPlayer(
-                            controller: reelProvider.controller,
-                            isTransitioning: _isTransitioning,
-                          );
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          );
+            Positioned(
+              top: Platform.isIOS ? 50 : 12,
+              right: 0,
+              child: Row(
+                children: [
+                  if (reelProvider.currentReel != null &&
+                      reelProvider.currentReel!.authorId ==
+                          reelProvider.currentUserId)
+                    IconButton(
+                      icon: const Icon(Icons.delete,
+                          size: 30, color: Colors.white),
+                      onPressed: () async {
+                        final shouldDelete = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Delete'),
+                              content: Text(
+                                  'Are you sure you want to delete this video?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text('Delete',
+                                      style: TextStyle(color: Colors.red)),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (shouldDelete == true) {
+                          try {
+                            await reelProvider.deleteReel();
+                            if (!mounted) return;
+                            Navigator.pushReplacementNamed(context, '/home');
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to delete reel')),
+                            );
+                          }
                         }
                       },
                     ),
-                  ),
-                ),
-              ),
-            ),
-          Positioned(
-            top: Platform.isIOS ? 50 : 12,
-            right: 0,
-            child: Row(
-              children: [
-                if (reelProvider.currentReel != null &&
-                    reelProvider.currentReel!.authorId ==
-                        reelProvider.currentUserId)
                   IconButton(
                     icon:
-                        const Icon(Icons.delete, size: 30, color: Colors.white),
-                    onPressed: () async {
-                      final shouldDelete = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Delete'),
-                            content: Text(
-                                'Are you sure you want to delete this video?'),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop(false);
-                                },
-                              ),
-                              TextButton(
-                                child: Text('Delete',
-                                    style: TextStyle(color: Colors.red)),
-                                onPressed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-
-                      if (shouldDelete == true) {
-                        try {
-                          await reelProvider.deleteReel();
-                          if (!mounted) return;
-                          Navigator.pushReplacementNamed(context, '/home');
-                        } catch (e) {
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to delete reel')),
-                          );
-                        }
-                      }
+                        const Icon(Icons.close, size: 30, color: Colors.white),
+                    onPressed: () {
+                      Navigator.pop(context);
                     },
                   ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 30, color: Colors.white),
-                  onPressed: () {
-                    Navigator.pop(context);
+                ],
+              ),
+            ),
+            if (reelProvider.currentReel != null)
+              Positioned(
+                bottom: 60,
+                right: 12,
+                child: ReelActionButtons(
+                  reel: reelProvider.currentReel!,
+                  onLike: () {
+                    Provider.of<ReelProvider>(context, listen: false)
+                        .toggleLikeReel();
+                  },
+                  onComment: () {
+                    if (!reelProvider.currentReel!.id.isNaN) {
+                      _showCommentDetail(context, reelProvider.currentReel!.id);
+                    }
+                  },
+                  onBookmark: () {
+                    Provider.of<ReelProvider>(context, listen: false)
+                        .toggleBookmarkReel();
+                  },
+                  onShare: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => ShareModal(
+                        post: reelProvider.currentReel!.id,
+                        type: "reel",
+                      ),
+                    );
                   },
                 ),
-              ],
-            ),
-          ),
-          if (reelProvider.currentReel != null)
-            Positioned(
-              bottom: 60,
-              right: 12,
-              child: ReelActionButtons(
-                reel: reelProvider.currentReel!,
-                onLike: () {
-                  Provider.of<ReelProvider>(context, listen: false)
-                      .toggleLikeReel();
-                },
-                onComment: () {
-                  if (!reelProvider.currentReel!.id.isNaN) {
-                    _showCommentDetail(context, reelProvider.currentReel!.id);
-                  }
-                },
-                onBookmark: () {
-                  Provider.of<ReelProvider>(context, listen: false)
-                      .toggleBookmarkReel();
-                },
-                onShare: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) => ShareModal(
-                      post: reelProvider.currentReel!.id,
-                      type: "reel",
-                    ),
-                  );
-                },
               ),
-            ),
-          if (reelProvider.currentReel != null &&
-              reelProvider.currentReel!.userInfo != null)
-            Positioned(
-              bottom: 50.0,
-              left: 10.0,
-              child: UserInfoSection(
-                userInfo: reelProvider.currentReel!.userInfo!,
-                reelInfo: reelProvider.currentReel!,
+            if (reelProvider.currentReel != null &&
+                reelProvider.currentReel!.userInfo != null)
+              Positioned(
+                bottom: 50.0,
+                left: 10.0,
+                child: UserInfoSection(
+                  userInfo: reelProvider.currentReel!.userInfo!,
+                  reelInfo: reelProvider.currentReel!,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
+        bottomNavigationBar: BottomNavigation(currentIndex: 3),
       ),
-      bottomNavigationBar: BottomNavigation(currentIndex: 3),
     );
   }
 }

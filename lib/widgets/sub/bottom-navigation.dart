@@ -31,6 +31,7 @@ class BottomNavigation extends StatelessWidget {
   };
 
   void onTabSelected(BuildContext context, int index) {
+    if (currentIndex == index) return;
     switch (index) {
       case 0:
         Navigator.pushReplacementNamed(context, '/home');
