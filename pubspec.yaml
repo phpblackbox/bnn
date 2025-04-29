@@ -2,7 +2,7 @@ name: bnn
 description: "A new Flutter project."
 publish_to: 'none' 
 
-version: 1.0.0+1
+version: 1.0.2+14
 
 environment:
   sdk: ^3.6.0
@@ -26,7 +26,6 @@ dependencies:
   google_sign_in: ^6.2.2
   permission_handler: ^11.3.1
   shared_preferences: ^2.3.5
-  fluttertoast: ^8.1.6
   skeletonizer: ^1.4.3
   flutter_supabase_chat_core: ^1.4.3
   flutter_chat_types: ^3.6.2
