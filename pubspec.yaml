@@ -42,6 +42,9 @@ dependencies:
   open_filex: ^4.6.0
   video_player: ^2.9.3
   google_sign_in_ios: ^5.8.1
+  twilio_flutter: ^0.9.0
+  phone_numbers_parser: ^9.0.3
+
 
 dev_dependencies:
   flutter_test:

@@ -46,10 +46,14 @@ class ProfilesModel {
   }
 
   String getFullName() {
+    if (firstName == null && lastName == null) return 'Anonymous User';
+    if (firstName == null) return lastName ?? '';
+    if (lastName == null) return firstName ?? '';
     return '$firstName $lastName';
   }
 
   ProfilesModel copyWith({
+    String? id,
     String? firstName,
     String? lastName,
     String? username,
@@ -59,7 +63,7 @@ class ProfilesModel {
     String? avatar,
   }) {
     return ProfilesModel(
-      this.id,
+      id ?? this.id,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       username: username ?? this.username,

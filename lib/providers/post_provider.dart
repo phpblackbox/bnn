@@ -38,17 +38,27 @@ class PostProvider extends ChangeNotifier {
 
   int offset = 0;
   final int _limit = 5;
+  bool _isDisposing = false;
 
-  // Add reset method to clear state
+  void setDisposing(bool value) {
+    _isDisposing = value;
+  }
+
   void reset() {
+    // Reset all the properties
     posts = [];
     comments = [];
     offset = 0;
     _loading = false;
     _loadingMore = true;
     _currentContext = null;
-    notifyListeners();
+    
+    // Only notify if not in the middle of disposal
+    if (!_isDisposing) {
+      notifyListeners();
+    }
   }
+
 
   Future<Map<String, dynamic>> getPostInfo(int postId) async {
     final post = await postService.getPostById(postId);

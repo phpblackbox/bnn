@@ -22,46 +22,50 @@ class _EmailSignUpState extends State<EmailSignUp>
     with SingleTickerProviderStateMixin {
   final supabase = Supabase.instance.client;
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   bool get isButtonEnabled {
-    return emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty &&
-        confirmPasswordController.text.isNotEmpty;
+    return emailController.text.isNotEmpty;
   }
 
   Future<void> _signUp() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    setState(() {
+      isLoading = true;
+    });
 
     if (_formKey.currentState!.validate()) {
-      bool success = await authProvider.signUp(
-        emailController.text,
-        passwordController.text,
-        confirmPasswordController.text,
-        context,
-      );
-
-      if (success) {
-        Navigator.pushReplacement(
+      try {
+        bool success = await authProvider.signUpWithEmail(
+          emailController.text,
           context,
-          MaterialPageRoute(
-            builder: (context) => EmailOTPVerification(
-              email: emailController.text,
-            ),
-          ),
         );
-      } else {
-        if (authProvider.errorMessage != null) {
-          CustomToast.showToastWarningBottom(
-              context, authProvider.errorMessage!);
+
+        if (success) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EmailOTPVerification(
+                email: emailController.text,
+              ),
+            ),
+          );
         } else {
-          CustomToast.showToastDangerBottom(
-              context, 'An unexpected error occurred');
+          if (authProvider.errorMessage != null) {
+            CustomToast.showToastWarningBottom(
+                context, authProvider.errorMessage!);
+          } else {
+            CustomToast.showToastDangerBottom(
+                context, 'An unexpected error occurred');
+          }
         }
+      } catch (e) {
+        CustomToast.showToastDangerBottom(context, e.toString());
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
@@ -141,37 +145,21 @@ class _EmailSignUpState extends State<EmailSignUp>
                               setState(() {});
                             }),
                         SizedBox(height: 10),
-                        CustomInputField(
-                            icon: Icons.lock,
-                            placeholder: 'Password',
-                            isPassword: true,
-                            controller: passwordController,
-                            onChanged: (value) {
-                              setState(() {});
-                            }),
-                        SizedBox(height: 10),
-                        CustomInputField(
-                            icon: Icons.lock,
-                            placeholder: 'Confirm Password',
-                            isPassword: true,
-                            controller: confirmPasswordController,
-                            onChanged: (value) {
-                              setState(() {});
-                            }),
+                        // Removed password fields
                       ],
                     ),
                   ],
                 ),
                 FooterTOS(),
                 ButtonGradientMain(
-                  label: 'Create account',
-                  onPressed: () {
+                  label: isLoading ? 'Sending...' : 'Continue',
+                  onPressed: isLoading ? () {} : () {
                     if (isButtonEnabled) {
                       _signUp();
                     }
                   },
                   textColor: Colors.white,
-                  gradientColors: isButtonEnabled
+                  gradientColors: isButtonEnabled && !isLoading
                       ? [AppColors.primaryBlack, AppColors.primaryRed]
                       : [
                           AppColors.primaryRed.withOpacity(0.5),

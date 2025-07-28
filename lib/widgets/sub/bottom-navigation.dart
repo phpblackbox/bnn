@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/screens/reel/reel.dart';
+import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavigation extends StatelessWidget {
   final int currentIndex;
@@ -30,7 +33,7 @@ class BottomNavigation extends StatelessWidget {
     ],
   };
 
-  void onTabSelected(BuildContext context, int index) {
+  Future<void> onTabSelected(BuildContext context, int index) async {
     if (currentIndex == index) return;
     switch (index) {
       case 0:
@@ -47,6 +50,18 @@ class BottomNavigation extends StatelessWidget {
             context, MaterialPageRoute(builder: (context) => ReelScreen()));
         break;
       case 4:
+        // final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        // if (authProvider.profile == null) {
+        //   // Redirect to create profile if profile is null
+        //   // Don't auto-logout here
+        //   Navigator.pushReplacementNamed(context, '/create-profile');
+        //   CustomToast.showToastWarningTop(
+        //       context, "Please complete your profile setup first");
+        // } else {
+        //   // Normal navigation
+        //   Navigator.pushReplacementNamed(context, '/profile');
+        // }
+        // Single Responsibility Principle: The profile page should be responsible for handling profile-related logic, including whether the profile exists.
         Navigator.pushReplacementNamed(context, '/profile');
         break;
       default:

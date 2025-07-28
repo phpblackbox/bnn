@@ -8,19 +8,16 @@ import 'package:country_flags/country_flags.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:bnn/providers/auth_provider.dart';
-import 'phone_otp_verification.dart';
+import 'phone_signup_otp_verification.dart';
 
 class PhoneSignUp extends StatefulWidget {
   const PhoneSignUp({super.key});
 
   @override
-  _PhoneSignUp createState() => _PhoneSignUp();
+  _PhoneSignUpState createState() => _PhoneSignUpState();
 }
 
-class _PhoneSignUp extends State<PhoneSignUp>
-    with SingleTickerProviderStateMixin {
-  final supabase = Supabase.instance.client;
-
+class _PhoneSignUpState extends State<PhoneSignUp> {
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedCountryCode;
   String? _selectedCountryPhoneCode;
@@ -30,27 +27,24 @@ class _PhoneSignUp extends State<PhoneSignUp>
   @override
   void initState() {
     super.initState();
+    // Set default country to US
+    _selectedCountryCode = 'US';
+    _selectedCountryPhoneCode = '1';
   }
 
   bool get isButtonEnabled {
-    if (_selectedCountryCode != null) {
-      return _phoneController.text.isNotEmpty &&
-          _selectedCountryCode!.isNotEmpty;
-    } else {
-      return false;
-    }
+    return _phoneController.text.isNotEmpty && _selectedCountryCode != null;
   }
 
   String get fullPhoneNumber {
     if (_selectedCountryPhoneCode != null && _phoneController.text.isNotEmpty) {
-      String cleanPhone =
-          _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
+      String cleanPhone = _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
       return '+${_selectedCountryPhoneCode!}$cleanPhone';
     }
     return '';
   }
 
-  Future<void> _handlePhoneVerification() async {
+  Future<void> _handlePhoneSignup() async {
     if (!isButtonEnabled) return;
 
     setState(() {
@@ -60,17 +54,26 @@ class _PhoneSignUp extends State<PhoneSignUp>
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.verifyPhone(fullPhoneNumber);
+      final success = await authProvider.signUpWithPhone(fullPhoneNumber);
 
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PhoneOTPVerification(
-              phone: fullPhoneNumber,
+      if (success) {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PhoneSignupOTPVerification(
+                phone: fullPhoneNumber,
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } else {
+        setState(() {
+          _errorMessage = authProvider.errorMessage ?? 'Failed to send verification code';
+        });
+        if (mounted && _errorMessage != null) {
+          CustomToast.showToastDangerBottom(context, _errorMessage!);
+        }
       }
     } catch (e) {
       setState(() {
@@ -86,6 +89,10 @@ class _PhoneSignUp extends State<PhoneSignUp>
         });
       }
     }
+  }
+
+  void _handleSkip() {
+    Navigator.pop(context);
   }
 
   @override
@@ -108,15 +115,35 @@ class _PhoneSignUp extends State<PhoneSignUp>
           color: Colors.white,
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Enter your phone number',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontFamily: 'Archivo',
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'We\'ll send you a verification code to get started',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              SizedBox(height: 24),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      minimumSize: Size(100, 40),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      minimumSize: Size(100, 50),
+                      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      backgroundColor: Colors.grey[100],
+                      elevation: 0,
                     ),
                     onPressed: () {
                       showCountryPicker(
@@ -146,10 +173,6 @@ class _PhoneSignUp extends State<PhoneSignUp>
                               ),
                             ),
                           ),
-                          searchTextStyle: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 12,
-                          ),
                         ),
                       );
                     },
@@ -158,18 +181,23 @@ class _PhoneSignUp extends State<PhoneSignUp>
                       children: [
                         if (_selectedCountryCode != null)
                           SizedBox(
-                            width: 18.0,
-                            height: 18.0,
-                            child: CountryFlag.fromCountryCode(
-                                _selectedCountryCode!),
+                            width: 20.0,
+                            height: 20.0,
+                            child: CountryFlag.fromCountryCode(_selectedCountryCode!),
                           ),
                         if (_selectedCountryPhoneCode != null)
-                          Text('  +$_selectedCountryPhoneCode '),
-                        SizedBox(width: 8.0),
+                          Text(
+                            '  +$_selectedCountryPhoneCode',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        Icon(Icons.arrow_drop_down, color: Colors.black),
                       ],
                     ),
                   ),
-                  SizedBox(width: 8.0),
+                  SizedBox(width: 12.0),
                   Expanded(
                     child: CustomInputField(
                       icon: Icons.phone,
@@ -177,37 +205,93 @@ class _PhoneSignUp extends State<PhoneSignUp>
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
                       onChanged: (value) {
-                        setState(() {});
+                        setState(() {
+                          _errorMessage = null;
+                        });
                       },
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              Text(
-                  "When you tap Continue, BNN will send a verification code. Message and data rates may apply. The verified phone number can be used to login. Learn what happens when your number changes"),
+              SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "By providing your phone number, you agree to receive security verification codes to access your account.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Message and data rates may apply.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Message frequency varies depending on your activity.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Reply HELP for help, STOP to cancel.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
               if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 12,
-                    ),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red[600], size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(
+                            color: Colors.red[700],
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              
               Spacer(),
-              ButtonGradientMain(
-                label: isLoading ? 'Sending Code...' : 'Continue',
-                onPressed: isLoading ? () {} : () => _handlePhoneVerification(),
-                textColor: Colors.white,
-                gradientColors: isButtonEnabled && !isLoading
-                    ? [AppColors.primaryBlack, AppColors.primaryRed]
-                    : [
-                        AppColors.primaryRed.withOpacity(0.5),
-                        AppColors.primaryBlack.withOpacity(0.5)
-                      ],
+              
+              Row(
+                children: [
+                  Expanded(
+                    child: ButtonGradientMain(
+                      label: 'SKIP',
+                      onPressed: _handleSkip,
+                      textColor: Colors.grey[700]!,
+                      gradientColors: [Colors.white, Colors.white],
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ButtonGradientMain(
+                      label: isLoading ? 'Sending Code...' : 'CONTINUE',
+                      onPressed: isLoading ? () {} : _handlePhoneSignup,
+                      textColor: Colors.white,
+                      gradientColors: isButtonEnabled && !isLoading
+                          ? [AppColors.primaryBlack, AppColors.primaryRed]
+                          : [
+                              AppColors.primaryRed.withOpacity(0.5),
+                              AppColors.primaryBlack.withOpacity(0.5)
+                            ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

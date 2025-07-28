@@ -4,6 +4,8 @@ import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/providers/profile_provider.dart';
 import 'package:bnn/providers/post_provider.dart';
 import 'package:bnn/screens/profile/following.dart';
+import 'package:bnn/utils/colors.dart';
+import 'package:bnn/widgets/buttons/button-gradient-main.dart';
 import 'package:bnn/widgets/sub/bottom-navigation.dart';
 import 'package:bnn/screens/post/posts.dart';
 import 'package:bnn/screens/profile/followers.dart';
@@ -27,16 +29,22 @@ class _ProfileState extends State<Profile> {
   final supabase = Supabase.instance.client;
 
   int _userorbookmark = 0;
+  bool _hasAttemptedRefresh = false;
+
+  PostProvider? _postProvider;
 
   @override
   void initState() {
     super.initState();
+    // Store the provider reference when the widget is created
+    _postProvider = Provider.of<PostProvider>(context, listen: false);
+    
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
-      final postProvider = Provider.of<PostProvider>(context, listen: false);
       profileProvider.loading = true;
-      postProvider.reset();
+      _postProvider?.reset();
       await profileProvider.getCountsOfProfileInfo();
     });
   }
@@ -51,15 +59,118 @@ class _ProfileState extends State<Profile> {
 
   @override
   void dispose() {
-    // Clean up when leaving home screen
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    postProvider.reset();
+    // Tell the provider we're disposing to prevent notifications
+    if (_postProvider != null) {
+      _postProvider!.setDisposing(true);
+      
+      // Reset properties without triggering notifications
+      _postProvider!.reset();
+      
+      // Reset flag (though it won't matter after disposal)
+      _postProvider!.setDisposing(false);
+    }
+    
+    // Always call super.dispose() last
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
+
+    // Loading state
+    if (authProvider.isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    // Not logged in
+    if (!authProvider.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: Text("Please sign in")),
+      );
+    }
+
+    // Profile not found - attempt to refresh
+    if (authProvider.profile == null) {
+
+      if (!_hasAttemptedRefresh) {
+        _hasAttemptedRefresh = true; // Set flag to prevent further attempts
+
+        Future.microtask(() async {
+          try {
+            // Try to refresh profile from API
+            final success = await authProvider.refreshProfile();
+            
+            // Since we could be redirecting to another page, make sure this widget is still mounted
+            if (!mounted) return;
+            
+            if (!success || authProvider.profile == null) {
+              // If refresh fails, go to create profile
+              CustomToast.showToastWarningTop(
+                  context, "Please complete your profile setup");
+              Navigator.pushReplacementNamed(context, '/create-profile');
+            }
+          } catch (e) {
+            print('Error refreshing profile: $e');
+            
+            // Since we could be redirecting to another page, make sure this widget is still mounted
+            if (!mounted) return;
+            
+            Navigator.pushReplacementNamed(context, '/create-profile');
+          }
+        });
+      }
+
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: Text("Profile Setup Required"),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text(
+                "Please complete your profile setup",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "You need to set up your profile before accessing this feature",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              SizedBox(height: 30),
+              ButtonGradientMain(
+                label: 'Set Up Profile',
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/create-profile');
+                },
+                textColor: Colors.white,
+                gradientColors: [AppColors.primaryBlack, AppColors.primaryRed],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    _hasAttemptedRefresh = false;
     final meProfile = authProvider.profile!;
     final profileProvider = Provider.of<ProfileProvider>(context);
     final postProvider = Provider.of<PostProvider>(context, listen: false);

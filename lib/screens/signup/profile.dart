@@ -40,6 +40,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         };
 
         await authProvider.setProfile(profile);
+        
         Navigator.push(context, MaterialPageRoute(builder: (context) => Age()));
       } catch (error) {
         CustomToast.showToastWarningBottom(
@@ -60,7 +61,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              } else {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
             },
           ),
         ),

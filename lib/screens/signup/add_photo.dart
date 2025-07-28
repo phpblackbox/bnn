@@ -65,18 +65,49 @@ class _PhotoState extends State<Photo> with SingleTickerProviderStateMixin {
   Future<void> handleSkip() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      // Log the current state
+      print('Before skip - Auth state: isLoggedIn=${authProvider.isLoggedIn}, userId=${authProvider.user?.id}');
+    
       final publicUrl =
           "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 
       final profile = {"avatar": publicUrl};
       await authProvider.setProfile(profile);
-      await authProvider.updateProfile();
 
-      CustomToast.showToastSuccessTop(context, 'Profile updated successfully!');
-      Navigator.pushNamed(context, '/home');
+      // CRITICAL: Save to database - use a try-catch to identify specific errors
+      try {
+        await authProvider.updateProfile();
+        print('Profile updated successfully');
+      } catch (updateError) {
+        print('Error updating profile: $updateError');
+        throw updateError;  // Re-throw to handle in outer catch
+      }
+
+      // Verify logged in state is preserved
+      print('After skip - Auth state: isLoggedIn=${authProvider.isLoggedIn}, userId=${authProvider.user?.id}');
+
+      if (!authProvider.isLoggedIn || authProvider.user == null) {
+        print('Authentication lost during profile setup - attempting to recover');
+        // Don't throw - instead try to gracefully handle the situation
+      }
+
+      // Show success message
+      if (mounted) {
+        CustomToast.showToastSuccessTop(context, 'Profile setup complete!');
+      }
+
+      // Clear navigation stack and go to home - this is critical
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+      // Navigator.pushNamed(context, '/home');
     } catch (e) {
-      CustomToast.showToastWarningTop(
+      print('Error in handleSkip: $e');
+      if (mounted) {
+        CustomToast.showToastWarningTop(
           context, 'Error uploading image: ${e.toString()}');
+      }
     }
   }
 

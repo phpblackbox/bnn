@@ -14,7 +14,13 @@ import 'package:flutter/material.dart';
 class AppRoutes {
   static final Map<String, WidgetBuilder> routes = {
     '/': (context) => Splash(),
-    '/login': (context) => LoginDash(),
+    '/login': (context) {
+      // Use this approach to avoid rebuilding login page repeatedly
+      var currentRoute = '';
+      if (currentRoute == '/login') return LoginDash();
+      currentRoute = '/login';
+      return LoginDash();
+    },
     '/signup': (context) => SignUpDash(),
     '/home': (context) => Home(),
     '/create-profile': (context) => CreateUserName(),

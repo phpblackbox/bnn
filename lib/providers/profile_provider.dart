@@ -1,9 +1,11 @@
 import 'package:bnn/models/profiles_model.dart';
+import 'package:bnn/providers/auth_provider.dart';
 import 'package:bnn/services/auth_service.dart';
 import 'package:bnn/services/profile_service.dart';
 import 'package:bnn/utils/constants.dart';
 import 'package:bnn/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -32,18 +34,78 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> getCountsOfProfileInfo() async {
-    final meId = _authService.getCurrentUser()?.id;
-    countFollowers = await _profileService.getCountFollowers(meId!);
-    countFollowing = await _profileService.getCountFollowing(meId);
-    countViews = await _profileService.getCountViews(meId);
-    loading = false;
+    loading = true;
+    try {
+      String? userId;
+      
+      try {
+        userId = _authService.getCurrentUser()?.id;
+      } catch (e) {
+        print('Error getting current user: $e');
+        userId = null;
+      }
+      
+      if (userId == null) {
+        print('Cannot get profile counts: userId is null');
+        countFollowers = 0;
+        countFollowing = 0;
+        countViews = 0;
+        loading = false;
+        return;
+      }
+      
+      try {
+        countFollowers = await _profileService.getCountFollowers(userId);
+      } catch (e) {
+        print('Error getting followers count: $e');
+        countFollowers = 0;
+      }
+      
+      try {
+        countFollowing = await _profileService.getCountFollowing(userId);
+      } catch (e) {
+        print('Error getting following count: $e');
+        countFollowing = 0;
+      }
+      
+      try {
+        countViews = await _profileService.getCountViews(userId);
+      } catch (e) {
+        print('Error getting views count: $e');
+        countViews = 0;
+      }
+    } catch (e) {
+      print('Error getting profile counts: $e');
+      // Set default values
+      countFollowers = 0;
+      countFollowing = 0;
+      countViews = 0;
+    } finally {
+      loading = false;
+    }
   }
 
   Future<Map<String, dynamic>?> getFriendInfo(String userId) async {
-    final meId = _authService.getCurrentUser()?.id;
-    print(meId);
-    final friendInfo = await _profileService.getFriendInfo(meId!, userId);
-    return friendInfo;
+    try {
+      // Safely get the current user ID
+      final currentUser = _authService.getCurrentUser();
+      final meId = currentUser?.id;
+      
+      // Handle null meId gracefully
+      if (meId == null) {
+        print('Cannot get friend info: current user ID is null');
+        return null;
+      }
+      
+      print('Getting friend info between $meId and $userId');
+      
+      // Get friend relationship info
+      final friendInfo = await _profileService.getFriendInfo(meId, userId);
+      return friendInfo;
+    } catch (e) {
+      print('Error getting friend info: $e');
+      return null;
+    }
   }
 
   Future<void> getFollowers() async {

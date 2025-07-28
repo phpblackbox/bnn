@@ -11,13 +11,13 @@ import '../models/user_model.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
-
   final ProfileService _profileService = ProfileService();
-
   // StreamService streamService = StreamService();
-
   ProfilesModel? profile;
+  bool _isSigningOut = false;
 
+  // ==================== GOOGLE AUTHENTICATION ====================
+  
   Future<UserModel?> nativeGoogleSignIn() async {
     final webClientId = dotenv.env['WEB_CLIENT_ID'] ?? '';
     final androidClientId = dotenv.env['ANDROID_CLIENT_ID'] ?? '';
@@ -73,8 +73,35 @@ class AuthService {
     }
   }
 
+  // ==================== SESSION MANAGEMENT ====================
+
   Future<bool> isLoggedIn() async {
-    return _supabase.auth.currentUser != null;
+    try {
+      final session = _supabase.auth.currentSession;
+      final user = _supabase.auth.currentUser;
+
+      // Only consider logged in if both session and user exist
+      if (session == null || user == null) {
+        return false;
+      }
+
+      // Check if token is expired
+      final expiresAt =
+          DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000);
+      final now = DateTime.now();
+
+      if (now.isAfter(expiresAt)) {
+        print('Token expired, trying to refresh');
+        // Try to refresh the token
+        final refreshResult = await refreshSession();
+        return refreshResult;
+      }
+
+      return true;
+    } catch (e) {
+      print('Error checking login status: $e');
+      return false;
+    }
   }
 
   UserModel? getCurrentUser() {
@@ -85,10 +112,73 @@ class AuthService {
     return null;
   }
 
-  Future<void> signOut() async {
-    // await streamService.disconnect();
-    await _supabase.auth.signOut();
+  Future<bool> refreshSession() async {
+    try {
+      final currentSession = _supabase.auth.currentSession;
+
+      // No session to refresh
+      if (currentSession == null) {
+        print('No session to refresh');
+        return false;
+      }
+
+      // Check if token is expired or about to expire (within 5 minutes)
+      final expiresAt =
+          DateTime.fromMillisecondsSinceEpoch(currentSession.expiresAt! * 1000);
+      final now = DateTime.now();
+      final fiveMinutes = Duration(minutes: 5);
+
+      if (now.isAfter(expiresAt) ||
+          now.isAfter(expiresAt.subtract(fiveMinutes))) {
+        print('Token expired or about to expire, refreshing...');
+
+        try {
+          // Attempt to refresh the session
+          final response = await _supabase.auth.refreshSession();
+
+          if (response.session != null) {
+            print('Session refreshed successfully');
+            return true;
+          } else {
+            print('Failed to refresh session');
+            return false;
+          }
+        } catch (e) {
+          print('Error during refresh: $e');
+          return false;
+        }
+      }
+
+      // Token is still valid
+      return true;
+    } catch (e) {
+      print('Error refreshing session: $e');
+      return false;
+    }
   }
+
+  Future<void> signOut() async {
+    // Guard against multiple simultaneous sign-outs
+    if (_isSigningOut) {
+      print('Auth service already signing out, ignoring repeated call');
+      return;
+    }
+
+    _isSigningOut = true;
+
+    try {
+      // Sign out with full scope to clear all sessions
+      await _supabase.auth.signOut(scope: SignOutScope.global);
+      print('Successfully signed out from Supabase');
+    } catch (e) {
+      print('Error signing out from Supabase: $e');
+      rethrow;
+    } finally {
+      _isSigningOut = false;
+    }
+  }
+
+  // ==================== EMAIL AUTHENTICATION ====================
 
   Future<AuthResponse> signInWithEmailAndPassword(
       String email, String password) async {
@@ -104,6 +194,63 @@ class AuthService {
     return response;
   }
 
+  Future<bool> loginWithEmail(String email) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        email: email.trim(),
+        emailRedirectTo: '${dotenv.env['APP_URL']}/auth/callback',
+        shouldCreateUser: false,
+      );
+      print('OTP sent successfully to: $email');
+      return true;
+    } catch (error) {
+      print('Login error: $error');
+
+      // Parse specific error messages from Supabase
+      String errorMessage = error.toString().toLowerCase();
+
+      if (errorMessage.contains('user not found') ||
+          errorMessage.contains('invalid login credentials') ||
+          errorMessage.contains('does not exist') ||
+          errorMessage.contains('not allowed for otp') ||
+          errorMessage.contains('invalid email')) {
+        throw AuthException(
+            'This email is not registered. Please sign up first.');
+      }
+
+      // Rethrow the original error for other cases
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> verifyEmailLoginOTP(String email, String otp) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.email,
+      );
+      return response;
+    } catch (e) {
+      print('Error verifying email OTP for login: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> signUpWithEmail(String email) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        email: email.trim(),
+        emailRedirectTo: '${dotenv.env['APP_URL']}/auth/callback',
+        shouldCreateUser: true,
+      );
+      return true;
+    } catch (e) {
+      print('Error sending email OTP: $e');
+      rethrow;
+    }
+  }
+
   Future<AuthResponse> signUp(String email, String password) async {
     return await _supabase.auth.signUp(
       email: email.trim(),
@@ -112,28 +259,136 @@ class AuthService {
     );
   }
 
-  Future<String> uploadAvatar({
-    required String userId,
-    required XFile image,
-  }) async {
+  Future<void> verifyEmailOTP(String email, String otp) async {
     try {
-      String randomNumStr = Constants().generateRandomNumberString(6);
-      final filename = '${userId}_$randomNumStr.png';
-      final fileBytes = await File(image.path).readAsBytes();
-
-      await _supabase.storage.from('avatars').uploadBinary(
-            filename,
-            fileBytes,
-          );
-
-      final publicUrl =
-          _supabase.storage.from('avatars').getPublicUrl(filename);
-      return publicUrl;
+      await _supabase.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.email,
+      );
     } catch (e) {
-      print('Error uploading avatar to Supabase: $e');
+      print('Error verifying email OTP: $e');
       rethrow;
     }
   }
+
+  Future<void> resendEmailOTP(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } catch (e) {
+      print('Error resending email OTP: $e');
+      rethrow;
+    }
+  }
+
+  // ==================== PHONE AUTHENTICATION ====================
+
+  /// Send OTP to phone number for signup
+  Future<bool> signUpWithPhone(String phoneNumber) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: phoneNumber,
+        shouldCreateUser: true,
+      );
+      print('Signup OTP sent successfully to: $phoneNumber');
+      return true;
+    } catch (error) {
+      print('Phone signup error: $error');
+      rethrow;
+    }
+  }
+
+  /// Send OTP to phone number for login (existing users only)
+  Future<bool> loginWithPhone(String phoneNumber) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: phoneNumber,
+        shouldCreateUser: false,
+      );
+      print('Login OTP sent successfully to: $phoneNumber');
+      return true;
+    } catch (error) {
+      print('Phone login error: $error');
+
+      // Parse specific error messages
+      String errorMessage = error.toString().toLowerCase();
+
+      if (errorMessage.contains('user not found') ||
+          errorMessage.contains('invalid login credentials') ||
+          errorMessage.contains('does not exist') ||
+          errorMessage.contains('not allowed for otp')) {
+        throw AuthException(
+            'This phone number is not registered. Please sign up first.');
+      }
+
+      rethrow;
+    }
+  }
+
+  /// Verify phone OTP for both signup and login
+  Future<AuthResponse> verifyPhoneOTP(String phoneNumber, String otp) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        phone: phoneNumber,
+        token: otp,
+        type: OtpType.sms,
+      );
+
+      if (response.user != null) {
+        print('Phone OTP verified successfully for: $phoneNumber');
+      }
+
+      return response;
+    } catch (e) {
+      print('Error verifying phone OTP: $e');
+      rethrow;
+    }
+  }
+
+  /// Resend phone OTP
+  Future<bool> resendPhoneOTP(String phoneNumber) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.sms,
+        phone: phoneNumber,
+      );
+      print('Phone OTP resent successfully to: $phoneNumber');
+      return true;
+    } catch (e) {
+      print('Error resending phone OTP: $e');
+      rethrow;
+    }
+  }
+
+  // LEGACY PHONE METHODS (for backward compatibility)
+  Future<void> verifyPhone(String phone) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: phone,
+      );
+    } catch (e) {
+      print('Error sending phone verification: $e');
+      rethrow;
+    }
+  }
+
+  // Future<void> verifyPhoneOTP(String phone, String otp) async {
+  //   try {
+  //     await _supabase.auth.verifyOTP(
+  //       phone: phone,
+  //       token: otp,
+  //       type: OtpType.sms,
+  //     );
+  //   } catch (e) {
+  //     print('Error verifying phone OTP: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  // ==================== PASSWORD MANAGEMENT ====================
 
   Future<void> resetPassword(String email) async {
     try {
@@ -179,29 +434,7 @@ class AuthService {
     }
   }
 
-  Future<void> verifyPhone(String phone) async {
-    try {
-      await _supabase.auth.signInWithOtp(
-        phone: phone,
-      );
-    } catch (e) {
-      print('Error sending phone verification: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> verifyPhoneOTP(String phone, String otp) async {
-    try {
-      await _supabase.auth.verifyOTP(
-        phone: phone,
-        token: otp,
-        type: OtpType.signup,
-      );
-    } catch (e) {
-      print('Error verifying phone OTP: $e');
-      rethrow;
-    }
-  }
+  // ==================== VERIFICATION STATUS ====================
 
   Future<bool> isEmailVerified() async {
     final user = _supabase.auth.currentUser;
@@ -213,27 +446,27 @@ class AuthService {
     return user?.phoneConfirmedAt != null;
   }
 
-  Future<void> verifyEmailOTP(String email, String otp) async {
-    try {
-      await _supabase.auth.verifyOTP(
-        email: email,
-        token: otp,
-        type: OtpType.signup,
-      );
-    } catch (e) {
-      print('Error verifying email OTP: $e');
-      rethrow;
-    }
-  }
+  // ==================== FILE UPLOAD ====================
 
-  Future<void> resendEmailOTP(String email) async {
+  Future<String> uploadAvatar({
+    required String userId,
+    required XFile image,
+  }) async {
     try {
-      await _supabase.auth.resend(
-        type: OtpType.signup,
-        email: email,
-      );
+      String randomNumStr = Constants().generateRandomNumberString(6);
+      final filename = '${userId}_$randomNumStr.png';
+      final fileBytes = await File(image.path).readAsBytes();
+
+      await _supabase.storage.from('avatars').uploadBinary(
+            filename,
+            fileBytes,
+          );
+
+      final publicUrl =
+          _supabase.storage.from('avatars').getPublicUrl(filename);
+      return publicUrl;
     } catch (e) {
-      print('Error resending email OTP: $e');
+      print('Error uploading avatar to Supabase: $e');
       rethrow;
     }
   }
